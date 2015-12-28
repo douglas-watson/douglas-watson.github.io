@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Programming notes</title>
-    <link>http://douglas-watson.github.com/</link>
+    <link>http://douglas-watson.github.io/</link>
     <description>Recent content on Programming notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 27 Dec 2015 16:15:13 +0100</lastBuildDate>
-    <atom:link href="http://douglas-watson.github.com/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://douglas-watson.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>The MIT License (MIT)</title>
-      <link>http://douglas-watson.github.com/license/</link>
+      <link>http://douglas-watson.github.io/license/</link>
       <pubDate>Sun, 27 Dec 2015 16:15:13 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.com/license/</guid>
+      <guid>http://douglas-watson.github.io/license/</guid>
       <description>&lt;p&gt;Copyright © 2015-2016 Douglas C. Watson&lt;/p&gt;
 
 &lt;p&gt;Permission is hereby granted, free of charge, to any person
@@ -42,33 +42,33 @@ OTHER DEALINGS IN THE SOFTWARE.&lt;/p&gt;
     
     <item>
       <title>Swiss parliament transcriptions</title>
-      <link>http://douglas-watson.github.com/projects/parliament/</link>
+      <link>http://douglas-watson.github.io/projects/parliament/</link>
       <pubDate>Sun, 27 Dec 2015 16:15:13 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.com/projects/parliament/</guid>
+      <guid>http://douglas-watson.github.io/projects/parliament/</guid>
       <description>&lt;p&gt;&lt;a href=&#34;https://github.com/douglas-watson/parl-scraping&#34;&gt;https://github.com/douglas-watson/parl-scraping&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;With a team of fellow hackers during the &lt;a href=&#34;http://make.opendata.ch/wiki/event:2015-09&#34;&gt;OpenData Election Hackdays&lt;/a&gt;, and in partnership with the newspaper Le Temps, we compiled a full-text-searchable index of the transcriptions of all parliamentary interventions of the Swiss government, since 1990. The result can be browsed online at &lt;a href=&#34;http://parlement.letemps.ch&#34;&gt;parlement.letemps.ch&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/projects/raclette_search.png&#34; alt=&#34;Search results&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/projects/raclette_search.png&#34; alt=&#34;Search results&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;The core of the project is a web scraper, which retrieved all the transcriptions from the official Swiss website, and combined the transcription with biographical information about the speakers (moslty party affiliations and canton of origin). The product is a large database of machine-readable transcriptions which can easily be re-used by researchers in different tool. We produced the data in two formats: CSV and JSON. The CSV data can be imported in R and Tableau, as well as other natural language processing and graphing tools. The JSON data can be imported into ElasticSearch. We additionally set up a Kibana interface for quick searches and analytics, hosted at &lt;a href=&#34;http://parlement.letemps.ch&#34;&gt;parlement.letemps.ch&lt;/a&gt;. Check out the &lt;a href=&#34;https://github.com/douglas-watson/parl-scraping&#34;&gt;github page&lt;/a&gt; for instructions on using Kibana, on settings up your own ElasticSearch server (including docker files), and rebuilding the index with a web scraper.&lt;/p&gt;
 
 &lt;p&gt;More information about the project on the hackathon wiki: &lt;a href=&#34;http://make.opendata.ch/wiki/project:chparlscraping&#34;&gt;http://make.opendata.ch/wiki/project:chparlscraping&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/projects/raclette_search.png&#34; alt=&#34;Visualization on Kibana&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/projects/raclette_search.png&#34; alt=&#34;Visualization on Kibana&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3.</title>
-      <link>http://douglas-watson.github.com/post/gdocs_3_shiny/</link>
+      <link>http://douglas-watson.github.io/post/gdocs_3_shiny/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:42 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.com/post/gdocs_3_shiny/</guid>
+      <guid>http://douglas-watson.github.io/post/gdocs_3_shiny/</guid>
       <description>
 
-&lt;p&gt;This is the third and final part of the Shiny + Google Docs dashboard tutorial, where I explain how to build a live web dashboard for connected &amp;ldquo;Internet of Things&amp;rdquo; sensors, using Google Sheets as a data server. &lt;a href=&#34;http://douglas-watson.github.com/post/gdocs_1_gdocs/&#34;&gt;Part one&lt;/a&gt; covered setting up a Google Sheet to store and serve data through HTTP requests; &lt;a href=&#34;http://douglas-watson.github.com/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt; covered reading, filtering, and plotting that data in R. In this part, we&amp;rsquo;ll create the actual dashboard and host it online.&lt;/p&gt;
+&lt;p&gt;This is the third and final part of the Shiny + Google Docs dashboard tutorial, where I explain how to build a live web dashboard for connected &amp;ldquo;Internet of Things&amp;rdquo; sensors, using Google Sheets as a data server. &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;Part one&lt;/a&gt; covered setting up a Google Sheet to store and serve data through HTTP requests; &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt; covered reading, filtering, and plotting that data in R. In this part, we&amp;rsquo;ll create the actual dashboard and host it online.&lt;/p&gt;
 
 &lt;p&gt;Shiny adds a web server and an interactive web front end to R code and graphics. We&amp;rsquo;ll use it to make a web-based dashboard, in other words a collection of plots that display the latest sensor data with some widgets to modify the plots. In this section, we&amp;rsquo;ll first build a simple page that shows a time series and boxplot with the latest data from Google Sheets. We&amp;rsquo;ll then add a date selection widget that narrows down the time period to be displayed.&lt;/p&gt;
 
@@ -130,11 +130,11 @@ shinyServer(function(input, output) {
 
 &lt;p&gt;Create the &lt;code&gt;ui.R&lt;/code&gt; and &lt;code&gt;server.R&lt;/code&gt; files in the same directory as &lt;code&gt;helpers.R&lt;/code&gt;, which you created at the end of the previous section. RStudio automatically detects that the files are Shiny application and adds a &amp;ldquo;Run App&amp;rdquo; button the toolbar above the editor.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/33_run_btn.png&#34; alt=&#34;RStudio adds a run button to Shiny applications&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/33_run_btn.png&#34; alt=&#34;RStudio adds a run button to Shiny applications&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Use that button to preview the application. It should pop up a window similar to the one below:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/31_basicui.png&#34; alt=&#34;Our first dashboard, with two static graphs&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/31_basicui.png&#34; alt=&#34;Our first dashboard, with two static graphs&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Note that none of our code detects changes on the google document; you still need to refresh the page to get the latest data.&lt;/p&gt;
 
@@ -219,15 +219,15 @@ shinyServer(function(input, output) {
 
 &lt;p&gt;Run the application again. The new result should resemble my example below:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/32_fullui.png&#34; alt=&#34;Our improved dashboard, now with date range selection&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;Our improved dashboard, now with date range selection&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;publish-to-shinyapps-io:bffe4c52645e4aa5f295033954d0e261&#34;&gt;Publish to Shinyapps.io&lt;/h2&gt;
 
 &lt;p&gt;ShinyApps.io provides a hosting service for Shiny apps, and is another product by the makers of RStudio. Their developers integrated the service into RStudio: simply click &amp;ldquo;Publish&amp;rdquo; in the upper right corner of your Shiny app preview, and follow the instructions! Create a free account and upload your dashboard.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/35_publish_btn.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/35_publish_btn.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/34_publish.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/34_publish.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Once the app is published, you will notice a problem remains: nothing shows up on your dashboard. If you check the server logs, you&amp;rsquo;ll notice that HTTPS requests from R to Google Sheets failed. The final section of our tutorial, below, will explain how to work around that.&lt;/p&gt;
 
@@ -255,15 +255,15 @@ data &amp;lt;- read.csv(
     
     <item>
       <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3.</title>
-      <link>http://douglas-watson.github.com/post/gdocs_2_r/</link>
+      <link>http://douglas-watson.github.io/post/gdocs_2_r/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:38 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.com/post/gdocs_2_r/</guid>
+      <guid>http://douglas-watson.github.io/post/gdocs_2_r/</guid>
       <description>
 
-&lt;p&gt;This is the second installment of the Shiny + GDocs dashboard tutorial, where we learn how to use a Google Sheet spreadsheet to store data from connected &amp;ldquo;Internet of Things&amp;rdquo; data and use Shiny to create a web page to show the data. The &lt;a href=&#34;http://douglas-watson.github.com/post/gdocs_1_gdocs/&#34;&gt;first part&lt;/a&gt; showed you how to set up a Google Sheet to serve as a data server that accepts POST and GET HTTP requests, as well as how to use pivot tables and filters on the sheets directly. In this section, I&amp;rsquo;ll walk you through the specific aspects of R that we will wrap in Shiny code. We&amp;rsquo;ll cover: how to download CSV data from the web, handling date fields, and making various plots with ggplot2. I assume if you are reading tutorial that you already are using R and found the tutorial through a desire to connect to Google Sheets data. If not, I hope this overview will motivate you to learn more R!&lt;/p&gt;
+&lt;p&gt;This is the second installment of the Shiny + GDocs dashboard tutorial, where we learn how to use a Google Sheet spreadsheet to store data from connected &amp;ldquo;Internet of Things&amp;rdquo; data and use Shiny to create a web page to show the data. The &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;first part&lt;/a&gt; showed you how to set up a Google Sheet to serve as a data server that accepts POST and GET HTTP requests, as well as how to use pivot tables and filters on the sheets directly. In this section, I&amp;rsquo;ll walk you through the specific aspects of R that we will wrap in Shiny code. We&amp;rsquo;ll cover: how to download CSV data from the web, handling date fields, and making various plots with ggplot2. I assume if you are reading tutorial that you already are using R and found the tutorial through a desire to connect to Google Sheets data. If not, I hope this overview will motivate you to learn more R!&lt;/p&gt;
 
-&lt;p&gt;If you want to skip to using Shiny, head over to &lt;a href=&#34;http://douglas-watson.github.com/post/gdocs_3_shiny&#34;&gt;part 3&lt;/a&gt;. The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;If you want to skip to using Shiny, head over to &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny&#34;&gt;part 3&lt;/a&gt;. The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;recommended-setup:94191fbd145b96fca71414b523ebad09&#34;&gt;Recommended setup&lt;/h2&gt;
 
@@ -330,28 +330,28 @@ data &amp;lt;- getRaw()
 qplot(date, value, data = data)
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/21_all.png&#34; alt=&#34;All points on a single plot, a good start, but not very clear.&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/21_all.png&#34; alt=&#34;All points on a single plot, a good start, but not very clear.&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;We can clarify the plot a little by colouring points according to sensor location:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin)
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/22_colours.png&#34; alt=&#34;Colouring the points as a function of sensor locations clarifies the plot a bit.&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/22_colours.png&#34; alt=&#34;Colouring the points as a function of sensor locations clarifies the plot a bit.&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;We still can&amp;rsquo;t distinguish temperature from humidity. Let&amp;rsquo;s separate those variables into different panels using &amp;ldquo;facets&amp;rdquo;. We&amp;rsquo;ll add the &amp;ldquo;free_y&amp;rdquo; option to allow each y to scale independently:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/23_facets.png&#34; alt=&#34;Faceted by variable.&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/23_facets.png&#34; alt=&#34;Faceted by variable.&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Since there is a lot of noise, joining the points with a line makes the plot easier to read:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin, geom = &amp;quot;line&amp;quot;) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/24_timeseries.png&#34; alt=&#34;Points replaced by lines&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/24_timeseries.png&#34; alt=&#34;Points replaced by lines&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;If you add a sensor in a new room, a new line colour will automatically appear on the plot. If you add a new type of data (such as &amp;ldquo;power&amp;rdquo; for a power meter), a third facet will appear. Try it! Just modify the Python script to send data from a new location and re-run the python script, the &lt;code&gt;data &amp;lt;- getRaw()&lt;/code&gt; line, and the latest qplot instruction.&lt;/p&gt;
 
@@ -367,7 +367,7 @@ qplot(date, value, data = data)
 &lt;pre&gt;&lt;code&gt;qplot(origin, value, data = data, geom = &amp;quot;boxplot&amp;quot;) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/25_boxplots.png&#34; alt=&#34;Box plots are even easier than time series&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/25_boxplots.png&#34; alt=&#34;Box plots are even easier than time series&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Have a look at the qplot official documents for more inspiration on plot types: &lt;a href=&#34;http://docs.ggplot2.org/current&#34;&gt;http://docs.ggplot2.org/current&lt;/a&gt;&lt;/p&gt;
 
@@ -418,15 +418,15 @@ boxPlot &amp;lt;- function(data) {
     
     <item>
       <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 1/3.</title>
-      <link>http://douglas-watson.github.com/post/gdocs_1_gdocs/</link>
+      <link>http://douglas-watson.github.io/post/gdocs_1_gdocs/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:30 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.com/post/gdocs_1_gdocs/</guid>
+      <guid>http://douglas-watson.github.io/post/gdocs_1_gdocs/</guid>
       <description>
 
 &lt;p&gt;In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&amp;rsquo;s data using an HTTP GET requests. On the way, you will also experiment with some of the spreadsheet&amp;rsquo;s built-in analytics tools: filters, pivot tables, and charts.&lt;/p&gt;
 
-&lt;p&gt;Skip to &lt;a href=&#34;http://douglas-watson.github.com/post/gdocs_2_r/&#34;&gt;part 2&lt;/a&gt; to learn how to fetch and manipulate this data in R, or &lt;a href=&#34;http://douglas-watson.github.com/post/gdocs_3_shiny/&#34;&gt;part 3&lt;/a&gt; to learn how to use Shiny.&lt;/p&gt;
+&lt;p&gt;Skip to &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part 2&lt;/a&gt; to learn how to fetch and manipulate this data in R, or &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part 3&lt;/a&gt; to learn how to use Shiny.&lt;/p&gt;
 
 &lt;p&gt;The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
 
@@ -552,7 +552,7 @@ boxPlot &amp;lt;- function(data) {
 
 &lt;p&gt;You are now ready to code!&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/0_gdoc_init.png&#34; alt=&#34;Create a header row, then open the script editor.&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/0_gdoc_init.png&#34; alt=&#34;Create a header row, then open the script editor.&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;1-1-appending-a-line-from-google-script:ad12335119693a6c644dff7295437abd&#34;&gt;1.1 Appending a line from google script&lt;/h2&gt;
 
@@ -583,15 +583,15 @@ function test() {
 
 &lt;p&gt;We additionally wrote a small &lt;code&gt;test&lt;/code&gt; function which calls appendLines, to make sure everything works. To run it, select the &lt;code&gt;test&lt;/code&gt; function in the toolbar and click the run button. If you are asked to authorize the script, do so. This should have appended two lines to the spreadsheet. You can also view the log output with &amp;ldquo;View&amp;rdquo; &amp;gt; &amp;ldquo;Logs&amp;rdquo; in the script editor.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/1_code_editor.png&#34; alt=&#34;To test your code from the script editor, click the run button.&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/1_code_editor.png&#34; alt=&#34;To test your code from the script editor, click the run button.&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Two lines of data should be added to the spreadsheet:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/2_appended_data.png&#34; alt=&#34;Two lines of data should be added to the spreadsheet&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/2_appended_data.png&#34; alt=&#34;Two lines of data should be added to the spreadsheet&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Our code has a critical flaw, however: later, when we&amp;rsquo;ll call it as a web service, the script will have no active spreadsheet associated. We need to change the code to fetch the spreadsheet from its unique ID. Find the document ID in the URL of spreadsheet:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/3_id.png&#34; alt=&#34;Find the document ID in its URL&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/3_id.png&#34; alt=&#34;Find the document ID in its URL&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Then modify &lt;code&gt;appendLines&lt;/code&gt; to fetch the document by ID:&lt;/p&gt;
 
@@ -621,15 +621,15 @@ function test() {
 
 &lt;p&gt;Now publish it with &amp;ldquo;Publish&amp;rdquo; &amp;gt; &amp;ldquo;Deploy as web app&amp;hellip;&amp;rdquo;. Give the version a brief description, ask to execute it as yourself, and allow anonymous access, so that you can post to the spreadsheet without authentication, then deploy:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/4_publish.png&#34; alt=&#34;Publishing our first web app!&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/4_publish.png&#34; alt=&#34;Publishing our first web app!&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Copy the URL:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/5_published.png&#34; alt=&#34;Publishing our first web app!&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/5_published.png&#34; alt=&#34;Publishing our first web app!&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;There&amp;rsquo;s one last thing you need to do before sending HTTP requests to this new web server. Share the spreadsheet publicly. Return to the spreadsheet tab, and open &amp;ldquo;File&amp;rdquo; &amp;gt; &amp;ldquo;Share&amp;hellip;&amp;rdquo;. Click &amp;ldquo;Get shareable link&amp;rdquo;, and allow anyone with the link to edit:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/6_share.png&#34; alt=&#34;Share the spreadsheet publicly to avoid authentication errors&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/6_share.png&#34; alt=&#34;Share the spreadsheet publicly to avoid authentication errors&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Now, fire up your favourite HTTP client (the Postman Chrome extension is a great graphical tool). I&amp;rsquo;ll be using CURL, from the console. Send a first POST request to the URL you copied above. If using CURL make sure to add the &lt;code&gt;-L&lt;/code&gt; option to follow redirects, and the &lt;code&gt;--data&lt;/code&gt; option to make a POST request. For my URL, I get:&lt;/p&gt;
 
@@ -669,7 +669,7 @@ function test() {
 
 &lt;p&gt;Publish a new version of the app (&amp;ldquo;Publish&amp;rdquo; &amp;gt; &amp;ldquo;Deploy as web app&amp;hellip;&amp;rdquo;, set &amp;ldquo;Project Version&amp;rdquo; to &amp;ldquo;new&amp;rdquo;, describe it, and click &amp;ldquo;update&amp;rdquo;). You can now append lines to the spreadsheet through an HTTP Post request! Rerun the last curl command, and observe the newest line added to your spreadsheet:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/7_post_append.png&#34; alt=&#34;You recorded data from an HTTP request!&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/7_post_append.png&#34; alt=&#34;You recorded data from an HTTP request!&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;Clear the spreadsheet now: delete all rows except for the header.&lt;/p&gt;
 
@@ -730,7 +730,7 @@ if __name__ == &#39;__main__&#39;:
 
 &lt;p&gt;Return to the spreadsheet. You should see the lines appearing as the script sends them:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/8_python_append.png&#34; alt=&#34;Fake data uploaded from a Python script&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/8_python_append.png&#34; alt=&#34;Fake data uploaded from a Python script&#34; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&#34;analytics-within-the-spreadsheet:ad12335119693a6c644dff7295437abd&#34;&gt;Analytics within the spreadsheet&lt;/h1&gt;
 
@@ -740,13 +740,13 @@ if __name__ == &#39;__main__&#39;:
 
 &lt;p&gt;Filters allow you to show or hide rows of data based on one or several criteria. They are ridiculously simple to use: select the columns you want to filter, then click the funnel symbol in the toolbar. Little arrow icons appear next to each column header. Clicking these pops down a menu from which you can choose filtering criteria. Try restricting the data to only today&amp;rsquo;s data, or only temperature measurements.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/9_filters.png&#34; alt=&#34;Filters hide rows based on a search criteria. Here, we filter based on date, to show only today&#39;s data.&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/9_filters.png&#34; alt=&#34;Filters hide rows based on a search criteria. Here, we filter based on date, to show only today&#39;s data.&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;pivot-tables:ad12335119693a6c644dff7295437abd&#34;&gt;Pivot tables&lt;/h2&gt;
 
 &lt;p&gt;Pivot tables transform long-format data into wide-format data. Select columns A:G, by clicking the A letter above the header row, and dragging to the G letter. Go to the &amp;ldquo;Data&amp;rdquo; &amp;gt; &amp;ldquo;Pivot table&amp;rdquo; menu option. This opens a new blank sheet, with a right-hand-side menu to configure the pivot table. Select the &amp;ldquo;date&amp;rdquo; column for rows, &amp;ldquo;origin&amp;rdquo; for the columns, and &amp;ldquo;value&amp;rdquo; for the values &amp;ndash; summarize by AVERAGE for the totals to make sense. Finally, filter by &amp;ldquo;variable&amp;rdquo;, showing only &amp;ldquo;temperature&amp;rdquo;. Your configuration and pivot table should look similar to the screenshot below:&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/10_pivot_table.png&#34; alt=&#34;Pivot tables&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/10_pivot_table.png&#34; alt=&#34;Pivot tables&#34; /&gt;&lt;/p&gt;
 
 &lt;p&gt;You now have a table that extracts only temperature data and presents them by room. If you kept the &amp;ldquo;show totals&amp;rdquo; option checked, you&amp;rsquo;ll also have an average temperature at each point in time, and an average per room. Note that it updates live, as soon as new data arrives!&lt;/p&gt;
 
@@ -758,7 +758,7 @@ if __name__ == &#39;__main__&#39;:
 
 &lt;p&gt;The screenshot below shows a &lt;em&gt;time line chart&lt;/em&gt;, moved to its own sheet. This chart can interactively zoom onto date ranges, and is thus ideal to represent time series data from a sensor. You could even embed the chart directly on a web page to make a monitoring dashboard (which could be hosted on google sites, if you are really lazy), using the &amp;ldquo;Publish chart&amp;rdquo; option.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/11_charts.png&#34; alt=&#34;Graphs&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Graphs&#34; /&gt;&lt;/p&gt;
 
 &lt;h1 id=&#34;get-data-in-csv-format:ad12335119693a6c644dff7295437abd&#34;&gt;GET data in CSV format&lt;/h1&gt;
 
@@ -824,15 +824,15 @@ timestamp,date,origin,variable,value
     
     <item>
       <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial Series.</title>
-      <link>http://douglas-watson.github.com/post/gdocs_0_intro/</link>
+      <link>http://douglas-watson.github.io/post/gdocs_0_intro/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:24 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.com/post/gdocs_0_intro/</guid>
+      <guid>http://douglas-watson.github.io/post/gdocs_0_intro/</guid>
       <description>
 
 &lt;p&gt;Logging data to a central server and displaying it online is a common task in Internet of Things applications. This usually requires deploying and maintaining your own servers, with a database for storage and a web server for display. System administration tasks are no fun to me, so instead I found a way to use Google Sheets as a server, and ShinyApps.io as a visualization platform. Uploading data to Google docs is relatively simple and well documented, but connecting Shiny to Google Docs was a little more tricky; this motivated me to write this tutorial to show others how to set up a similar system.&lt;/p&gt;
 
-&lt;p&gt;In &lt;a href=&#34;http://douglas-watson.github.com/post/gdocs_1_gdocs/&#34;&gt;part one&lt;/a&gt;, I&amp;rsquo;ll explain how to set up a Google spreadsheet as data storage and use it as an elementary dashboard. In &lt;a href=&#34;http://douglas-watson.github.com/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt;, I&amp;rsquo;ll teach you how to retrieve that data in R, and plot it with the ggplot2 library. In &lt;a href=&#34;http://douglas-watson.github.com/post/gdocs_3_shiny/&#34;&gt;part three&lt;/a&gt;, I&amp;rsquo;ll walk you through making a simple interactive visualization in Shiny and publishing it online to ShinyApps.io.&lt;/p&gt;
+&lt;p&gt;In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;part one&lt;/a&gt;, I&amp;rsquo;ll explain how to set up a Google spreadsheet as data storage and use it as an elementary dashboard. In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt;, I&amp;rsquo;ll teach you how to retrieve that data in R, and plot it with the ggplot2 library. In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part three&lt;/a&gt;, I&amp;rsquo;ll walk you through making a simple interactive visualization in Shiny and publishing it online to ShinyApps.io.&lt;/p&gt;
 
 &lt;p&gt;During the tutorial, we&amp;rsquo;ll pretend to have a network of several temperature and humidity sensors. Each sensor is named after its location name (such as &amp;ldquo;bedroom&amp;rdquo; or &amp;ldquo;living room&amp;rdquo;), and records the temperature every hour. I assume you know how to program your IOT hardware to make HTTP requests; for the sake of the tutorial I provide a Python script to upload fake temperature and humidity values.&lt;/p&gt;
 
@@ -840,22 +840,22 @@ timestamp,date,origin,variable,value
 
 &lt;p&gt;Google spreadsheets can serve as a simple server to store and retrieve data, while writing surprisingly little code. We avoid maintaining our own servers, and we additionally benefit from easy access to the raw data. On top of that, the spreadsheets on their own are powerful analysis tools, with statistics, pivot tables, filters, and interactive charts which can be embedded on external websites.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/11_charts.png&#34; alt=&#34;Google Sheets on their own are a powerful analytics tool for distributed data&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Google Sheets on their own are a powerful analytics tool for distributed data&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;why-use-r-and-shiny:1d31138e44f763ff5e61f4534683debe&#34;&gt;Why use R and Shiny?&lt;/h2&gt;
 
 &lt;p&gt;R is a powerful language specifically designed for data analysis. Combined with the ggplot2 graphing library, it provides an ideal package to explore and visualize large amounts data. Once you have figured out what you want to show, Shiny allows you to take your visualizations, make them interactive, and publish them on the web. RStudio, the makers of Shiny, even provide free hosting for visualizations, which makes the service quite convenient to experiment with.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.com/images/gdocs/32_fullui.png&#34; alt=&#34;The final product of our tutorial: a live interactive web-based dashboard&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;The final product of our tutorial: a live interactive web-based dashboard&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>About</title>
-      <link>http://douglas-watson.github.com/about/</link>
+      <link>http://douglas-watson.github.io/about/</link>
       <pubDate>Sun, 27 Dec 2015 13:01:07 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.com/about/</guid>
+      <guid>http://douglas-watson.github.io/about/</guid>
       <description>&lt;p&gt;I look after software in a hardware startup. I frequently code in Python and Go, and sometimes in R, Javascript, and MATLAB.&lt;/p&gt;
 
 &lt;p&gt;I&amp;rsquo;ve often found other developers blogs to be useful resources, so I&amp;rsquo;m setting up my own to share some tips and tricks.&lt;/p&gt;
