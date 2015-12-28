@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
-  <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3. &middot; Douglas Watson</title>
+  <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3 &middot; Douglas Watson</title>
 
   
   <link rel="stylesheet" href="http://douglas-watson.github.io/css/poole.css">
@@ -74,7 +74,7 @@
 
 <div class="content container">
   <div class="post">
-    <h1>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3.</h1>
+    <h1>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3</h1>
     <span class="post-date">Dec 27, 2015 &middot; 7 minute read &middot; <a href="http://douglas-watson.github.io/post/gdocs_3_shiny/#disqus_thread">Comments</a>
     </span>
     
@@ -106,7 +106,7 @@ shinyUI(fluidPage(
 ))
 </code></pre>
 
-<p>The next step is to render graphics that can be displayed in the plotOutputs; we do this in <code>server.R</code>. The server code is broken down into three parts, code that is run:</p>
+<p>The next step is to render graphics that can be displayed in the plotOutputs; we do this in <code>server.R</code>. The server code is broken down into code that is run:</p>
 
 <ol>
 <li>when the server is started;</li>
@@ -114,7 +114,7 @@ shinyUI(fluidPage(
 <li>each time an interactive widget is changed.</li>
 </ol>
 
-<p>In our case, when the server is started we only want to import the helper code (data loading and plotting functions), but not execute any of it. Each time a page is loaded, we want to fetch new data and draw the plots. We have no widgets yet, and therefore no code in the third category.</p>
+<p>In our case, when the server is started, we only want to import the helper code (data loading and plotting functions), but not execute any of it. Each time a page is loaded, we want to fetch new data and draw the plots. We have no widgets yet, and therefore, no code in the third category.</p>
 
 <p>The first draft of server code, below, does just that: code outside of the <code>shinyServer(...)</code> block is executed just once, code inside it is executed every time the page is accessed. This last block fetches the raw data, creates a time series plot and places it into the the <code>plotOuput</code> named &ldquo;timeseries&rdquo; which we defined in <code>ui.R</code>, then renders a boxplot into the &ldquo;boxplot&rdquo; <code>plotOutput</code>.</p>
 

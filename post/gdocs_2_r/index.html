@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
-  <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3. &middot; Douglas Watson</title>
+  <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3 &middot; Douglas Watson</title>
 
   
   <link rel="stylesheet" href="http://douglas-watson.github.io/css/poole.css">
@@ -74,7 +74,7 @@
 
 <div class="content container">
   <div class="post">
-    <h1>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3.</h1>
+    <h1>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3</h1>
     <span class="post-date">Dec 27, 2015 &middot; 6 minute read &middot; <a href="http://douglas-watson.github.io/post/gdocs_2_r/#disqus_thread">Comments</a>
     </span>
     
@@ -122,7 +122,7 @@
 
 <h2 id="convert-date-time-column:94191fbd145b96fca71414b523ebad09">Convert date-time column</h2>
 
-<p>Let&rsquo;s now convert the date-time data to a proper R date object. The easiest way is to transform the UNIX timestamp column into a <code>POSIXct</code> object, and replace the &ldquo;date&rdquo; column. Since we generated UTC dates, we set the time zone to &ldquo;GMT&rdquo;. Complete the getRaw function:</p>
+<p>Let&rsquo;s now convert the date-time data to a proper R date object. The easiest way is to transform the UNIX timestamp column into a <code>POSIXct</code> object and replace the &ldquo;date&rdquo; column. Since we generated UTC dates, we set the time zone to &ldquo;GMT&rdquo;. Complete the getRaw function:</p>
 
 <pre><code>getRaw &lt;- function () {
   data &lt;- read.csv(

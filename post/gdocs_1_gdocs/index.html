@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
-  <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 1/3. &middot; Douglas Watson</title>
+  <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 1/3 &middot; Douglas Watson</title>
 
   
   <link rel="stylesheet" href="http://douglas-watson.github.io/css/poole.css">
@@ -74,12 +74,12 @@
 
 <div class="content container">
   <div class="post">
-    <h1>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 1/3.</h1>
+    <h1>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 1/3</h1>
     <span class="post-date">Dec 27, 2015 &middot; 11 minute read &middot; <a href="http://douglas-watson.github.io/post/gdocs_1_gdocs/#disqus_thread">Comments</a>
     </span>
     
 
-<p>In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&rsquo;s data using an HTTP GET requests. On the way, you will also experiment with some of the spreadsheet&rsquo;s built-in analytics tools: filters, pivot tables, and charts.</p>
+<p>In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&rsquo;s data using an HTTP GET requests. Along the way, you will also experiment with some of the spreadsheet&rsquo;s built-in analytics tools: filters, pivot tables, and charts.</p>
 
 <p>Skip to <a href="/post/gdocs_2_r/">part 2</a> to learn how to fetch and manipulate this data in R, or <a href="/post/gdocs_3_shiny/">part 3</a> to learn how to use Shiny.</p>
 
@@ -190,11 +190,11 @@
 </tbody>
 </table>
 
-<p>The wide format is more obvious to work with and more compact, but isn&rsquo;t easily extensible: if we add a new sensor to our system, we need to add a column to the file. With the long format, we just keep appending new lines. The long format also suits R analysis well, and can be transformed into the wide format using a pivot table in a spreadsheet.</p>
+<p>The wide format is more obvious to work with and more compact, but isn&rsquo;t easily extensible: if we add a new sensor to our system, we need to add a column to the file. With the long format, we just keep appending new lines. The long format also suits R analysis well and can be transformed into the wide format using a pivot table in a spreadsheet.</p>
 
-<p>Finally, we&rsquo;ll exchange data in Comma-Separated Values (CSV) format, because it is easy to generate from an embedded device, easy to store as a text file, and easy to read in any text editor or spreadsheet application.</p>
+<p>Finally, we&rsquo;ll exchange data in Comma-Separated Values (CSV) format because it is easy to generate from an embedded device, easy to store as a text file, and easy to read in any text editor or spreadsheet application.</p>
 
-<h1 id="1-preparing-a-spreadsheet-to-receive-data:ad12335119693a6c644dff7295437abd">1. Preparing a spreadsheet to receive data</h1>
+<h1 id="preparing-a-spreadsheet-to-receive-data:ad12335119693a6c644dff7295437abd">Preparing a spreadsheet to receive data</h1>
 
 <p>If you don&rsquo;t have a google drive account, create one. Then:</p>
 
@@ -209,9 +209,9 @@
 
 <p><img src="/images/gdocs/0_gdoc_init.png" alt="Create a header row, then open the script editor." /></p>
 
-<h2 id="1-1-appending-a-line-from-google-script:ad12335119693a6c644dff7295437abd">1.1 Appending a line from google script</h2>
+<h2 id="appending-a-line-from-google-script:ad12335119693a6c644dff7295437abd">Appending a line from google script</h2>
 
-<p>You should now be looking at the script editor. This tool allows you to write custom spreadsheet functions (which are called like <code>=SUM(A1:A5)</code>), and to write simple web applications. Our first step will be to write a function that appends CSV data to the spreadsheet. Copy this code into the script editor:</p>
+<p>You should now be looking at the script editor. This tool allows you to write custom spreadsheet functions (which are called as<code>=SUM(A1:A5)</code>), and to write simple web applications. Our first step will be to write a function that appends CSV data to the spreadsheet. Copy this code into the script editor:</p>
 
 <pre><code>function appendLines(worksheet, csvData) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -230,11 +230,14 @@ function test() {
 }
 </code></pre>
 
-<p>Our appendLine function does this:
-- Open the current spreadsheet (full document);
-- select a sheet within the document, as identified by the first argument (we currently only have one, named Raw);
-- parse the CSV data given as the second argument;
-- for each line in the CSV data, append the line to the sheet.</p>
+<p>Our appendLine function does this:</p>
+
+<ul>
+<li>Open the current spreadsheet (full document);</li>
+<li>select a sheet within the document, as identified by the first argument (we currently only have one, named Raw);</li>
+<li>parse the CSV data given as the second argument;</li>
+<li>for each line in the CSV data, append the line to the sheet.</li>
+</ul>
 
 <p>We additionally wrote a small <code>test</code> function which calls appendLines, to make sure everything works. To run it, select the <code>test</code> function in the toolbar and click the run button. If you are asked to authorize the script, do so. This should have appended two lines to the spreadsheet. You can also view the log output with &ldquo;View&rdquo; &gt; &ldquo;Logs&rdquo; in the script editor.</p>
 
@@ -244,7 +247,7 @@ function test() {
 
 <p><img src="/images/gdocs/2_appended_data.png" alt="Two lines of data should be added to the spreadsheet" /></p>
 
-<p>Our code has a critical flaw, however: later, when we&rsquo;ll call it as a web service, the script will have no active spreadsheet associated. We need to change the code to fetch the spreadsheet from its unique ID. Find the document ID in the URL of spreadsheet:</p>
+<p>Our code has a critical flaw, however. Later, when we&rsquo;ll call it as a web service, the script will have no active spreadsheet associated. We need to change the code to fetch the spreadsheet from its unique ID. Find the document ID in the URL of spreadsheet:</p>
 
 <p><img src="/images/gdocs/3_id.png" alt="Find the document ID in its URL" /></p>
 
@@ -304,10 +307,13 @@ function test() {
 
 <p>The URL parameter appeared as <code>e[&quot;parameter&quot;][&quot;sheet&quot;]</code>.</p>
 
-<p>Now that we understand the structure of the event object, we can modify <code>doPost</code> to:
-- Look for a &ldquo;sheet&rdquo; argument in the URL
-- Extract CSV data from the POST request payload
-- Append all lines in the CSV data to the designated sheet.</p>
+<p>Now that we understand the structure of the event object, we can modify <code>doPost</code> to:</p>
+
+<ul>
+<li>Look for a &ldquo;sheet&rdquo; argument in the URL</li>
+<li>Extract CSV data from the POST request payload</li>
+<li>Append all lines in the CSV data to the designated sheet.</li>
+</ul>
 
 <pre><code>function doPost(e) {
   var contents = e.postData.contents;
@@ -393,13 +399,13 @@ if __name__ == '__main__':
 
 <h2 id="filters:ad12335119693a6c644dff7295437abd">Filters</h2>
 
-<p>Filters allow you to show or hide rows of data based on one or several criteria. They are ridiculously simple to use: select the columns you want to filter, then click the funnel symbol in the toolbar. Little arrow icons appear next to each column header. Clicking these pops down a menu from which you can choose filtering criteria. Try restricting the data to only today&rsquo;s data, or only temperature measurements.</p>
+<p>Filters allow you to show or hide rows of data based on one or several criteria. They are ridiculously simple to use: select the columns you want to filter, then click the funnel symbol in the toolbar. Little arrow icons appear next to each column header. Clicking these pops down a menu from which you can choose filtering criteria. Try restricting the data to only today&rsquo;s data or only temperature measurements.</p>
 
 <p><img src="/images/gdocs/9_filters.png" alt="Filters hide rows based on a search criteria. Here, we filter based on date, to show only today's data." /></p>
 
 <h2 id="pivot-tables:ad12335119693a6c644dff7295437abd">Pivot tables</h2>
 
-<p>Pivot tables transform long-format data into wide-format data. Select columns A:G, by clicking the A letter above the header row, and dragging to the G letter. Go to the &ldquo;Data&rdquo; &gt; &ldquo;Pivot table&rdquo; menu option. This opens a new blank sheet, with a right-hand-side menu to configure the pivot table. Select the &ldquo;date&rdquo; column for rows, &ldquo;origin&rdquo; for the columns, and &ldquo;value&rdquo; for the values &ndash; summarize by AVERAGE for the totals to make sense. Finally, filter by &ldquo;variable&rdquo;, showing only &ldquo;temperature&rdquo;. Your configuration and pivot table should look similar to the screenshot below:</p>
+<p>Pivot tables transform long-format data into wide-format data. Select columns A:G, by clicking the A letter above the header row and dragging to the G letter. Go to the &ldquo;Data&rdquo; &gt; &ldquo;Pivot table&rdquo; menu option. This opens a new blank sheet with a right-hand-side menu to configure the pivot table. Select the &ldquo;date&rdquo; column for rows, &ldquo;origin&rdquo; for the columns, and &ldquo;value&rdquo; for the values &ndash; summarize by AVERAGE for the totals to make sense. Finally, filter by &ldquo;variable&rdquo;, showing only &ldquo;temperature&rdquo;. Your configuration and pivot table should look similar to the screenshot below:</p>
 
 <p><img src="/images/gdocs/10_pivot_table.png" alt="Pivot tables" /></p>
 

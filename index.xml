@@ -52,7 +52,7 @@ OTHER DEALINGS IN THE SOFTWARE.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/projects/raclette_search.png&#34; alt=&#34;Search results&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;The core of the project is a web scraper, which retrieved all the transcriptions from the official Swiss website, and combined the transcription with biographical information about the speakers (moslty party affiliations and canton of origin). The product is a large database of machine-readable transcriptions which can easily be re-used by researchers in different tool. We produced the data in two formats: CSV and JSON. The CSV data can be imported in R and Tableau, as well as other natural language processing and graphing tools. The JSON data can be imported into ElasticSearch. We additionally set up a Kibana interface for quick searches and analytics, hosted at &lt;a href=&#34;http://parlement.letemps.ch&#34;&gt;parlement.letemps.ch&lt;/a&gt;. Check out the &lt;a href=&#34;https://github.com/douglas-watson/parl-scraping&#34;&gt;github page&lt;/a&gt; for instructions on using Kibana, on settings up your own ElasticSearch server (including docker files), and rebuilding the index with a web scraper.&lt;/p&gt;
+&lt;p&gt;The core of the project is a web scraper, which retrieved all the transcriptions from the official Swiss website, and combined the transcription with biographical information about the speakers (moslty party affiliations and canton of origin). The product is a large database of machine-readable transcriptions which can easily be re-used by researchers by using their favorite tools. We produced the data in two formats: CSV and JSON. The CSV data can be imported in R and Tableau, as well as other natural language processing and graphing tools. The JSON data can be imported into ElasticSearch. We additionally set up a Kibana interface for quick searches and analytics, hosted at &lt;a href=&#34;http://parlement.letemps.ch&#34;&gt;parlement.letemps.ch&lt;/a&gt;. Check out the &lt;a href=&#34;https://github.com/douglas-watson/parl-scraping&#34;&gt;github page&lt;/a&gt; for instructions on using Kibana, on settings up your own ElasticSearch server (including docker files), and rebuilding the index with a web scraper.&lt;/p&gt;
 
 &lt;p&gt;More information about the project on the hackathon wiki: &lt;a href=&#34;http://make.opendata.ch/wiki/project:chparlscraping&#34;&gt;http://make.opendata.ch/wiki/project:chparlscraping&lt;/a&gt;&lt;/p&gt;
 
@@ -61,7 +61,7 @@ OTHER DEALINGS IN THE SOFTWARE.&lt;/p&gt;
     </item>
     
     <item>
-      <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3.</title>
+      <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3</title>
       <link>http://douglas-watson.github.io/post/gdocs_3_shiny/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:42 +0100</pubDate>
       
@@ -95,7 +95,7 @@ shinyUI(fluidPage(
 ))
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The next step is to render graphics that can be displayed in the plotOutputs; we do this in &lt;code&gt;server.R&lt;/code&gt;. The server code is broken down into three parts, code that is run:&lt;/p&gt;
+&lt;p&gt;The next step is to render graphics that can be displayed in the plotOutputs; we do this in &lt;code&gt;server.R&lt;/code&gt;. The server code is broken down into code that is run:&lt;/p&gt;
 
 &lt;ol&gt;
 &lt;li&gt;when the server is started;&lt;/li&gt;
@@ -103,7 +103,7 @@ shinyUI(fluidPage(
 &lt;li&gt;each time an interactive widget is changed.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;In our case, when the server is started we only want to import the helper code (data loading and plotting functions), but not execute any of it. Each time a page is loaded, we want to fetch new data and draw the plots. We have no widgets yet, and therefore no code in the third category.&lt;/p&gt;
+&lt;p&gt;In our case, when the server is started, we only want to import the helper code (data loading and plotting functions), but not execute any of it. Each time a page is loaded, we want to fetch new data and draw the plots. We have no widgets yet, and therefore, no code in the third category.&lt;/p&gt;
 
 &lt;p&gt;The first draft of server code, below, does just that: code outside of the &lt;code&gt;shinyServer(...)&lt;/code&gt; block is executed just once, code inside it is executed every time the page is accessed. This last block fetches the raw data, creates a time series plot and places it into the the &lt;code&gt;plotOuput&lt;/code&gt; named &amp;ldquo;timeseries&amp;rdquo; which we defined in &lt;code&gt;ui.R&lt;/code&gt;, then renders a boxplot into the &amp;ldquo;boxplot&amp;rdquo; &lt;code&gt;plotOutput&lt;/code&gt;.&lt;/p&gt;
 
@@ -254,7 +254,7 @@ data &amp;lt;- read.csv(
     </item>
     
     <item>
-      <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3.</title>
+      <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3</title>
       <link>http://douglas-watson.github.io/post/gdocs_2_r/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:38 +0100</pubDate>
       
@@ -304,7 +304,7 @@ data &amp;lt;- read.csv(
 
 &lt;h2 id=&#34;convert-date-time-column:94191fbd145b96fca71414b523ebad09&#34;&gt;Convert date-time column&lt;/h2&gt;
 
-&lt;p&gt;Let&amp;rsquo;s now convert the date-time data to a proper R date object. The easiest way is to transform the UNIX timestamp column into a &lt;code&gt;POSIXct&lt;/code&gt; object, and replace the &amp;ldquo;date&amp;rdquo; column. Since we generated UTC dates, we set the time zone to &amp;ldquo;GMT&amp;rdquo;. Complete the getRaw function:&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s now convert the date-time data to a proper R date object. The easiest way is to transform the UNIX timestamp column into a &lt;code&gt;POSIXct&lt;/code&gt; object and replace the &amp;ldquo;date&amp;rdquo; column. Since we generated UTC dates, we set the time zone to &amp;ldquo;GMT&amp;rdquo;. Complete the getRaw function:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;getRaw &amp;lt;- function () {
   data &amp;lt;- read.csv(
@@ -417,14 +417,14 @@ boxPlot &amp;lt;- function(data) {
     </item>
     
     <item>
-      <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 1/3.</title>
+      <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 1/3</title>
       <link>http://douglas-watson.github.io/post/gdocs_1_gdocs/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:30 +0100</pubDate>
       
       <guid>http://douglas-watson.github.io/post/gdocs_1_gdocs/</guid>
       <description>
 
-&lt;p&gt;In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&amp;rsquo;s data using an HTTP GET requests. On the way, you will also experiment with some of the spreadsheet&amp;rsquo;s built-in analytics tools: filters, pivot tables, and charts.&lt;/p&gt;
+&lt;p&gt;In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&amp;rsquo;s data using an HTTP GET requests. Along the way, you will also experiment with some of the spreadsheet&amp;rsquo;s built-in analytics tools: filters, pivot tables, and charts.&lt;/p&gt;
 
 &lt;p&gt;Skip to &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part 2&lt;/a&gt; to learn how to fetch and manipulate this data in R, or &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part 3&lt;/a&gt; to learn how to use Shiny.&lt;/p&gt;
 
@@ -535,11 +535,11 @@ boxPlot &amp;lt;- function(data) {
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;The wide format is more obvious to work with and more compact, but isn&amp;rsquo;t easily extensible: if we add a new sensor to our system, we need to add a column to the file. With the long format, we just keep appending new lines. The long format also suits R analysis well, and can be transformed into the wide format using a pivot table in a spreadsheet.&lt;/p&gt;
+&lt;p&gt;The wide format is more obvious to work with and more compact, but isn&amp;rsquo;t easily extensible: if we add a new sensor to our system, we need to add a column to the file. With the long format, we just keep appending new lines. The long format also suits R analysis well and can be transformed into the wide format using a pivot table in a spreadsheet.&lt;/p&gt;
 
-&lt;p&gt;Finally, we&amp;rsquo;ll exchange data in Comma-Separated Values (CSV) format, because it is easy to generate from an embedded device, easy to store as a text file, and easy to read in any text editor or spreadsheet application.&lt;/p&gt;
+&lt;p&gt;Finally, we&amp;rsquo;ll exchange data in Comma-Separated Values (CSV) format because it is easy to generate from an embedded device, easy to store as a text file, and easy to read in any text editor or spreadsheet application.&lt;/p&gt;
 
-&lt;h1 id=&#34;1-preparing-a-spreadsheet-to-receive-data:ad12335119693a6c644dff7295437abd&#34;&gt;1. Preparing a spreadsheet to receive data&lt;/h1&gt;
+&lt;h1 id=&#34;preparing-a-spreadsheet-to-receive-data:ad12335119693a6c644dff7295437abd&#34;&gt;Preparing a spreadsheet to receive data&lt;/h1&gt;
 
 &lt;p&gt;If you don&amp;rsquo;t have a google drive account, create one. Then:&lt;/p&gt;
 
@@ -554,9 +554,9 @@ boxPlot &amp;lt;- function(data) {
 
 &lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/0_gdoc_init.png&#34; alt=&#34;Create a header row, then open the script editor.&#34; /&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;1-1-appending-a-line-from-google-script:ad12335119693a6c644dff7295437abd&#34;&gt;1.1 Appending a line from google script&lt;/h2&gt;
+&lt;h2 id=&#34;appending-a-line-from-google-script:ad12335119693a6c644dff7295437abd&#34;&gt;Appending a line from google script&lt;/h2&gt;
 
-&lt;p&gt;You should now be looking at the script editor. This tool allows you to write custom spreadsheet functions (which are called like &lt;code&gt;=SUM(A1:A5)&lt;/code&gt;), and to write simple web applications. Our first step will be to write a function that appends CSV data to the spreadsheet. Copy this code into the script editor:&lt;/p&gt;
+&lt;p&gt;You should now be looking at the script editor. This tool allows you to write custom spreadsheet functions (which are called as&lt;code&gt;=SUM(A1:A5)&lt;/code&gt;), and to write simple web applications. Our first step will be to write a function that appends CSV data to the spreadsheet. Copy this code into the script editor:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;function appendLines(worksheet, csvData) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -575,11 +575,14 @@ function test() {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Our appendLine function does this:
-- Open the current spreadsheet (full document);
-- select a sheet within the document, as identified by the first argument (we currently only have one, named Raw);
-- parse the CSV data given as the second argument;
-- for each line in the CSV data, append the line to the sheet.&lt;/p&gt;
+&lt;p&gt;Our appendLine function does this:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Open the current spreadsheet (full document);&lt;/li&gt;
+&lt;li&gt;select a sheet within the document, as identified by the first argument (we currently only have one, named Raw);&lt;/li&gt;
+&lt;li&gt;parse the CSV data given as the second argument;&lt;/li&gt;
+&lt;li&gt;for each line in the CSV data, append the line to the sheet.&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;p&gt;We additionally wrote a small &lt;code&gt;test&lt;/code&gt; function which calls appendLines, to make sure everything works. To run it, select the &lt;code&gt;test&lt;/code&gt; function in the toolbar and click the run button. If you are asked to authorize the script, do so. This should have appended two lines to the spreadsheet. You can also view the log output with &amp;ldquo;View&amp;rdquo; &amp;gt; &amp;ldquo;Logs&amp;rdquo; in the script editor.&lt;/p&gt;
 
@@ -589,7 +592,7 @@ function test() {
 
 &lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/2_appended_data.png&#34; alt=&#34;Two lines of data should be added to the spreadsheet&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Our code has a critical flaw, however: later, when we&amp;rsquo;ll call it as a web service, the script will have no active spreadsheet associated. We need to change the code to fetch the spreadsheet from its unique ID. Find the document ID in the URL of spreadsheet:&lt;/p&gt;
+&lt;p&gt;Our code has a critical flaw, however. Later, when we&amp;rsquo;ll call it as a web service, the script will have no active spreadsheet associated. We need to change the code to fetch the spreadsheet from its unique ID. Find the document ID in the URL of spreadsheet:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/3_id.png&#34; alt=&#34;Find the document ID in its URL&#34; /&gt;&lt;/p&gt;
 
@@ -649,10 +652,13 @@ function test() {
 
 &lt;p&gt;The URL parameter appeared as &lt;code&gt;e[&amp;quot;parameter&amp;quot;][&amp;quot;sheet&amp;quot;]&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;Now that we understand the structure of the event object, we can modify &lt;code&gt;doPost&lt;/code&gt; to:
-- Look for a &amp;ldquo;sheet&amp;rdquo; argument in the URL
-- Extract CSV data from the POST request payload
-- Append all lines in the CSV data to the designated sheet.&lt;/p&gt;
+&lt;p&gt;Now that we understand the structure of the event object, we can modify &lt;code&gt;doPost&lt;/code&gt; to:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Look for a &amp;ldquo;sheet&amp;rdquo; argument in the URL&lt;/li&gt;
+&lt;li&gt;Extract CSV data from the POST request payload&lt;/li&gt;
+&lt;li&gt;Append all lines in the CSV data to the designated sheet.&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;pre&gt;&lt;code&gt;function doPost(e) {
   var contents = e.postData.contents;
@@ -738,13 +744,13 @@ if __name__ == &#39;__main__&#39;:
 
 &lt;h2 id=&#34;filters:ad12335119693a6c644dff7295437abd&#34;&gt;Filters&lt;/h2&gt;
 
-&lt;p&gt;Filters allow you to show or hide rows of data based on one or several criteria. They are ridiculously simple to use: select the columns you want to filter, then click the funnel symbol in the toolbar. Little arrow icons appear next to each column header. Clicking these pops down a menu from which you can choose filtering criteria. Try restricting the data to only today&amp;rsquo;s data, or only temperature measurements.&lt;/p&gt;
+&lt;p&gt;Filters allow you to show or hide rows of data based on one or several criteria. They are ridiculously simple to use: select the columns you want to filter, then click the funnel symbol in the toolbar. Little arrow icons appear next to each column header. Clicking these pops down a menu from which you can choose filtering criteria. Try restricting the data to only today&amp;rsquo;s data or only temperature measurements.&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/9_filters.png&#34; alt=&#34;Filters hide rows based on a search criteria. Here, we filter based on date, to show only today&#39;s data.&#34; /&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;pivot-tables:ad12335119693a6c644dff7295437abd&#34;&gt;Pivot tables&lt;/h2&gt;
 
-&lt;p&gt;Pivot tables transform long-format data into wide-format data. Select columns A:G, by clicking the A letter above the header row, and dragging to the G letter. Go to the &amp;ldquo;Data&amp;rdquo; &amp;gt; &amp;ldquo;Pivot table&amp;rdquo; menu option. This opens a new blank sheet, with a right-hand-side menu to configure the pivot table. Select the &amp;ldquo;date&amp;rdquo; column for rows, &amp;ldquo;origin&amp;rdquo; for the columns, and &amp;ldquo;value&amp;rdquo; for the values &amp;ndash; summarize by AVERAGE for the totals to make sense. Finally, filter by &amp;ldquo;variable&amp;rdquo;, showing only &amp;ldquo;temperature&amp;rdquo;. Your configuration and pivot table should look similar to the screenshot below:&lt;/p&gt;
+&lt;p&gt;Pivot tables transform long-format data into wide-format data. Select columns A:G, by clicking the A letter above the header row and dragging to the G letter. Go to the &amp;ldquo;Data&amp;rdquo; &amp;gt; &amp;ldquo;Pivot table&amp;rdquo; menu option. This opens a new blank sheet with a right-hand-side menu to configure the pivot table. Select the &amp;ldquo;date&amp;rdquo; column for rows, &amp;ldquo;origin&amp;rdquo; for the columns, and &amp;ldquo;value&amp;rdquo; for the values &amp;ndash; summarize by AVERAGE for the totals to make sense. Finally, filter by &amp;ldquo;variable&amp;rdquo;, showing only &amp;ldquo;temperature&amp;rdquo;. Your configuration and pivot table should look similar to the screenshot below:&lt;/p&gt;
 
 &lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/10_pivot_table.png&#34; alt=&#34;Pivot tables&#34; /&gt;&lt;/p&gt;
 
