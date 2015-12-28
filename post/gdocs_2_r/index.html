@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3. &middot; Douglas Watson</title>
+
+  
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/poole.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/hyde.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/poole-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/hyde-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/hyde-x.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/highlight/color-brewer.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://douglas-watson.github.com/touch-icon-144-precomposed.png">
+  <link href="http://douglas-watson.github.com/favicon.png" rel="icon">
+
+  
+  
+  
+  
+
+  <meta name="description" content="Your default page description">
+  <meta name="keywords" content="your,default,page,keywords">
+  
+</head>
+<body class="theme-base-08">
+<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      
+      <h1>Douglas Watson</h1>
+      <p class="lead">Programming notes.</p>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.com/">Blog</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.com/projects/">Projects</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.com/about/">About</a></li>
+      
+    </ul>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item">
+      <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
+      
+      
+      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
+      
+      
+      
+      <a href="http://douglas-watson.github.com/index.xml" type="application/rss+xml"><i class="fa fa-rss-square fa-3x"></i></a>
+      </li>
+    </ul>
+
+    
+
+    <p>Copyright &copy; 2015 <a href="http://douglas-watson.github.com/license/">License</a><br/>
+       Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
+  </div>
+</div>
+
+
+<div class="content container">
+  <div class="post">
+    <h1>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3.</h1>
+    <span class="post-date">Dec 27, 2015 &middot; 6 minute read &middot; <a href="http://douglas-watson.github.com/post/gdocs_2_r/#disqus_thread">Comments</a>
+    </span>
+    
+
+<p>This is the second installment of the Shiny + GDocs dashboard tutorial, where we learn how to use a Google Sheet spreadsheet to store data from connected &ldquo;Internet of Things&rdquo; data and use Shiny to create a web page to show the data. The <a href="/post/gdocs_1_gdocs/">first part</a> showed you how to set up a Google Sheet to serve as a data server that accepts POST and GET HTTP requests, as well as how to use pivot tables and filters on the sheets directly. In this section, I&rsquo;ll walk you through the specific aspects of R that we will wrap in Shiny code. We&rsquo;ll cover: how to download CSV data from the web, handling date fields, and making various plots with ggplot2. I assume if you are reading tutorial that you already are using R and found the tutorial through a desire to connect to Google Sheets data. If not, I hope this overview will motivate you to learn more R!</p>
+
+<p>If you want to skip to using Shiny, head over to <a href="/post/gdocs_3_shiny">part 3</a>. The finished code files are available on Github: <a href="https://github.com/douglas-watson/shiny-gdocs">https://github.com/douglas-watson/shiny-gdocs</a></p>
+
+<h2 id="recommended-setup:94191fbd145b96fca71414b523ebad09">Recommended setup</h2>
+
+<p>If you are an experienced R user, you already know what development environment you prefer. Use that one. If not, I recommend RStudio, available for Linux, Mac, and Windows. It has a decent editor (with Vim mode!) and integrates with Shiny. Head over to <a href="https://www.rstudio.com/products/rstudio/#Desktop">https://www.rstudio.com/products/rstudio/#Desktop</a> to download it.</p>
+
+<p>You will also need R and the ggplot2. Install R from your package manager on Linux, or download it from here on other platforms: <a href="https://www.r-project.org/">https://www.r-project.org/</a>. Once R and RStudio are installed, open RStudio, and install ggplot2 from the R console:</p>
+
+<pre><code>install.packages('ggplot2')
+</code></pre>
+
+<h2 id="import-a-csv-file-from-a-web-url:94191fbd145b96fca71414b523ebad09">Import a CSV file from a web URL</h2>
+
+<p>Fetching CSV data from the web is trivial: just feed <code>read.csv</code> a <code>url</code> parameter, it automatically downloads the data and makes a data frame with the correct header names. Create a &ldquo;helpers.R&rdquo; file, and write the following code in it:</p>
+
+<pre><code>getRaw &lt;- function () {
+  data &lt;- read.csv(
+    url(&quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&quot;),
+    strip.white = TRUE
+  )
+  data
+}
+</code></pre>
+
+<p>We call the file helpers.R, as it will be used later by the Shiny app. The <code>getRaw</code> function returns a data frame with five variables, named identically to the spreadsheet&rsquo;s headers:</p>
+
+<pre><code>&gt; data &lt;- getRaw()
+&gt; summary(data)
+   timestamp                                              date         origin           variable       value      
+ Min.   :1.448e+09   Mon Nov 23 2015 22:44:45 GMT+0100 (CET):  4   bedroom:120   humidity   :120   Min.   :23.00  
+ 1st Qu.:1.448e+09   Mon Nov 23 2015 23:44:45 GMT+0100 (CET):  4   kitchen:120   temperature:120   1st Qu.:23.88  
+ Median :1.448e+09   Thu Nov 26 2015 00:44:45 GMT+0100 (CET):  4                                   Median :32.55  
+ Mean   :1.448e+09   Thu Nov 26 2015 01:44:45 GMT+0100 (CET):  4                                   Mean   :34.34  
+ 3rd Qu.:1.448e+09   Thu Nov 26 2015 02:44:45 GMT+0100 (CET):  4                                   3rd Qu.:44.45  
+ Max.   :1.449e+09   Thu Nov 26 2015 03:44:45 GMT+0100 (CET):  4                                   Max.   :49.90  
+                     (Other)                                :216                                                  
+&gt;
+</code></pre>
+
+<h2 id="convert-date-time-column:94191fbd145b96fca71414b523ebad09">Convert date-time column</h2>
+
+<p>Let&rsquo;s now convert the date-time data to a proper R date object. The easiest way is to transform the UNIX timestamp column into a <code>POSIXct</code> object, and replace the &ldquo;date&rdquo; column. Since we generated UTC dates, we set the time zone to &ldquo;GMT&rdquo;. Complete the getRaw function:</p>
+
+<pre><code>getRaw &lt;- function () {
+  data &lt;- read.csv(
+    url(&quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&quot;),
+    strip.white = TRUE
+  )
+  data$date = as.POSIXct(data$timestamp, tz=&quot;GMT&quot;, origin=&quot;1970-01-01&quot;)
+  data
+}
+</code></pre>
+
+<p>You&rsquo;re now ready to rock!</p>
+
+<h2 id="play-with-ggplot2:94191fbd145b96fca71414b523ebad09">Play with ggplot2</h2>
+
+<p>The ggplot2 library provides the brilliant <code>qplot</code> function. A single line of code can produce a huge variety of plots, which makes R my favourite tool to  play with data.</p>
+
+<p>To start off, let&rsquo;s plot all the values we recorded as a function of time. If you haven&rsquo;t already, import ggplot2 and helpers.R, and load the CSV data in a data frame.</p>
+
+<pre><code>import(ggplot2)
+source(&quot;helpers.R&quot;)
+data &lt;- getRaw()
+qplot(date, value, data = data)
+</code></pre>
+
+<p><img src="/images/gdocs/21_all.png" alt="All points on a single plot, a good start, but not very clear." /></p>
+
+<p>We can clarify the plot a little by colouring points according to sensor location:</p>
+
+<pre><code>qplot(date, value, data = data, colour = origin)
+</code></pre>
+
+<p><img src="/images/gdocs/22_colours.png" alt="Colouring the points as a function of sensor locations clarifies the plot a bit." /></p>
+
+<p>We still can&rsquo;t distinguish temperature from humidity. Let&rsquo;s separate those variables into different panels using &ldquo;facets&rdquo;. We&rsquo;ll add the &ldquo;free_y&rdquo; option to allow each y to scale independently:</p>
+
+<pre><code>qplot(date, value, data = data, colour = origin) + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
+</code></pre>
+
+<p><img src="/images/gdocs/23_facets.png" alt="Faceted by variable." /></p>
+
+<p>Since there is a lot of noise, joining the points with a line makes the plot easier to read:</p>
+
+<pre><code>qplot(date, value, data = data, colour = origin, geom = &quot;line&quot;) + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
+</code></pre>
+
+<p><img src="/images/gdocs/24_timeseries.png" alt="Points replaced by lines" /></p>
+
+<p>If you add a sensor in a new room, a new line colour will automatically appear on the plot. If you add a new type of data (such as &ldquo;power&rdquo; for a power meter), a third facet will appear. Try it! Just modify the Python script to send data from a new location and re-run the python script, the <code>data &lt;- getRaw()</code> line, and the latest qplot instruction.</p>
+
+<p>If the date scale looks wrong, with one tick per point on the x axis, try adding <code>scale_x_datetime</code>:</p>
+
+<pre><code>qplot(date, value, data = data, colour = origin, geom = &quot;line&quot;) + scale_x_datetime() + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
+</code></pre>
+
+<h2 id="other-forms-of-plots:94191fbd145b96fca71414b523ebad09">Other forms of plots.</h2>
+
+<p>How about box plots to observe variations in temperature and humidity? Easy: just change x axis to &ldquo;origin&rdquo;, ditch the colours, and change geometry to &ldquo;boxplot&rdquo;:</p>
+
+<pre><code>qplot(origin, value, data = data, geom = &quot;boxplot&quot;) + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
+</code></pre>
+
+<p><img src="/images/gdocs/25_boxplots.png" alt="Box plots are even easier than time series" /></p>
+
+<p>Have a look at the qplot official documents for more inspiration on plot types: <a href="http://docs.ggplot2.org/current">http://docs.ggplot2.org/current</a></p>
+
+<h2 id="filtering-by-date:94191fbd145b96fca71414b523ebad09">Filtering by date</h2>
+
+<p>We&rsquo;ll cover a final R topic before moving on: filtering data frames, and in particular filtering by date. To filter a data frame, we extract a <em>subset</em> of the data that fulfills a condition. For example, if we want to retrieve all the lines of <code>data</code> that contain a <code>temperature</code> measurement, pick the subset:</p>
+
+<pre><code>data.filt &lt;- subset(data, variable == 'temperature')
+</code></pre>
+
+<p>Now let&rsquo;s keep all the data from the second half of our measurement period. Pick a timestamp from the middle of the data frame and create a <code>POSIXct object from it</code>.</p>
+
+<pre><code>ts &lt;- data$timestamp[nrow(data) / 2]
+mindate &lt;- as.POSIXct(ts, tz = &quot;GMT&quot;, origin = &quot;1970-01-01&quot;)
+</code></pre>
+
+<p>POSIXct objects allow comparisons (<code>&gt;</code> and <code>&lt;</code>), so we can use <code>mindate</code> to filter the data:</p>
+
+<pre><code>data.filt &lt;- subset(data, date &gt; mindate)
+</code></pre>
+
+<h2 id="wrapping-them-in-functions-for-shiny:94191fbd145b96fca71414b523ebad09">Wrapping them in functions for Shiny</h2>
+
+<p>For easy access later in Shiny, we&rsquo;ll just shove the two <code>qplot</code> calls in a function. Our <code>helpers.R</code> file now looks like this, with the library import statement added:</p>
+
+<pre><code>library(ggplot2)
+
+getRaw &lt;- function () {
+  data &lt;- read.csv(
+    url(&quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&quot;),
+    strip.white = TRUE
+  )
+
+  data$date = as.POSIXct(data$timestamp, tz=&quot;GMT&quot;, origin=&quot;1970-01-01&quot;)
+  data
+}
+
+timeseriesPlot &lt;- function(data) {
+  qplot(date, value, data = data, colour = origin, geom = &quot;line&quot;) + scale_x_datetime() + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
+}
+
+boxPlot &lt;- function(data) {
+  qplot(origin, value, data = data, geom = &quot;boxplot&quot;) + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
+}
+</code></pre>
+
+  </div>
+  <div id="disqus_thread"></div>
+</div>
+
+
+<script type="text/javascript">
+var disqus_shortname = "douglaswatsongithub";
+(function () {
+    var s = document.createElement('script'); s.async = true;
+    s.type = 'text/javascript';
+    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+}());
+</script>
+
+
+
+<script type="text/javascript">
+    var disqus_shortname = "douglaswatsongithub";
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script src="http://douglas-watson.github.com/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+  var _gaq=[['_setAccount','Your Google Analytics tracking code'],['_trackPageview']];
+  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+  s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
+
+</body>
+</html>
+

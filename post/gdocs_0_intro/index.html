@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial Series. &middot; Douglas Watson</title>
+
+  
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/poole.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/hyde.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/poole-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/hyde-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/hyde-x.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.com/css/highlight/color-brewer.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://douglas-watson.github.com/touch-icon-144-precomposed.png">
+  <link href="http://douglas-watson.github.com/favicon.png" rel="icon">
+
+  
+  
+  
+  
+
+  <meta name="description" content="Your default page description">
+  <meta name="keywords" content="your,default,page,keywords">
+  
+</head>
+<body class="theme-base-08">
+<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      
+      <h1>Douglas Watson</h1>
+      <p class="lead">Programming notes.</p>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.com/">Blog</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.com/projects/">Projects</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.com/about/">About</a></li>
+      
+    </ul>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item">
+      <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
+      
+      
+      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
+      
+      
+      
+      <a href="http://douglas-watson.github.com/index.xml" type="application/rss+xml"><i class="fa fa-rss-square fa-3x"></i></a>
+      </li>
+    </ul>
+
+    
+
+    <p>Copyright &copy; 2015 <a href="http://douglas-watson.github.com/license/">License</a><br/>
+       Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
+  </div>
+</div>
+
+
+<div class="content container">
+  <div class="post">
+    <h1>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial Series.</h1>
+    <span class="post-date">Dec 27, 2015 &middot; 2 minute read &middot; <a href="http://douglas-watson.github.com/post/gdocs_0_intro/#disqus_thread">Comments</a>
+    </span>
+    
+
+<p>Logging data to a central server and displaying it online is a common task in Internet of Things applications. This usually requires deploying and maintaining your own servers, with a database for storage and a web server for display. System administration tasks are no fun to me, so instead I found a way to use Google Sheets as a server, and ShinyApps.io as a visualization platform. Uploading data to Google docs is relatively simple and well documented, but connecting Shiny to Google Docs was a little more tricky; this motivated me to write this tutorial to show others how to set up a similar system.</p>
+
+<p>In <a href="/post/gdocs_1_gdocs/">part one</a>, I&rsquo;ll explain how to set up a Google spreadsheet as data storage and use it as an elementary dashboard. In <a href="/post/gdocs_2_r/">part two</a>, I&rsquo;ll teach you how to retrieve that data in R, and plot it with the ggplot2 library. In <a href="/post/gdocs_3_shiny/">part three</a>, I&rsquo;ll walk you through making a simple interactive visualization in Shiny and publishing it online to ShinyApps.io.</p>
+
+<p>During the tutorial, we&rsquo;ll pretend to have a network of several temperature and humidity sensors. Each sensor is named after its location name (such as &ldquo;bedroom&rdquo; or &ldquo;living room&rdquo;), and records the temperature every hour. I assume you know how to program your IOT hardware to make HTTP requests; for the sake of the tutorial I provide a Python script to upload fake temperature and humidity values.</p>
+
+<h2 id="why-use-google-sheets:1d31138e44f763ff5e61f4534683debe">Why use Google Sheets?</h2>
+
+<p>Google spreadsheets can serve as a simple server to store and retrieve data, while writing surprisingly little code. We avoid maintaining our own servers, and we additionally benefit from easy access to the raw data. On top of that, the spreadsheets on their own are powerful analysis tools, with statistics, pivot tables, filters, and interactive charts which can be embedded on external websites.</p>
+
+<p><img src="/images/gdocs/11_charts.png" alt="Google Sheets on their own are a powerful analytics tool for distributed data" /></p>
+
+<h2 id="why-use-r-and-shiny:1d31138e44f763ff5e61f4534683debe">Why use R and Shiny?</h2>
+
+<p>R is a powerful language specifically designed for data analysis. Combined with the ggplot2 graphing library, it provides an ideal package to explore and visualize large amounts data. Once you have figured out what you want to show, Shiny allows you to take your visualizations, make them interactive, and publish them on the web. RStudio, the makers of Shiny, even provide free hosting for visualizations, which makes the service quite convenient to experiment with.</p>
+
+<p><img src="/images/gdocs/32_fullui.png" alt="The final product of our tutorial: a live interactive web-based dashboard" /></p>
+
+  </div>
+  <div id="disqus_thread"></div>
+</div>
+
+
+<script type="text/javascript">
+var disqus_shortname = "douglaswatsongithub";
+(function () {
+    var s = document.createElement('script'); s.async = true;
+    s.type = 'text/javascript';
+    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+}());
+</script>
+
+
+
+<script type="text/javascript">
+    var disqus_shortname = "douglaswatsongithub";
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script src="http://douglas-watson.github.com/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+  var _gaq=[['_setAccount','Your Google Analytics tracking code'],['_trackPageview']];
+  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+  s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
+
+</body>
+</html>
+
