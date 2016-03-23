@@ -19,6 +19,8 @@
 
 &lt;p&gt;This is the third and final part of the Shiny + Google Docs dashboard tutorial, where I explain how to build a live web dashboard for connected &amp;ldquo;Internet of Things&amp;rdquo; sensors, using Google Sheets as a data server. &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;Part one&lt;/a&gt; covered setting up a Google Sheet to store and serve data through HTTP requests; &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt; covered reading, filtering, and plotting that data in R. In this part, we&amp;rsquo;ll create the actual dashboard and host it online.&lt;/p&gt;
 
+&lt;p&gt;&lt;em&gt;Chinese translation: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
 &lt;p&gt;Shiny adds a web server and an interactive web front end to R code and graphics. We&amp;rsquo;ll use it to make a web-based dashboard, in other words a collection of plots that display the latest sensor data with some widgets to modify the plots. In this section, we&amp;rsquo;ll first build a simple page that shows a time series and boxplot with the latest data from Google Sheets. We&amp;rsquo;ll then add a date selection widget that narrows down the time period to be displayed.&lt;/p&gt;
 
 &lt;p&gt;The finished shiny app is on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
@@ -214,6 +216,8 @@ data &amp;lt;- read.csv(
 
 &lt;p&gt;If you want to skip to using Shiny, head over to &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny&#34;&gt;part 3&lt;/a&gt;. The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
 
+&lt;p&gt;&lt;em&gt;Chinese translation: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
+
 &lt;h2 id=&#34;recommended-setup:94191fbd145b96fca71414b523ebad09&#34;&gt;Recommended setup&lt;/h2&gt;
 
 &lt;p&gt;If you are an experienced R user, you already know what development environment you prefer. Use that one. If not, I recommend RStudio, available for Linux, Mac, and Windows. It has a decent editor (with Vim mode!) and integrates with Shiny. Head over to &lt;a href=&#34;https://www.rstudio.com/products/rstudio/#Desktop&#34;&gt;https://www.rstudio.com/products/rstudio/#Desktop&lt;/a&gt; to download it.&lt;/p&gt;
@@ -376,6 +380,8 @@ boxPlot &amp;lt;- function(data) {
 &lt;p&gt;In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&amp;rsquo;s data using an HTTP GET requests. Along the way, you will also experiment with some of the spreadsheet&amp;rsquo;s built-in analytics tools: filters, pivot tables, and charts.&lt;/p&gt;
 
 &lt;p&gt;Skip to &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part 2&lt;/a&gt; to learn how to fetch and manipulate this data in R, or &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part 3&lt;/a&gt; to learn how to use Shiny.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Chinese translation: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 
 &lt;p&gt;The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
 
@@ -790,6 +796,8 @@ timestamp,date,origin,variable,value
 &lt;p&gt;In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;part one&lt;/a&gt;, I&amp;rsquo;ll explain how to set up a Google spreadsheet as data storage and use it as an elementary dashboard. In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt;, I&amp;rsquo;ll teach you how to retrieve that data in R, and plot it with the ggplot2 library. In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part three&lt;/a&gt;, I&amp;rsquo;ll walk you through making a simple interactive visualization in Shiny and publishing it online to ShinyApps.io.&lt;/p&gt;
 
 &lt;p&gt;During the tutorial, we&amp;rsquo;ll pretend to have a network of several temperature and humidity sensors. Each sensor is named after its location name (such as &amp;ldquo;bedroom&amp;rdquo; or &amp;ldquo;living room&amp;rdquo;), and records the temperature every hour. I assume you know how to program your IOT hardware to make HTTP requests; for the sake of the tutorial I provide a Python script to upload fake temperature and humidity values.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;This tutorial series has kindly been translated to Chinese by Harry Zhu: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 
 &lt;h2 id=&#34;why-use-google-sheets:1d31138e44f763ff5e61f4534683debe&#34;&gt;Why use Google Sheets?&lt;/h2&gt;
 
