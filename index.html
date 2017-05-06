@@ -66,7 +66,7 @@
 
     
 
-    <p>Copyright &copy; 2016 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+    <p>Copyright &copy; 2017 <a href="http://douglas-watson.github.io/license/">License</a><br/>
        Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
   </div>
 </div>
@@ -75,6 +75,21 @@
 <div class="content container">
   <div class="posts">
     
+    
+    <div class="post">
+      <h1 class="post-title">
+        <a href="http://douglas-watson.github.io/post/2017-05_ggplot_datetime/">How to change the number of breaks on a datetime axis with R and ggplot2</a>
+      </h1>
+      <span class="post-date">May 6, 2017 &middot; 3 minute read &middot; <a href="http://douglas-watson.github.io/post/2017-05_ggplot_datetime/#disqus_thread">Comments</a>
+      
+      <br/>
+      
+      </span>
+      
+      It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax: scale_x_datetime(breaks = date_breaks(&quot;12 hours&quot;)) This places a break every 12 hours. The interval can be any value accepted by the scales package: &ldquo;sec&rdquo;, &ldquo;min&rdquo;, &ldquo;hour&rdquo;, &ldquo;day&rdquo;, &ldquo;week&rdquo;, &ldquo;month&rdquo;, or &ldquo;year&rdquo;. The trailing s is ignored.
+      <a href="http://douglas-watson.github.io/post/2017-05_ggplot_datetime/">Read On &rarr;</a>
+      
+    </div>
     
     <div class="post">
       <h1 class="post-title">
