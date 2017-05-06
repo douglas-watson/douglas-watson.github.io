@@ -64,7 +64,7 @@ qplot(date, value, data = temperatures, geom=&amp;quot;line&amp;quot;, ylab = &a
 
 &lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/2_datetime.png&#34; alt=&#34;Reduced number of ticks&#34; /&gt;&lt;/p&gt;
 
-&lt;p&gt;You can see the number of breaks has changed. Most of the time, however, I&amp;rsquo;m more interested in increasing their density. Let&amp;rsquo;s switch to an interval in hours, and also include the time in the labels:&lt;/p&gt;
+&lt;p&gt;You can see the number of breaks has changed. Most of the time, I&amp;rsquo;m more interested in increasing their density. Let&amp;rsquo;s switch to an interval in hours, and also include the time in the labels:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;qplot(date, value, data = temperatures, geom=&amp;quot;line&amp;quot;, ylab = &amp;quot;Temperature [C]&amp;quot;) +
   scale_x_datetime(breaks = date_breaks(&amp;quot;12 hour&amp;quot;), labels = date_format(&amp;quot;%b %d - %H:%M&amp;quot;))
