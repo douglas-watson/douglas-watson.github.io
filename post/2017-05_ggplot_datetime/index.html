@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>How to change the number of breaks on a datetime axis with R and ggplot2 &middot; Douglas Watson</title>
+
+  
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/poole.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/hyde.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/poole-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/hyde-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/hyde-x.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/highlight/color-brewer.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://douglas-watson.github.io/touch-icon-144-precomposed.png">
+  <link href="http://douglas-watson.github.io/favicon.png" rel="icon">
+
+  
+  
+  
+  
+
+  <meta name="description" content="Your default page description">
+  <meta name="keywords" content="programming,python,R,golang,Linux">
+  
+</head>
+<body class="theme-base-08">
+<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      
+      <h1>Douglas Watson</h1>
+      <p class="lead">Programming notes.</p>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.io/">Blog</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.io/projects/">Projects</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.io/about/">About</a></li>
+      
+    </ul>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item">
+      <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
+      
+      
+      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
+      
+      
+      
+      <a href="http://douglas-watson.github.io/index.xml" type="application/rss+xml"><i class="fa fa-rss-square fa-3x"></i></a>
+      </li>
+    </ul>
+
+    
+
+    <p>Copyright &copy; 2017 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+       Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
+  </div>
+</div>
+
+
+<div class="content container">
+  <div class="post">
+    <h1>How to change the number of breaks on a datetime axis with R and ggplot2</h1>
+    <span class="post-date">May 6, 2017 &middot; 3 minute read &middot; <a href="http://douglas-watson.github.io/post/2017-05_ggplot_datetime/#disqus_thread">Comments</a>
+    
+    <br/>
+    
+    </span>
+    
+
+<p>It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax:</p>
+
+<pre><code class="language-R">scale_x_datetime(breaks = date_breaks(&quot;12 hours&quot;))
+</code></pre>
+
+<p>This places a break every 12 hours. The interval can be any value accepted by the <code>scales</code> package: &ldquo;sec&rdquo;, &ldquo;min&rdquo;, &ldquo;hour&rdquo;, &ldquo;day&rdquo;, &ldquo;week&rdquo;, &ldquo;month&rdquo;, or &ldquo;year&rdquo;. The trailing <code>s</code> is ignored. Read along for examples and instructions on how to rotate the label text.</p>
+
+<h1 id="examples:95830ea7247b952557e3c1315e1f5616">Examples</h1>
+
+<p>Let&rsquo;s illustrate with some fake data. I&rsquo;ve re-used the CSV data from my Shiny tutorial. You can download the file <a href="/data/datetime/data.csv">here</a>. The format looks like this:</p>
+
+<pre><code>&quot;timestamp&quot;,&quot;date&quot;,&quot;origin&quot;,&quot;variable&quot;,&quot;value&quot;
+1448315085.07,2015-11-23 21:44:45,&quot;kitchen&quot;,&quot;temperature&quot;,24.4
+1448315085.07,2015-11-23 21:44:45,&quot;kitchen&quot;,&quot;humidity&quot;,44.9
+1448315085.07,2015-11-23 21:44:45,&quot;bedroom&quot;,&quot;temperature&quot;,24.8
+1448315085.07,2015-11-23 21:44:45,&quot;bedroom&quot;,&quot;humidity&quot;,46.1
+1448318685.07,2015-11-23 22:44:45,&quot;kitchen&quot;,&quot;temperature&quot;,23
+1448318685.07,2015-11-23 22:44:45,&quot;kitchen&quot;,&quot;humidity&quot;,41.1
+1448318685.07,2015-11-23 22:44:45,&quot;bedroom&quot;,&quot;temperature&quot;,23.6
+1448318685.07,2015-11-23 22:44:45,&quot;bedroom&quot;,&quot;humidity&quot;,45.7
+1448322285.07,2015-11-23 23:44:45,&quot;kitchen&quot;,&quot;temperature&quot;,23.4
+...
+</code></pre>
+
+<p>Let&rsquo;s load it into an R dataframe, making sure to convert the date column to an R datetime object (see my <a href="/posts/gdocs_2_R">previous post</a> on the subject), then create a simple plot of temperature versus time:</p>
+
+<pre><code class="language-R">library(ggplot2)
+library(dplyr)
+
+data &lt;- read.csv(&quot;data.csv&quot;)
+data$date &lt;- as.POSIXct(data$date)
+temperatures &lt;- filter(data, variable == &quot;temperature&quot;, origin == &quot;kitchen&quot;)
+
+
+qplot(date, value, data = temperatures, geom=&quot;line&quot;, ylab = &quot;Temperature [C]&quot;)
+</code></pre>
+
+<p><img src="/images/datetime/1_baseplot.png" alt="Default date scale" /></p>
+
+<p>The default breaks are quite sensible, but for the sake of illustration let&rsquo;s change them to a break every two days. The label format follows strftime syntax (see <a href="http://www.foragoodstrftime.com/">http://www.foragoodstrftime.com/</a> for help building them):</p>
+
+<pre><code class="language-R">qplot(date, value, data = temperatures, geom=&quot;line&quot;, ylab = &quot;Temperature [C]&quot;) +
+  scale_x_datetime(breaks = date_breaks(&quot;2 day&quot;), labels = date_format(&quot;%b %d&quot;))
+</code></pre>
+
+<p><img src="/images/datetime/2_datetime.png" alt="Reduced number of ticks" /></p>
+
+<p>You can see the number of breaks has changed. Most of the time, however, I&rsquo;m more interested in increasing their density. Let&rsquo;s switch to an interval in hours, and also include the time in the labels:</p>
+
+<pre><code class="language-R">qplot(date, value, data = temperatures, geom=&quot;line&quot;, ylab = &quot;Temperature [C]&quot;) +
+  scale_x_datetime(breaks = date_breaks(&quot;12 hour&quot;), labels = date_format(&quot;%b %d - %H:%M&quot;))
+</code></pre>
+
+<p><img src="/images/datetime/3_hours.png" alt="Increased number of ticks" /></p>
+
+<p>Ouch! The labels are unreadable. Thankfully we can rotate the text to prevent them from overlapping:</p>
+
+<pre><code class="language-R">qplot(date, value, data = temperatures, geom=&quot;line&quot;, ylab = &quot;Temperature [C]&quot;) +
+  scale_x_datetime(breaks = date_breaks(&quot;12 hour&quot;), labels = date_format(&quot;%b %d - %H:%M&quot;)) +
+  theme(axis.text.x = element_text(angle = 25, vjust = 1.0, hjust = 1.0))
+</code></pre>
+
+<p><img src="/images/datetime/4_hours_rotation.png" alt="Increased number of ticks" /></p>
+
+<p>That&rsquo;s a lot better! If you set the angle to 90 degrees, or if you have an older version of R, you will need to play with the <code>vjust</code> and <code>hjust</code> values until the labels line up correctly. Try adding <code>debug = TRUE</code> to <code>element_text</code> to display the text anchor point.</p>
+
+<h1 id="including-these-in-a-library:95830ea7247b952557e3c1315e1f5616">Including these in a library</h1>
+
+<p>I found myself loading the same data format and making similar graphs across many R notebooks, so I wrote a small library of functions that I could re-use in all of my analyses. <a href="https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/">Hillary Parker&rsquo;s guide</a> explains everything you need to write your own. My functions resemble the code below, where I can optionally specify a tick interval. The labels include the time automatically if I specify an interval in hours. If I leave the argument blank, ggplot keeps its defaults:</p>
+
+<pre><code class="language-R">plot_temperature &lt;- function(data, title = &quot;&quot;, breaks = &quot;&quot;, angle = 25) {
+    p &lt;- ggplot2::qplot(date, value, data = data, ylab=&quot;Temperature [C]&quot;) 
+    
+    if (title != '') {
+      p &lt;- p + ggplot2::ggtitle(title)
+    }
+    
+    if ( breaks != '' ) {
+      if ( grepl(&quot;hour&quot;, breaks) ) {
+        fmt &lt;- &quot;%b %d - %H:%M&quot;
+      } else {
+        fmt &lt;- &quot;%b %d&quot;
+      }
+      p &lt;- p + ggplot2::scale_x_datetime(date_breaks = breaks, date_labels = fmt) +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(
+          angle = angle, vjust = 1.0, hjust = 1.0
+        ))
+    }
+    return(p)
+}
+</code></pre>
+
+<p>When you move your function to an external library, it&rsquo;s important to specify the namespace of every function you call. Hence the <code>ggplot2::</code> scattered all over.</p>
+
+  </div>
+  <div id="disqus_thread"></div>
+</div>
+
+
+<script type="text/javascript">
+var disqus_shortname = "douglaswatsongithub";
+(function () {
+    var s = document.createElement('script'); s.async = true;
+    s.type = 'text/javascript';
+    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+}());
+</script>
+
+
+
+<script type="text/javascript">
+    var disqus_shortname = "douglaswatsongithub";
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script src="http://douglas-watson.github.io/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+  var _gaq=[['_setAccount','UA-71804013-1'],['_trackPageview']];
+  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+  s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
+
+</body>
+</html>
+
