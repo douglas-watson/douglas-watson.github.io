@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="http://douglas-watson.github.io/css/highlight/color-brewer.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
 
   
   <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://douglas-watson.github.io/touch-icon-144-precomposed.png">
@@ -30,6 +31,16 @@
 
   <meta name="description" content="Your default page description">
   <meta name="keywords" content="programming,python,R,golang,Linux">
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-71804013-1', 'auto');
+    ga('send', 'pageview');
+  </script>
   
 </head>
 <body class="theme-base-08">
@@ -66,15 +77,16 @@
 
     
 
-    <p>Copyright &copy; 2017 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+    <p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
        Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
+
   </div>
 </div>
 
 
 <div class="content container">
   <div class="post">
-    <h1>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3</h1>
+    <h1 class="post-title">Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3</h1>
     <span class="post-date">Dec 27, 2015 &middot; 6 minute read &middot; <a href="http://douglas-watson.github.io/post/gdocs_2_r/#disqus_thread">Comments</a>
     </span>
     
@@ -85,7 +97,7 @@
 
 <p><em>Chinese translation: <a href="https://segmentfault.com/a/1190000004426828">https://segmentfault.com/a/1190000004426828</a></em></p>
 
-<h2 id="recommended-setup:94191fbd145b96fca71414b523ebad09">Recommended setup</h2>
+<h2 id="recommended-setup">Recommended setup</h2>
 
 <p>If you are an experienced R user, you already know what development environment you prefer. Use that one. If not, I recommend RStudio, available for Linux, Mac, and Windows. It has a decent editor (with Vim mode!) and integrates with Shiny. Head over to <a href="https://www.rstudio.com/products/rstudio/#Desktop">https://www.rstudio.com/products/rstudio/#Desktop</a> to download it.</p>
 
@@ -94,7 +106,7 @@
 <pre><code>install.packages('ggplot2')
 </code></pre>
 
-<h2 id="import-a-csv-file-from-a-web-url:94191fbd145b96fca71414b523ebad09">Import a CSV file from a web URL</h2>
+<h2 id="import-a-csv-file-from-a-web-url">Import a CSV file from a web URL</h2>
 
 <p>Fetching CSV data from the web is trivial: just feed <code>read.csv</code> a <code>url</code> parameter, it automatically downloads the data and makes a data frame with the correct header names. Create a &ldquo;helpers.R&rdquo; file, and write the following code in it:</p>
 
@@ -122,7 +134,7 @@
 &gt;
 </code></pre>
 
-<h2 id="convert-date-time-column:94191fbd145b96fca71414b523ebad09">Convert date-time column</h2>
+<h2 id="convert-date-time-column">Convert date-time column</h2>
 
 <p>Let&rsquo;s now convert the date-time data to a proper R date object. The easiest way is to transform the UNIX timestamp column into a <code>POSIXct</code> object and replace the &ldquo;date&rdquo; column. Since we generated UTC dates, we set the time zone to &ldquo;GMT&rdquo;. Complete the getRaw function:</p>
 
@@ -138,7 +150,7 @@
 
 <p>You&rsquo;re now ready to rock!</p>
 
-<h2 id="play-with-ggplot2:94191fbd145b96fca71414b523ebad09">Play with ggplot2</h2>
+<h2 id="play-with-ggplot2">Play with ggplot2</h2>
 
 <p>The ggplot2 library provides the brilliant <code>qplot</code> function. A single line of code can produce a huge variety of plots, which makes R my favourite tool to  play with data.</p>
 
@@ -180,7 +192,7 @@ qplot(date, value, data = data)
 <pre><code>qplot(date, value, data = data, colour = origin, geom = &quot;line&quot;) + scale_x_datetime() + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
 </code></pre>
 
-<h2 id="other-forms-of-plots:94191fbd145b96fca71414b523ebad09">Other forms of plots.</h2>
+<h2 id="other-forms-of-plots">Other forms of plots.</h2>
 
 <p>How about box plots to observe variations in temperature and humidity? Easy: just change x axis to &ldquo;origin&rdquo;, ditch the colours, and change geometry to &ldquo;boxplot&rdquo;:</p>
 
@@ -191,7 +203,7 @@ qplot(date, value, data = data)
 
 <p>Have a look at the qplot official documents for more inspiration on plot types: <a href="http://docs.ggplot2.org/current">http://docs.ggplot2.org/current</a></p>
 
-<h2 id="filtering-by-date:94191fbd145b96fca71414b523ebad09">Filtering by date</h2>
+<h2 id="filtering-by-date">Filtering by date</h2>
 
 <p>We&rsquo;ll cover a final R topic before moving on: filtering data frames, and in particular filtering by date. To filter a data frame, we extract a <em>subset</em> of the data that fulfills a condition. For example, if we want to retrieve all the lines of <code>data</code> that contain a <code>temperature</code> measurement, pick the subset:</p>
 
@@ -209,7 +221,7 @@ mindate &lt;- as.POSIXct(ts, tz = &quot;GMT&quot;, origin = &quot;1970-01-01&quo
 <pre><code>data.filt &lt;- subset(data, date &gt; mindate)
 </code></pre>
 
-<h2 id="wrapping-them-in-functions-for-shiny:94191fbd145b96fca71414b523ebad09">Wrapping them in functions for Shiny</h2>
+<h2 id="wrapping-them-in-functions-for-shiny">Wrapping them in functions for Shiny</h2>
 
 <p>For easy access later in Shiny, we&rsquo;ll just shove the two <code>qplot</code> calls in a function. Our <code>helpers.R</code> file now looks like this, with the library import statement added:</p>
 
@@ -264,14 +276,6 @@ var disqus_shortname = "douglaswatsongithub";
 
 <script src="http://douglas-watson.github.io/js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
-
-<script>
-  var _gaq=[['_setAccount','UA-71804013-1'],['_trackPageview']];
-  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-  s.parentNode.insertBefore(g,s)}(document,'script'));
-</script>
-
 </body>
 </html>
 

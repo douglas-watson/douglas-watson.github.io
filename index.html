@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
+	<meta name="generator" content="Hugo 0.35" />
   <link href="http://gmpg.org/xfn/11" rel="profile">
   <meta http-equiv="content-type" content="text/html; charset=utf-8">
 
@@ -18,6 +19,7 @@
   <link rel="stylesheet" href="http://douglas-watson.github.io/css/highlight/color-brewer.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
   <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
 
   
   <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://douglas-watson.github.io/touch-icon-144-precomposed.png">
@@ -30,6 +32,16 @@
 
   <meta name="description" content="Your default page description">
   <meta name="keywords" content="programming,python,R,golang,Linux">
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-71804013-1', 'auto');
+    ga('send', 'pageview');
+  </script>
   
 </head>
 <body class="theme-base-08">
@@ -66,8 +78,9 @@
 
     
 
-    <p>Copyright &copy; 2017 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+    <p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
        Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
+
   </div>
 </div>
 
@@ -86,7 +99,8 @@
       
       </span>
       
-      It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax: scale_x_datetime(breaks = date_breaks(&quot;12 hours&quot;)) This places a break every 12 hours. The interval can be any value accepted by the scales package: &ldquo;sec&rdquo;, &ldquo;min&rdquo;, &ldquo;hour&rdquo;, &ldquo;day&rdquo;, &ldquo;week&rdquo;, &ldquo;month&rdquo;, or &ldquo;year&rdquo;. The trailing s is ignored.
+      It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax:
+scale_x_datetime(date_breaks = &quot;12 hours&quot;)  This places a break every 12 hours. The interval can be any value accepted by the scales package: &ldquo;sec&rdquo;, &ldquo;min&rdquo;, &ldquo;hour&rdquo;, &ldquo;day&rdquo;, &ldquo;week&rdquo;, &ldquo;month&rdquo;, or &ldquo;year&rdquo;.
       <a href="http://douglas-watson.github.io/post/2017-05_ggplot_datetime/">Read On &rarr;</a>
       
     </div>
@@ -122,7 +136,8 @@
       <span class="post-date">Dec 27, 2015 &middot; 11 minute read &middot; <a href="http://douglas-watson.github.io/post/gdocs_1_gdocs/#disqus_thread">Comments</a>
       </span>
       
-      In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&rsquo;s data using an HTTP GET requests. Along the way, you will also experiment with some of the spreadsheet&rsquo;s built-in analytics tools: filters, pivot tables, and charts. Skip to part 2 to learn how to fetch and manipulate this data in R, or part 3 to learn how to use Shiny.
+      In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&rsquo;s data using an HTTP GET requests. Along the way, you will also experiment with some of the spreadsheet&rsquo;s built-in analytics tools: filters, pivot tables, and charts.
+Skip to part 2 to learn how to fetch and manipulate this data in R, or part 3 to learn how to use Shiny.
       <a href="http://douglas-watson.github.io/post/gdocs_1_gdocs/">Read On &rarr;</a>
       
     </div>
@@ -140,7 +155,7 @@
     </div>
     
     
-    
+
   </div>
 </div>
 
@@ -157,14 +172,6 @@ var disqus_shortname = "douglaswatsongithub";
 
 <script src="http://douglas-watson.github.io/js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
-
-<script>
-  var _gaq=[['_setAccount','UA-71804013-1'],['_trackPageview']];
-  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-  s.parentNode.insertBefore(g,s)}(document,'script'));
-</script>
-
 </body>
 </html>
 
