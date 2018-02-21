@@ -6,10 +6,20 @@
     <description>Recent content in Posts on Programming notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 06 May 2017 07:33:58 +0200</lastBuildDate>
+    <lastBuildDate>Wed, 21 Feb 2018 22:00:00 +0100</lastBuildDate>
     
 	<atom:link href="http://douglas-watson.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Adding Google Analytics to a Shiny application</title>
+      <link>http://douglas-watson.github.io/post/2018-02_shiny_google_analytics/</link>
+      <pubDate>Wed, 21 Feb 2018 22:00:00 +0100</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2018-02_shiny_google_analytics/</guid>
+      <description>I recently wanted to add a Google Analytics tracker to a Shiny dashboard, and I found that the official documentation doesn&amp;rsquo;t explain how to include &amp;ldquo;Global Site Tag&amp;rdquo; tracking code, which seems to be the current default setting in Analytics. The process is simple, we just have to include the tracking code as an HTML snippet in ui.R. The process requires only two steps:
+ Copy the analytics HTML snippet into a text file Reference the file in ui.</description>
+    </item>
     
     <item>
       <title>How to change the number of breaks on a datetime axis with R and ggplot2</title>
