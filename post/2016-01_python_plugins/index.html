@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>Loading plugins in Python / Allowing users to script your python app &middot; Douglas Watson</title>
+
+  
+  <link rel="stylesheet" href="http://localhost:1313/css/poole.css">
+  <link rel="stylesheet" href="http://localhost:1313/css/hyde.css">
+  <link rel="stylesheet" href="http://localhost:1313/css/poole-overrides.css">
+  <link rel="stylesheet" href="http://localhost:1313/css/hyde-overrides.css">
+  <link rel="stylesheet" href="http://localhost:1313/css/hyde-x.css">
+  <link rel="stylesheet" href="http://localhost:1313/css/highlight/color-brewer.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://localhost:1313/touch-icon-144-precomposed.png">
+  <link href="http://localhost:1313/favicon.png" rel="icon">
+
+  
+  
+  
+  
+
+  <meta name="description" content="Your default page description">
+  <meta name="keywords" content="programming,python,R,golang,Linux">
+  
+</head>
+<body class="theme-base-08">
+<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      
+      <h1>Douglas Watson</h1>
+      <p class="lead">Programming notes.</p>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item"><a href="http://localhost:1313/">Blog</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://localhost:1313/projects/">Projects</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://localhost:1313/about/">About</a></li>
+      
+    </ul>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item">
+      <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
+      
+      
+      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
+      
+      
+      
+      <a href="http://localhost:1313/index.xml" type="application/rss+xml"><i class="fa fa-rss-square fa-3x"></i></a>
+      </li>
+    </ul>
+
+    
+
+    <p>Copyright &copy; 2017 <a href="http://localhost:1313/license/">License</a><br/>
+       Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
+  </div>
+</div>
+
+
+<div class="content container">
+  <div class="post">
+    <h1>Loading plugins in Python / Allowing users to script your python app</h1>
+    <span class="post-date">Jan 5, 2016 &middot; 3 minute read &middot; <a href="http://localhost:1313/post/2016-01_python_plugins/#disqus_thread">Comments</a>
+    
+    <br/>
+    
+    </span>
+    
+
+<h2 id="objectives:4d7ceafa77884ce262c3ad789576f347">Objectives</h2>
+
+<ul>
+<li>We have an application that controls a piece of hardware</li>
+<li>We want an easy way for users to write their own scripts. These will mostly be simple scripts: do this, do that, maybe loop a little.</li>
+<li>We want to implement this with minimal modifications to our existing libraries, and without reinventing a scripting language.</li>
+</ul>
+
+<h2 id="overview-of-approaches:4d7ceafa77884ce262c3ad789576f347">Overview of approaches</h2>
+
+<ul>
+<li>Proper plugin framework, install a plugin and make it discoverable with entry points &ndash; too complicated, we just want simple users scripts to be placed in a directory.</li>
+<li>Straight-up import scripts</li>
+</ul>
+
+<h2 id="project-structure:4d7ceafa77884ce262c3ad789576f347">Project structure</h2>
+
+<pre><code>.
+└── scriptable/
+    ├── scripts/
+    |   ├── fade.py
+    |   └── on_off.py
+    ├── scriptable.py
+</code></pre>
+
+<h2 id="background:4d7ceafa77884ce262c3ad789576f347">Background</h2>
+
+<h3 id="create-a-class-that-users-are-allowed-to-script:4d7ceafa77884ce262c3ad789576f347">Create a class that users are allowed to script</h3>
+
+<pre><code class="language-python">class Scriptable(object):
+    &quot;&quot;&quot; Scriptable defines methods that can be called from an external script.
+
+    Users of my software can write their own Python scripts which call the
+    methods of this class. In an actual piece of software, this class would
+    represent a piece of hardware that can be automated, for example. Users
+    would write their own automation protocols.
+
+    Here we'll pretend to have an RGB LED, and allow users to set that colour.
+
+    &quot;&quot;&quot;
+
+    def power_on(self):
+        print(&quot;Powering on subsystems...            [OK]&quot;)
+
+    def set_colour(self, r, g, b):
+        print(&quot;Colour changed to rgb [{}, {}, {}]   [OK]&quot;.format(r, g, b))
+
+    def power_off(self):
+        print(&quot;Powering off subsystems...           [OK]&quot;)
+
+</code></pre>
+
+<h3 id="user-script-structure:4d7ceafa77884ce262c3ad789576f347">User script structure</h3>
+
+<ul>
+<li>User script loaded from my application</li>
+<li>Scripts are regular python, they must contain a <code>main</code> function that takes a single argument.</li>
+<li>main() called, first argument <code>light</code> is a Scriptable instance.</li>
+<li>This is loosely inspired from AngularJS&rsquo;s dependency injection.</li>
+</ul>
+
+<pre><code># scripts/on_off.py
+
+import time
+
+def main(light):
+    light.power_on()
+    light.set_colour(255, 100, 0)
+    time.sleep(2)
+    light.power_off()
+</code></pre>
+
+<h2 id="loading-the-user-script-basic-example:4d7ceafa77884ce262c3ad789576f347">Loading the user script, basic example</h2>
+
+<pre><code class="language-python"># scriptable.py
+
+def load_script(name, folder):
+    &quot;&quot;&quot; Return user script `name` located in `folder` as a Python module &quot;&quot;&quot;
+    fo, path, description = imp.find_module(name, [folder])
+    try:
+        script = imp.load_module(name, fo, path, description)
+    finally:
+        fo.close()
+    return script
+
+if __name__ == '__main__':
+    light = Scriptable()
+    script = load_script('on_off', 'scripts/')
+    script.main(light)
+
+</code></pre>
+
+<ul>
+<li>using imp library, in two steps: locate and import the script, return is as a python module.</li>
+<li>In the last two lines: <code>script</code> is a module, can use it as if we had done <code>import on_off as script</code></li>
+</ul>
+
+<h2 id="add-error-checking:4d7ceafa77884ce262c3ad789576f347">Add error checking</h2>
+
+<pre><code># fragment of scriptable.py
+
+def load_script(name, folder):
+    try:
+        fo, path, description = imp.find_module(name, [folder])
+    except ImportError as e:
+        raise ScriptError(
+            &quot;Script named `{}.py` does not exist.&quot;.format(name)
+        ) from e
+
+    try:
+        script = imp.load_module(name, fo, path, description)
+    except SyntaxError as e:
+        raise ScriptError(&quot;Invalid syntax in requested script&quot;) from e
+    finally:
+        fo.close()
+
+    # Perform some elementary checking
+    if not hasattr(script, 'main'):
+        raise ScriptError(&quot;Script must contain a `main` function&quot;)
+    if len(inspect.getargspec(script.main).args) != 1:
+        raise ScriptError(&quot;Script's `main` must take a single argument&quot;)
+
+    return script
+</code></pre>
+
+<h1 id="going-further:4d7ceafa77884ce262c3ad789576f347">Going further</h1>
+
+<p>It is easy to add:</p>
+
+<ul>
+<li>Wrap the script call in error handling code, with proper teardowns if needed (for example, turn off system in all cases)</li>
+<li>Initialize something beforehand.</li>
+<li>If Create a &ldquo;simulator&rdquo; class, which mocks the hardware control class. It contains all the same functions, but never touches the hardware. For example: a robotic arm provides a move(x, y) function. The simulator checks that (x, y) are within the working area bounds.
+
+<ul>
+<li>Like this we can rapidly check if the script is expected to execute correctly.</li>
+</ul></li>
+</ul>
+
+  </div>
+  <div id="disqus_thread"></div>
+</div>
+
+
+<script type="text/javascript">
+var disqus_shortname = "douglaswatsongithub";
+(function () {
+    var s = document.createElement('script'); s.async = true;
+    s.type = 'text/javascript';
+    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+}());
+</script>
+
+
+
+<script type="text/javascript">
+    var disqus_shortname = "douglaswatsongithub";
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script src="http://localhost:1313/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script>
+  var _gaq=[['_setAccount','UA-71804013-1'],['_trackPageview']];
+  (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+  g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+  s.parentNode.insertBefore(g,s)}(document,'script'));
+</script>
+
+<script data-no-instant>document.write('<script src="http://'
+        + (location.host || 'localhost').split(':')[0]
+		+ ':1313/livereload.js?mindelay=10"></'
+        + 'script>')</script></body>
+</html>
+
