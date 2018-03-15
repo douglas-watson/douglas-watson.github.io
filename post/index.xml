@@ -6,10 +6,21 @@
     <description>Recent content in Posts on Programming notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 21 Feb 2018 22:00:00 +0100</lastBuildDate>
+    <lastBuildDate>Thu, 15 Mar 2018 08:12:00 +0100</lastBuildDate>
     
 	<atom:link href="http://douglas-watson.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Building an interactive map of mass shootings with Shiny</title>
+      <link>http://douglas-watson.github.io/post/2018-03_mass-shootings/</link>
+      <pubDate>Thu, 15 Mar 2018 08:12:00 +0100</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2018-03_mass-shootings/</guid>
+      <description>&amp;ldquo;Four? That&amp;rsquo;s barely your average family murder-suicide!&amp;rdquo; - Anonymous American
+ The United States saw 427 mass shootings in 2017, making a total of 2571 victims. That&amp;rsquo;s more than one shooting per day.
+Why don&amp;rsquo;t you hear about them on the news every day? Or conversely, if they are so common, why did the recent shooting in Las Vegas or the night club shooting in Orlando get so much attention?</description>
+    </item>
     
     <item>
       <title>How to add Google Analytics to a Shiny application</title>
