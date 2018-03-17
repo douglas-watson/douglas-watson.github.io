@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Top on Programming notes</title>
+    <link>http://douglas-watson.github.io/tags/top/</link>
+    <description>Recent content in Top on Programming notes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 15 Mar 2018 08:12:00 +0100</lastBuildDate>
+    
+	<atom:link href="http://douglas-watson.github.io/tags/top/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>An interactive map of mass shootings based on Shiny</title>
+      <link>http://douglas-watson.github.io/post/2018-03_mass-shootings/</link>
+      <pubDate>Thu, 15 Mar 2018 08:12:00 +0100</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2018-03_mass-shootings/</guid>
+      <description>&amp;ldquo;Four? That&amp;rsquo;s barely your average family murder-suicide!&amp;rdquo; - Anonymous American
+ The United States saw 427 mass shootings in 2017, making a total of 2571 victims. That&amp;rsquo;s more than one shooting per day.
+Why don&amp;rsquo;t you hear about them on the news every day? Or conversely, if they are so common, why did the recent shooting in Las Vegas or the night club shooting in Orlando get so much attention?</description>
+    </item>
+    
+    <item>
+      <title>How to change the number of breaks on a datetime axis with R and ggplot2</title>
+      <link>http://douglas-watson.github.io/post/2017-05_ggplot_datetime/</link>
+      <pubDate>Sat, 06 May 2017 07:33:58 +0200</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2017-05_ggplot_datetime/</guid>
+      <description>It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax:
+scale_x_datetime(date_breaks = &amp;quot;12 hours&amp;quot;)  This places a break every 12 hours. The interval can be any value accepted by the scales package: &amp;ldquo;sec&amp;rdquo;, &amp;ldquo;min&amp;rdquo;, &amp;ldquo;hour&amp;rdquo;, &amp;ldquo;day&amp;rdquo;, &amp;ldquo;week&amp;rdquo;, &amp;ldquo;month&amp;rdquo;, or &amp;ldquo;year&amp;rdquo;.</description>
+    </item>
+    
+  </channel>
+</rss>
