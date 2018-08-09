@@ -79,5 +79,27 @@ Skip to part 2 to learn how to fetch and manipulate this data in R, or part 3 to
       <description>Logging data to a central server and displaying it online is a common task in Internet of Things applications. This usually requires deploying and maintaining your own servers, with a database for storage and a web server for display. System administration tasks are no fun to me, so instead I found a way to use Google Sheets as a server, and ShinyApps.io as a visualization platform. Uploading data to Google docs is relatively simple and well documented, but connecting Shiny to Google Docs was a little more tricky; this motivated me to write this tutorial to show others how to set up a similar system.</description>
     </item>
     
+    <item>
+      <title></title>
+      <link>http://douglas-watson.github.io/post/2018-04_google_sheets_macros/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2018-04_google_sheets_macros/</guid>
+      <description>General idea: I&amp;rsquo;ve noticed that many people search for &amp;ldquo;Google spreadsheet macros&amp;rdquo;. I could write an article that specifically targets those search terms.
+Include a couple creative uses. Maybe look through comments of competing articles to find unanswered questions. Add the keywords:
+ tutorial how to examples  </description>
+    </item>
+    
+    <item>
+      <title>Translate an AngularJS web app from Google Sheets</title>
+      <link>http://douglas-watson.github.io/post/2018-05_angular_translations/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2018-05_angular_translations/</guid>
+      <description>General idea:
+ Present how I used google sheet macros to translate an Angular JS frontend Mention other javascript frontends. Mini-tutorial with a working Angular example Build script integration  Keywords:
+ Use &amp;ldquo;google sheet macros&amp;rdquo; Look at search terms to determine what content is searched for in requests that land on my blog.  </description>
+    </item>
+    
   </channel>
 </rss>

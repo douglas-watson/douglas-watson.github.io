@@ -110,5 +110,27 @@ Skip to part 2 to learn how to fetch and manipulate this data in R, or part 3 to
 I&amp;rsquo;ve often found other developers blogs to be useful resources, so I set up my own to share some tips and tricks, and solutions to problems that didn&amp;rsquo;t have obvious solutions.</description>
     </item>
     
+    <item>
+      <title></title>
+      <link>http://douglas-watson.github.io/post/2018-04_google_sheets_macros/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2018-04_google_sheets_macros/</guid>
+      <description>General idea: I&amp;rsquo;ve noticed that many people search for &amp;ldquo;Google spreadsheet macros&amp;rdquo;. I could write an article that specifically targets those search terms.
+Include a couple creative uses. Maybe look through comments of competing articles to find unanswered questions. Add the keywords:
+ tutorial how to examples  </description>
+    </item>
+    
+    <item>
+      <title>Translate an AngularJS web app from Google Sheets</title>
+      <link>http://douglas-watson.github.io/post/2018-05_angular_translations/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2018-05_angular_translations/</guid>
+      <description>General idea:
+ Present how I used google sheet macros to translate an Angular JS frontend Mention other javascript frontends. Mini-tutorial with a working Angular example Build script integration  Keywords:
+ Use &amp;ldquo;google sheet macros&amp;rdquo; Look at search terms to determine what content is searched for in requests that land on my blog.  </description>
+    </item>
+    
   </channel>
 </rss>

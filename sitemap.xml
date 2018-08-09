@@ -53,6 +53,10 @@
   </url>
   
   <url>
+    <loc>http://douglas-watson.github.io/post/2018-04_google_sheets_macros/</loc>
+  </url>
+  
+  <url>
     <loc>http://douglas-watson.github.io/categories/</loc>
     <priority>0</priority>
   </url>
@@ -84,6 +88,10 @@
     <loc>http://douglas-watson.github.io/tags/top/</loc>
     <lastmod>2018-03-15T08:12:00+01:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>http://douglas-watson.github.io/post/2018-05_angular_translations/</loc>
   </url>
   
 </urlset>
