@@ -10,7 +10,8 @@ Ported by Fabrício Tavares de Oliveira
   display: block;
   overflow-x: auto;
   padding: 0.5em;
-  background: #fff;
+  /* background: #fff;*/
+  background: #f9f9f9;
   -webkit-text-size-adjust: none;
 }
 
