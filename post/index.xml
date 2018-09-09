@@ -6,15 +6,25 @@
     <description>Recent content in Posts on Programming notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Sep 2018 10:00:00 +0100</lastBuildDate>
+    <lastBuildDate>Sun, 09 Sep 2018 11:00:00 +0200</lastBuildDate>
     
 	<atom:link href="http://douglas-watson.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>Fitting exponential decays in R, the easy way</title>
+      <link>http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/</link>
+      <pubDate>Sun, 09 Sep 2018 11:00:00 +0200</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/</guid>
+      <description>Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&amp;rsquo;ll quickly run into a &amp;ldquo;singular gradient&amp;rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.
+The formula I&amp;rsquo;ll use in the following examples is: $$ y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t} $$</description>
+    </item>
+    
+    <item>
       <title>Curve fitting on batches in the tidyverse: R, dplyr, and broom</title>
       <link>http://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/</link>
-      <pubDate>Sun, 09 Sep 2018 10:00:00 +0100</pubDate>
+      <pubDate>Sun, 09 Sep 2018 10:00:00 +0200</pubDate>
       
       <guid>http://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/</guid>
       <description>I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.</description>

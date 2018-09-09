@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>Fitting exponential decays in R, the easy way &middot; Douglas Watson</title>
+
+  
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/poole.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/hyde.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/poole-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/hyde-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/hyde-x.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/highlight/color-brewer.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://douglas-watson.github.io/touch-icon-144-precomposed.png">
+  <link href="http://douglas-watson.github.io/favicon.png" rel="icon">
+
+  
+  
+  
+  
+
+  <meta name="description" content="Your default page description">
+  <meta name="keywords" content="R,dplyr,broom,curve fitting,statistics,modelling,exponential,decay,evanescent,fit,data science">
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-71804013-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+  
+</head>
+<body class="theme-base-08">
+<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      
+      <h1>Douglas Watson</h1>
+      <p class="lead">Programming notes.</p>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.io/">Blog</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.io/projects/">Projects</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.io/about/">About</a></li>
+      
+    </ul>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item">
+      <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
+      
+      
+      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
+      
+      
+      
+      <a href="http://douglas-watson.github.io/index.xml" type="application/rss+xml"><i class="fa fa-rss-square fa-3x"></i></a>
+      </li>
+    </ul>
+
+    
+
+    <p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+       Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
+
+  </div>
+</div>
+
+
+<div class="content container">
+  <div class="post">
+    <h1 class="post-title">Fitting exponential decays in R, the easy way</h1>
+    <span class="post-date">Sep 9, 2018 &middot; 3 minute read &middot; <a href="http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/#disqus_thread">Comments</a>
+    
+    <br/>
+    
+    </span>
+    
+
+<p>Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&rsquo;ll quickly run into a &ldquo;singular gradient&rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.</p>
+
+<p>The formula I&rsquo;ll use in the following examples is:
+$$
+y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
+$$</p>
+
+<p>The measured value $y$ starts at $y_0$ and decays towards $y_f$ at a rate $\alpha$. Let&rsquo;s generate some artificial data so you can replicate the examples:</p>
+
+<pre><code class="language-R">library(tidyverse)
+library(broom)
+
+t = 1:100
+y1 = 22 + (53 - 22) * exp(-0.02 * t) %&gt;% jitter(10)
+y2 = 24 + (60 - 22) * exp(-0.01 * t) %&gt;% jitter(10)
+
+
+df &lt;- data.frame(t = t, y = y1, sensor = 'sensor1') %&gt;% 
+  rbind(. , data.frame(t = t, y = y2, sensor = 'sensor2'))
+sensor1 &lt;- df %&gt;% filter(sensor == 'sensor1')
+</code></pre>
+
+<p>Our data looks like this:</p>
+
+<pre><code>qplot(t, y, data = df, colour = sensor)
+</code></pre>
+
+<p><img src="/images/fitting/raw_data.png" alt="raw_data" /></p>
+
+<h2 id="fitting-with-nls">Fitting with NLS</h2>
+
+<p><code>nls</code> is the standard R base function to fit non-linear equations. Trying to fit the exponential decay with <code>nls</code> however leads to sadness and disappointment if you pick a bad initial guess for the rate constant ($\alpha$). This code:</p>
+
+<pre><code class="language-R">nls(y ~ yf + (y0 - yf) * exp(-alpha * t), 
+    data = sensor1,
+    start = list(y0 = 54, yf = 25, alpha = 1))
+</code></pre>
+
+<p>fails with:</p>
+
+<pre><code>Error in nls(y ~ yf + (y0 - yf) * exp(-alpha * t), data = sensor1, start = list(y0 = 54,  : 
+  singular gradient
+</code></pre>
+
+<h2 id="using-ssasymp">Using SSasymp</h2>
+
+<p>The solution is to use a <em>self-starting function</em>, a special function for curve fitting that guesses its own start parameters. The asymptotic regression function, <code>SSasymp</code> is equivalent to our exponential decay:</p>
+
+<pre><code class="language-R">&gt; fit &lt;- nls(y ~ SSasymp(t, yf, y0, log_alpha), data = sensor1)
+&gt; fit
+Nonlinear regression model
+  model: y ~ SSasymp(t, yf, y0, log_alpha)
+   data: sensor1
+       yf        y0 log_alpha 
+   21.884    52.976    -3.921 
+ residual sum-of-squares: 0.9205
+
+Number of iterations to convergence: 0 
+Achieved convergence tolerance: 8.788e-07
+</code></pre>
+
+<p>Its formula is a little different from ours, instead of fitting the rate constant $\alpha$ directly:
+$$
+y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
+$$</p>
+
+<p>It searches for the logarithm of $\alpha$:</p>
+
+<p>$$
+y(t) \sim y_f + (y_0 - y_f) e^{-\exp(\log\alpha) t}
+$$</p>
+
+<p>From the fit result, you can plot the fitted curve, or extract whichever other information you need:</p>
+
+<pre><code class="language-R">qplot(t, y, data = augment(fit)) + geom_line(aes(y = .fitted))
+</code></pre>
+
+<p><img src="/images/fitting/exponential.png" alt="Exponentially decaying data, fitted" /></p>
+
+<p>For a single curve, it&rsquo;s easy to guess the approximate fit parameters by looking at the plot, or just trying several values. When fitting many curves however, it is quite convenient to automate the process. Self-starting functions are especially useful combined with dplyr, to fit several experimental conditions in one step.</p>
+
+<p>Here is how we can read out the fit parameters for each sensor in our example data:</p>
+
+<pre><code class="language-R">df %&gt;% 
+  group_by(sensor) %&gt;% 
+  do(fit = nls(y ~ SSasymp(t, yf, y0, log_alpha), data = .)) %&gt;% 
+  tidy(fit) %&gt;% 
+  select(sensor, term, estimate) %&gt;% 
+  spread(term, estimate) %&gt;% 
+  mutate(alpha = exp(log_alpha))
+</code></pre>
+
+<table>
+<thead>
+<tr>
+<th>sensor<fctr></th>
+<th>log_alpha<dbl></th>
+<th>y0<dbl></th>
+<th>yf<dbl></th>
+<th>alpha<dbl></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>sensor1</td>
+<td>-3.920671</td>
+<td>52.97573</td>
+<td>21.88404</td>
+<td>0.019827795</td>
+</tr>
+
+<tr>
+<td>sensor2</td>
+<td>-4.611703</td>
+<td>61.98803</td>
+<td>23.85592</td>
+<td>0.009934881</td>
+</tr>
+</tbody>
+</table>
+
+<p>Now we know at one glance the rate constant for each sensor location, or the $y$ value that each position will stabilise at.</p>
+
+<p>For more ideas on how to apply curve fitting with dplyr, check out my <a href="/post/2018-09_dplyr_curve_fitting">previous article on dplyr</a>.</p>
+
+  </div>
+  
+
+<h2>See Also</h3>
+<ul>
+	
+	<li><a href="/post/2018-09_dplyr_curve_fitting/">Curve fitting on batches in the tidyverse: R, dplyr, and broom</a></li>
+	
+	<li><a href="/post/2018-03_mass-shootings/">An interactive map of mass shootings based on Shiny</a></li>
+	
+	<li><a href="/post/2018-02_shiny_google_analytics/">How to add Google Analytics to a Shiny application</a></li>
+	
+	<li><a href="/post/2017-05_ggplot_datetime/">How to change the number of breaks on a datetime axis with R and ggplot2</a></li>
+	
+	<li><a href="/post/gdocs_3_shiny/">Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3</a></li>
+	
+</ul>
+
+  <div id="disqus_thread"></div>
+</div>
+
+
+<script type="text/javascript">
+var disqus_shortname = "douglaswatsongithub";
+(function () {
+    var s = document.createElement('script'); s.async = true;
+    s.type = 'text/javascript';
+    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+}());
+</script>
+
+
+
+<script type="text/javascript">
+    var disqus_shortname = "douglaswatsongithub";
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script src="http://douglas-watson.github.io/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\[','\]']],
+        processEscapes: true,
+        processEnvironments: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code'],
+        TeX: { equationNumbers: { autoNumber: "AMS" },
+             extensions: ["AMSmath.js", "AMSsymbols.js"] }
+      }
+    });
+</script>
+</body>
+</html>
+
