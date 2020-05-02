@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>How To Export Apple Podcasts to mp3 Files &middot; Douglas Watson</title>
+
+  
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/poole.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/hyde.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/poole-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/hyde-overrides.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/hyde-x.css">
+  <link rel="stylesheet" href="http://douglas-watson.github.io/css/highlight/color-brewer.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans:400,400italic,700|Abril+Fatface">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://douglas-watson.github.io/touch-icon-144-precomposed.png">
+  <link href="http://douglas-watson.github.io/favicon.png" rel="icon">
+
+  
+  
+  
+  
+
+  <meta name="description" content="Apple Podcasts is a neat little podcast app, but k">
+  <meta name="keywords" content="podcasts,catalina,macOS,mp3,mp3 player,music player,sandisk clip,automator,python,ID3 tag,offline">
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-71804013-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+  
+</head>
+<body class="theme-base-08">
+<div class="sidebar">
+  <div class="container sidebar-sticky">
+    <div class="sidebar-about">
+      
+      <h1>Douglas Watson</h1>
+      <p class="lead">Programming notes.</p>
+    </div>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.io/">Blog</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.io/projects/">Projects</a></li>
+      
+      <li class="sidebar-nav-item"><a href="http://douglas-watson.github.io/about/">About</a></li>
+      
+    </ul>
+
+    <ul class="sidebar-nav">
+      <li class="sidebar-nav-item">
+      <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
+      
+      
+      
+      
+      
+      
+      
+      <a href="http://douglas-watson.github.io/index.xml" type="application/rss+xml"><i class="fa fa-rss-square fa-3x"></i></a>
+      </li>
+    </ul>
+
+    
+
+    <p>Blogroll:</p>
+<ul class="sidebar-nav">
+    <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
+    <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
+</ul>
+<p>Copyright &copy; 2020 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+    Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
+
+  </div>
+</div>
+
+
+<div class="content container">
+  <div class="post">
+    <h1 class="post-title">How To Export Apple Podcasts to mp3 Files</h1>
+    <span class="post-date">May 2, 2020 &middot; 3 minute read &middot; <a href="http://douglas-watson.github.io/post/2020-05_export_podcasts/#disqus_thread">Comments</a>
+    
+    <br/>
+    
+    </span>
+    <p><em>Or how to export podcasts to your Sandisk Clip or other non-Apple device.</em></p>
+<p>Apple Podcasts, introduced in macOS Catalina, is a convenient app: every podcast page I&rsquo;ve ever visited includes a &ldquo;Listen on Apple Podcasts&rdquo; link, it&rsquo;s already installed on my computer, and I can download episodes for offline listening. The problem is that I can&rsquo;t get those offline files <em>out</em> of Apple Podcasts, to transfer them to my small waterproof mp3 player.</p>
+<p>To solve this problem, I made a quick Automator service that finds all downloaded episodes and copies them to a directory of your choosing. Download it <a href="/dl/Export%20Downloaded%20Podcasts.zip">here</a>, unzip the file, and open the .workflow file. MacOS should offer to install it: <em>Do you want to install the “Export Downloaded Podcasts” quick action?</em> Once installed, you&rsquo;ll have a new service available in Podcasts:</p>
+<p><a href="/dl/Export%20Downloaded%20Podcasts.zip"><img src="/images/varia/export_podcast_service.png" alt="Export Downloaded Podcasts service"></a></p>
+<p>Clicking this will prompt you to choose a destination folder (on your desktop for example). It will then copy all downloaded episodes to this folder, tagging them in the process so that your music player indexes them correctly. The first time you run this service, it may ask for your password. It is needed to install a python library to manage mp3 file tags.</p>
+<p>You can now copy these files to any device. Happy listening!</p>
+<h1 id="side-notes">Side notes</h1>
+<p>For cautious readers, the password is prompted by this line in a script:</p>
+<pre><code>osascript -e 'do shell script &quot;/usr/bin/easy_install mp3_tagger&quot; with administrator privileges'
+</code></pre><p>It executes the shell command <code>easy_install mp3_tagger</code>. My script never sees the password. Note that the script is written in Python 2.7, which has already been deprecated but is still the only Python version in Automator. It may break in future updates.</p>
+<h1 id="how-does-it-work">How does it work?</h1>
+<p>Podcasts stores its data in the <code>~/Library/Group Containers/243LU875E5.groups.com.apple.podcasts</code> directory, structured like so:</p>
+<pre><code>.
+├── Documents
+│   ├── MTLibrary.sqlite
+│   ├── ...
+├── Library
+│   ├── Cache
+│   │   ├── 07AED83C-4AA9-4EAC-9589-16BFADD32D31.mp3
+│   │   ├── 79B12784-8123-4CC1-B2B5-860636224A12.mp3
+│   │   ├── 92C57A6D-94DC-4B3E-9BB4-A1B2041B5F09.mp3
+│   │   ├── FF865F4C-55BC-408A-A10A-45EBBE32BF67.mp3
+... ... ... 
+</code></pre><p>As far as I can tell, the path is the same on everyone&rsquo;s computer. The <code>Library/Cache</code> subfolder contains an mp3 file for each downloaded episode, named after an internal unique id and with empty ID3 tags. Since the tags are empty, we need to look elsewhere to identify these files. We find that <code>Documents</code> contains a sqlite database that stores the application&rsquo;s Core Data, including lists of podcasts and episodes.</p>
+<p>It was actually easiest to use the database as a starting point. The first step was to find all episodes that are cached and find their associated podcast name and author:</p>
+<p><img src="/images/varia/sql_query.png" alt="SQlite query"></p>
+<p>Quick shout-out to <a href="https://sqlitebrowser.org/">DB browser for SQLite</a> that made this exploration quite easy.</p>
+<p>Once we&rsquo;ve figured out the SQL query, we just need to execute it in a python script and loop through each result, copying the file from <code>ZASSETURL</code> to the destination folder and setting the ID3 tags.</p>
+<p>For convenience, I wrapped this python script in an Automator workflow that registers as a service for the Podcasts App. You can see the full code here: <a href="https://github.com/douglas-watson/podcasts_export">https://github.com/douglas-watson/podcasts_export</a>.</p>
+
+  </div>
+  
+
+  <div id="disqus_thread"></div>
+</div>
+
+
+<script type="text/javascript">
+var disqus_shortname = "douglaswatsongithub";
+(function () {
+    var s = document.createElement('script'); s.async = true;
+    s.type = 'text/javascript';
+    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+}());
+</script>
+
+
+
+<script type="text/javascript">
+    var disqus_shortname = "douglaswatsongithub";
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+<script src="http://douglas-watson.github.io/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\[','\]']],
+        processEscapes: true,
+        processEnvironments: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre','code'],
+        TeX: { equationNumbers: { autoNumber: "AMS" },
+             extensions: ["AMSmath.js", "AMSsymbols.js"] }
+      }
+    });
+</script>
+</body>
+</html>
+

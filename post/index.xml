@@ -5,10 +5,48 @@
     <description>Recent content in Posts on Programming notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Sep 2018 11:00:00 +0200</lastBuildDate>
+    <lastBuildDate>Sat, 02 May 2020 20:03:46 +0000</lastBuildDate>
     
         <atom:link href="http://douglas-watson.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>How To Export Apple Podcasts to mp3 Files</title>
+      <link>http://douglas-watson.github.io/post/2020-05_export_podcasts/</link>
+      <pubDate>Sat, 02 May 2020 20:03:46 +0000</pubDate>
+      
+      <guid>http://douglas-watson.github.io/post/2020-05_export_podcasts/</guid>
+      <description>&lt;p&gt;&lt;em&gt;Or how to export podcasts to your Sandisk Clip or other non-Apple device.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Apple Podcasts, introduced in macOS Catalina, is a convenient app: every podcast page I&amp;rsquo;ve ever visited includes a &amp;ldquo;Listen on Apple Podcasts&amp;rdquo; link, it&amp;rsquo;s already installed on my computer, and I can download episodes for offline listening. The problem is that I can&amp;rsquo;t get those offline files &lt;em&gt;out&lt;/em&gt; of Apple Podcasts, to transfer them to my small waterproof mp3 player.&lt;/p&gt;
+&lt;p&gt;To solve this problem, I made a quick Automator service that finds all downloaded episodes and copies them to a directory of your choosing. Download it &lt;a href=&#34;http://douglas-watson.github.io/dl/Export%20Downloaded%20Podcasts.zip&#34;&gt;here&lt;/a&gt;, unzip the file, and open the .workflow file. MacOS should offer to install it: &lt;em&gt;Do you want to install the “Export Downloaded Podcasts” quick action?&lt;/em&gt; Once installed, you&amp;rsquo;ll have a new service available in Podcasts:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://douglas-watson.github.io/dl/Export%20Downloaded%20Podcasts.zip&#34;&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/varia/export_podcast_service.png&#34; alt=&#34;Export Downloaded Podcasts service&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Clicking this will prompt you to choose a destination folder (on your desktop for example). It will then copy all downloaded episodes to this folder, tagging them in the process so that your music player indexes them correctly. The first time you run this service, it may ask for your password. It is needed to install a python library to manage mp3 file tags.&lt;/p&gt;
+&lt;p&gt;You can now copy these files to any device. Happy listening!&lt;/p&gt;
+&lt;h1 id=&#34;side-notes&#34;&gt;Side notes&lt;/h1&gt;
+&lt;p&gt;For cautious readers, the password is prompted by this line in a script:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;osascript -e &#39;do shell script &amp;quot;/usr/bin/easy_install mp3_tagger&amp;quot; with administrator privileges&#39;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;It executes the shell command &lt;code&gt;easy_install mp3_tagger&lt;/code&gt;. My script never sees the password. Note that the script is written in Python 2.7, which has already been deprecated but is still the only Python version in Automator. It may break in future updates.&lt;/p&gt;
+&lt;h1 id=&#34;how-does-it-work&#34;&gt;How does it work?&lt;/h1&gt;
+&lt;p&gt;Podcasts stores its data in the &lt;code&gt;~/Library/Group Containers/243LU875E5.groups.com.apple.podcasts&lt;/code&gt; directory, structured like so:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;.
+├── Documents
+│   ├── MTLibrary.sqlite
+│   ├── ...
+├── Library
+│   ├── Cache
+│   │   ├── 07AED83C-4AA9-4EAC-9589-16BFADD32D31.mp3
+│   │   ├── 79B12784-8123-4CC1-B2B5-860636224A12.mp3
+│   │   ├── 92C57A6D-94DC-4B3E-9BB4-A1B2041B5F09.mp3
+│   │   ├── FF865F4C-55BC-408A-A10A-45EBBE32BF67.mp3
+... ... ... 
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;As far as I can tell, the path is the same on everyone&amp;rsquo;s computer. The &lt;code&gt;Library/Cache&lt;/code&gt; subfolder contains an mp3 file for each downloaded episode, named after an internal unique id and with empty ID3 tags. Since the tags are empty, we need to look elsewhere to identify these files. We find that &lt;code&gt;Documents&lt;/code&gt; contains a sqlite database that stores the application&amp;rsquo;s Core Data, including lists of podcasts and episodes.&lt;/p&gt;
+&lt;p&gt;It was actually easiest to use the database as a starting point. The first step was to find all episodes that are cached and find their associated podcast name and author:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/varia/sql_query.png&#34; alt=&#34;SQlite query&#34;&gt;&lt;/p&gt;
+&lt;p&gt;Quick shout-out to &lt;a href=&#34;https://sqlitebrowser.org/&#34;&gt;DB browser for SQLite&lt;/a&gt; that made this exploration quite easy.&lt;/p&gt;
+&lt;p&gt;Once we&amp;rsquo;ve figured out the SQL query, we just need to execute it in a python script and loop through each result, copying the file from &lt;code&gt;ZASSETURL&lt;/code&gt; to the destination folder and setting the ID3 tags.&lt;/p&gt;
+&lt;p&gt;For convenience, I wrapped this python script in an Automator workflow that registers as a service for the Podcasts App. You can see the full code here: &lt;a href=&#34;https://github.com/douglas-watson/podcasts_export&#34;&gt;https://github.com/douglas-watson/podcasts_export&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Fitting exponential decays in R, the easy way</title>
