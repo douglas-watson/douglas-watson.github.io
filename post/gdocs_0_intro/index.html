@@ -66,7 +66,7 @@
       <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
       
       
-      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
       
       
       
@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2020 <a href="http://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -94,27 +94,16 @@
     <h1 class="post-title">Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial Series.</h1>
     <span class="post-date">Dec 27, 2015 &middot; 2 minute read &middot; <a href="http://douglas-watson.github.io/post/gdocs_0_intro/#disqus_thread">Comments</a>
     </span>
-    
-
-<p>Logging data to a central server and displaying it online is a common task in Internet of Things applications. This usually requires deploying and maintaining your own servers, with a database for storage and a web server for display. System administration tasks are no fun to me, so instead I found a way to use Google Sheets as a server, and ShinyApps.io as a visualization platform. Uploading data to Google docs is relatively simple and well documented, but connecting Shiny to Google Docs was a little more tricky; this motivated me to write this tutorial to show others how to set up a similar system.</p>
-
+    <p>Logging data to a central server and displaying it online is a common task in Internet of Things applications. This usually requires deploying and maintaining your own servers, with a database for storage and a web server for display. System administration tasks are no fun to me, so instead I found a way to use Google Sheets as a server, and ShinyApps.io as a visualization platform. Uploading data to Google docs is relatively simple and well documented, but connecting Shiny to Google Docs was a little more tricky; this motivated me to write this tutorial to show others how to set up a similar system.</p>
 <p>In <a href="/post/gdocs_1_gdocs/">part one</a>, I&rsquo;ll explain how to set up a Google spreadsheet as data storage and use it as an elementary dashboard. In <a href="/post/gdocs_2_r/">part two</a>, I&rsquo;ll teach you how to retrieve that data in R, and plot it with the ggplot2 library. In <a href="/post/gdocs_3_shiny/">part three</a>, I&rsquo;ll walk you through making a simple interactive visualization in Shiny and publishing it online to ShinyApps.io.</p>
-
 <p>During the tutorial, we&rsquo;ll pretend to have a network of several temperature and humidity sensors. Each sensor is named after its location name (such as &ldquo;bedroom&rdquo; or &ldquo;living room&rdquo;), and records the temperature every hour. I assume you know how to program your IOT hardware to make HTTP requests; for the sake of the tutorial I provide a Python script to upload fake temperature and humidity values.</p>
-
 <p><em>This tutorial series has kindly been translated to Chinese by Harry Zhu: <a href="https://segmentfault.com/a/1190000004426828">https://segmentfault.com/a/1190000004426828</a></em></p>
-
 <h2 id="why-use-google-sheets">Why use Google Sheets?</h2>
-
 <p>Google spreadsheets can serve as a simple server to store and retrieve data, while writing surprisingly little code. We avoid maintaining our own servers, and we additionally benefit from easy access to the raw data. On top of that, the spreadsheets on their own are powerful analysis tools, with statistics, pivot tables, filters, and interactive charts which can be embedded on external websites.</p>
-
-<p><img src="/images/gdocs/11_charts.png" alt="Google Sheets on their own are a powerful analytics tool for distributed data" /></p>
-
+<p><img src="/images/gdocs/11_charts.png" alt="Google Sheets on their own are a powerful analytics tool for distributed data"></p>
 <h2 id="why-use-r-and-shiny">Why use R and Shiny?</h2>
-
 <p>R is a powerful language specifically designed for data analysis. Combined with the ggplot2 graphing library, it provides an ideal package to explore and visualize large amounts data. Once you have figured out what you want to show, Shiny allows you to take your visualizations, make them interactive, and publish them on the web. RStudio, the makers of Shiny, even provide free hosting for visualizations, which makes the service quite convenient to experiment with.</p>
-
-<p><img src="/images/gdocs/32_fullui.png" alt="The final product of our tutorial: a live interactive web-based dashboard" /></p>
+<p><img src="/images/gdocs/32_fullui.png" alt="The final product of our tutorial: a live interactive web-based dashboard"></p>
 
   </div>
   

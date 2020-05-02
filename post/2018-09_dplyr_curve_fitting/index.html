@@ -66,7 +66,7 @@
       <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
       
       
-      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
       
       
       
@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2020 <a href="http://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -97,80 +97,64 @@
     <br/>
     
     </span>
-    
-
-<p>I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.</p>
-
+    <p>I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.</p>
 <p>First we&rsquo;ll generate some artificial data so that you can follow along at home. Here&rsquo;s an exponentially decaying value measured by two sensors at different locations:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#aaa;font-style:italic"># if needed</span>
+<span style="color:#0a0">install.packages</span>(<span style="color:#0a0">c</span>(<span style="color:#a50">&#34;tidyverse&#34;</span>, <span style="color:#a50">&#34;broom&#34;</span>))
 
-<pre><code class="language-R"># if needed
-install.packages(c(&quot;tidyverse&quot;, &quot;broom&quot;))
+<span style="color:#0a0">library</span>(tidyverse)
+<span style="color:#0a0">library</span>(broom)
 
-library(tidyverse)
-library(broom)
-
-t = 1:100
-y1 = 22 + (53 - 22) * exp(-0.02 * t) %&gt;% jitter(10)
-y2 = 24 + (60 - 22) * exp(-0.01 * t) %&gt;% jitter(10)
-
-
-df &lt;- data.frame(t = t, y = y1, sensor = 'sensor1') %&gt;% 
-  rbind(. , data.frame(t = t, y = y2, sensor = 'sensor2'))
+t = <span style="color:#099">1</span>:<span style="color:#099">100</span>
+y1 = <span style="color:#099">22</span> + (<span style="color:#099">53</span> - <span style="color:#099">22</span>) * <span style="color:#0a0">exp</span>(<span style="color:#099">-0.02</span> * t) %&gt;% <span style="color:#0a0">jitter</span>(<span style="color:#099">10</span>)
+y2 = <span style="color:#099">24</span> + (<span style="color:#099">60</span> - <span style="color:#099">22</span>) * <span style="color:#0a0">exp</span>(<span style="color:#099">-0.01</span> * t) %&gt;% <span style="color:#0a0">jitter</span>(<span style="color:#099">10</span>)
 
 
-</code></pre>
+df &lt;- <span style="color:#0a0">data.frame</span>(t = t, y = y1, sensor = <span style="color:#a50">&#39;sensor1&#39;</span>) %&gt;% 
+  <span style="color:#0a0">rbind</span>(. , <span style="color:#0a0">data.frame</span>(t = t, y = y2, sensor = <span style="color:#a50">&#39;sensor2&#39;</span>))
 
-<p>Our data frame looks like this:</p>
 
+</code></pre></div><p>Our data frame looks like this:</p>
 <pre><code>df
-</code></pre>
-
-<table>
+</code></pre><table>
 <thead>
 <tr>
-<th>t<int></th>
-<th>y<dbl></th>
-<th>sensor<fctr></th>
+<th>t<!-- raw HTML omitted --></th>
+<th>y<!-- raw HTML omitted --></th>
+<th>sensor<!-- raw HTML omitted --></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>1</td>
 <td>52.25302</td>
 <td>sensor1</td>
 </tr>
-
 <tr>
 <td>2</td>
 <td>51.71440</td>
 <td>sensor1</td>
 </tr>
-
 <tr>
 <td>3</td>
 <td>51.13971</td>
 <td>sensor1</td>
 </tr>
-
 <tr>
 <td>…</td>
 <td>…</td>
 <td>…</td>
 </tr>
-
 <tr>
 <td>98</td>
 <td>38.13328</td>
 <td>sensor2</td>
 </tr>
-
 <tr>
 <td>99</td>
 <td>38.17017</td>
 <td>sensor2</td>
 </tr>
-
 <tr>
 <td>100</td>
 <td>37.72184</td>
@@ -178,62 +162,42 @@ df &lt;- data.frame(t = t, y = y1, sensor = 'sensor1') %&gt;%
 </tr>
 </tbody>
 </table>
-
 <p>And our data looks like this:</p>
-
 <pre><code>qplot(t, y, data = df, colour = sensor)
-</code></pre>
-
-<p><img src="/images/fitting/raw_data.png" alt="raw_data" /></p>
-
+</code></pre><p><img src="/images/fitting/raw_data.png" alt="raw_data"></p>
 <p>I created the data in <em>long format</em>, as it works best with dplyr pipelines. You can read more about long format vs wide format data <a href="/post/gdocs_1_gdocs">here</a>.</p>
-
-<h2 id="tl-dr">TL;DR</h2>
-
+<h2 id="tldr">TL;DR</h2>
 <h3 id="i-want-to-plot-the-fitted-curve-over-my-data-points">I want to plot the fitted curve over my data points</h3>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">augmented &lt;- df %&gt;% 
+  <span style="color:#0a0">group_by</span>(sensor) %&gt;% 
+  <span style="color:#0a0">do</span>(fit = <span style="color:#0a0">nls</span>(y ~ a * t + b, data = .)) %&gt;% 
+  <span style="color:#0a0">augment</span>(fit)
 
-<pre><code class="language-R">augmented &lt;- df %&gt;% 
-  group_by(sensor) %&gt;% 
-  do(fit = nls(y ~ a * t + b, data = .)) %&gt;% 
-  augment(fit)
+<span style="color:#0a0">qplot</span>(t, y, data = augmented, geom = <span style="color:#a50">&#39;point&#39;</span>, colour = sensor) +
+  <span style="color:#0a0">geom_line</span>(<span style="color:#0a0">aes</span>(y=.fitted))
 
-qplot(t, y, data = augmented, geom = 'point', colour = sensor) +
-  geom_line(aes(y=.fitted))
-
-</code></pre>
-
-<p><img src="/images/fitting/fit.png" alt="raw_data" /></p>
-
+</code></pre></div><p><img src="/images/fitting/fit.png" alt="raw_data"></p>
 <h3 id="i-want-to-plot-the-residuals">I want to plot the residuals</h3>
-
-<pre><code class="language-R">qplot(t, .resid, data = augmented, colour = sensor)
-qplot(.fitted, .resid, data = augmented, colour = sensor)
-</code></pre>
-
-<p><img src="/images/fitting/residuals1.png" alt="raw_data" /></p>
-
-<p><img src="/images/fitting/residuals2.png" alt="raw_data" /></p>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">qplot</span>(t, .resid, data = augmented, colour = sensor)
+<span style="color:#0a0">qplot</span>(.fitted, .resid, data = augmented, colour = sensor)
+</code></pre></div><p><img src="/images/fitting/residuals1.png" alt="raw_data"></p>
+<p><img src="/images/fitting/residuals2.png" alt="raw_data"></p>
 <h2 id="i-want-a-table-of-my-fit-parameters-for-each-condition">I want a table of my fit parameters for each condition:</h2>
-
-<pre><code class="language-R">df %&gt;% 
-  group_by(sensor) %&gt;% 
-  do(fit = nls(y ~ a * t + b, data = .)) %&gt;% 
-  tidy(fit) %&gt;% 
-  select(sensor, term, estimate) %&gt;% 
-  spread(term, estimate)
-</code></pre>
-
-<table>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">df %&gt;% 
+  <span style="color:#0a0">group_by</span>(sensor) %&gt;% 
+  <span style="color:#0a0">do</span>(fit = <span style="color:#0a0">nls</span>(y ~ a * t + b, data = .)) %&gt;% 
+  <span style="color:#0a0">tidy</span>(fit) %&gt;% 
+  <span style="color:#0a0">select</span>(sensor, term, estimate) %&gt;% 
+  <span style="color:#0a0">spread</span>(term, estimate)
+</code></pre></div><table>
 <thead>
 <tr>
 <th></th>
-<th>sensor<fctr></th>
-<th>a<dbl></th>
-<th>b<dbl></th>
+<th>sensor<!-- raw HTML omitted --></th>
+<th>a<!-- raw HTML omitted --></th>
+<th>b<!-- raw HTML omitted --></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>1</td>
@@ -241,7 +205,6 @@ qplot(.fitted, .resid, data = augmented, colour = sensor)
 <td>-0.2495347</td>
 <td>47.87376</td>
 </tr>
-
 <tr>
 <td>2</td>
 <td>sensor2</td>
@@ -250,23 +213,14 @@ qplot(.fitted, .resid, data = augmented, colour = sensor)
 </tr>
 </tbody>
 </table>
-
 <h3 id="i-want-a-less-horrendous-fit-how-can-i-do-better">I want a less horrendous fit. How can I do better?</h3>
-
 <p>Try with an actual exponential. You&rsquo;ll probably want a self-starting function to avoid the &ldquo;singular gradient&rdquo; error — read more in <a href="/post/2018-09_exponential_curve_fitting/">my post on the subject</a>.</p>
-
 <h2 id="explanation-intro-to-curve-fitting-in-r">Explanation: intro to curve fitting in R</h2>
-
 <p>The goal of our fitting example was to find an estimate $\hat{y}(t) = a t + b$ that approximates our measured data $y$. In R, we can directly write that we want to approximate $y$ as a function $a \cdot t + b$, using the very intuitive built-in <strong>formula</strong> syntax:</p>
-
 <pre><code>y ~ a * t + b
-</code></pre>
-
-<p>In R&rsquo;s documentation, $a$ and $b$ are the <strong>coefficients</strong>, $t$ is the <strong>independent variable</strong> and $y$ is the <strong>dependent variable</strong> — $t$ can go about its day without every knowing $y$ exists, but $y$ can&rsquo;t progress without knowing the latest trend in $t$.</p>
-
+</code></pre><p>In R&rsquo;s documentation, $a$ and $b$ are the <strong>coefficients</strong>, $t$ is the <strong>independent variable</strong> and $y$ is the <strong>dependent variable</strong> — $t$ can go about its day without every knowing $y$ exists, but $y$ can&rsquo;t progress without knowing the latest trend in $t$.</p>
 <p>We fit these models using various fitting functions: <code>lm</code> or <code>glm</code> for linear models or <code>nls</code> for non-linear least squares for example. I&rsquo;m using <code>nls</code> here because I can specify the names of my coefficients, which I find clearer to explain:</p>
-
-<pre><code class="language-r"># Select the data from our first sensor:
+<pre><code class="language-{r}" data-lang="{r}"># Select the data from our first sensor:
 sensor1 &lt;- df %&gt;% filter(sensor == &quot;sensor1&quot;)
 
 # Fit our model:
@@ -275,10 +229,7 @@ fit &lt;- nls(y ~ a * t + b, data = sensor1)
 # nls works best if we specify an initial guess for the coefficients, 
 # the 'start' point for the optimisation:
 fit &lt;- nls(y ~ a * t + b, data = sensor1, start = list(a = 1, b = 10))
-</code></pre>
-
-<p>The fitting functions all return a fit object:</p>
-
+</code></pre><p>The fitting functions all return a fit object:</p>
 <pre><code>&gt; summary(fit)
 Formula: y ~ a * t + b
 
@@ -293,19 +244,14 @@ Residual standard error: 1.841 on 98 degrees of freedom
 
 Number of iterations to convergence: 1 
 Achieved convergence tolerance: 1.571e-09
-</code></pre>
-
-<p>You can use one of these base R functions to extract useful data from the fit object:</p>
-
+</code></pre><p>You can use one of these base R functions to extract useful data from the fit object:</p>
 <ul>
 <li><code>coef(fit)</code> returns the values of the coefficients $a$ and $b$.</li>
 <li><code>predict(fit)</code> returns $\hat{y}(t_i)$, i.e. it applies the fitted model to each of the original data points $t_i$. It can also be applied on new values of $t$.</li>
 <li><code>resid(fit)</code> returns the residuals $y_i - \hat{y}(t_i)$ at each point of the original data.</li>
 </ul>
-
 <p>Try them out in the console:</p>
-
-<pre><code class="language-r">&gt; coef(fit)
+<pre><code class="language-{r}" data-lang="{r}">&gt; coef(fit)
          a          b 
 -0.2495347 47.8737585
 
@@ -317,38 +263,26 @@ Achieved convergence tolerance: 1.571e-09
 
 &gt; resid(fit)
 [1] 4.628798 4.339712 4.014558 3.576258 3.528138 3.001447 ...
-</code></pre>
-
-<p>Now these functions all return vectors, which work best with R&rsquo;s native plotting functions. To integrate with dplyr and ggplot, we&rsquo;d rather have data frames. This is where the <em>broom</em> package comes in.</p>
-
+</code></pre><p>Now these functions all return vectors, which work best with R&rsquo;s native plotting functions. To integrate with dplyr and ggplot, we&rsquo;d rather have data frames. This is where the <em>broom</em> package comes in.</p>
 <h2 id="introducing-broom">Introducing broom</h2>
-
 <p><em>Broom</em> is a separate R package that feeds on fit results and produces useful data frames. Install it directly within the R console if you haven&rsquo;t already:</p>
-
-<pre><code class="language-R">install.packages('broom')
-library(broom)
-</code></pre>
-
-<p>It provides three useful functions, which are easier to demonstrate than to explain. All of them return data frames:</p>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">install.packages</span>(<span style="color:#a50">&#39;broom&#39;</span>)
+<span style="color:#0a0">library</span>(broom)
+</code></pre></div><p>It provides three useful functions, which are easier to demonstrate than to explain. All of them return data frames:</p>
 <ul>
 <li><strong>tidy</strong> extracts the fit coefficients and related information. The <strong>term</strong> column contains the name of your coefficient, and <strong>estimate</strong> contains its fitted value:</li>
 </ul>
-
-<pre><code class="language-R">tidy(fit)
-</code></pre>
-
-<table>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">tidy</span>(fit)
+</code></pre></div><table>
 <thead>
 <tr>
-<th>term<chr></th>
-<th>estimate<dbl></th>
-<th>std.error<dbl></th>
-<th>statistic<dbl></th>
-<th>p.value<dbl></th>
+<th>term<!-- raw HTML omitted --></th>
+<th>estimate<!-- raw HTML omitted --></th>
+<th>std.error<!-- raw HTML omitted --></th>
+<th>statistic<!-- raw HTML omitted --></th>
+<th>p.value<!-- raw HTML omitted --></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>a</td>
@@ -357,7 +291,6 @@ library(broom)
 <td>-39.12932</td>
 <td>1.267667e-61</td>
 </tr>
-
 <tr>
 <td>b</td>
 <td>47.8737585</td>
@@ -367,24 +300,19 @@ library(broom)
 </tr>
 </tbody>
 </table>
-
 <ul>
 <li><strong>augment</strong> is equivalent to <code>predict</code> and <code>resid</code> combined. The returned data frame contains columns <code>t</code> and <code>y</code> with your original data, as well as <code>.fitted</code>, the fitted curve, and <code>.resid</code>, the residuals:</li>
 </ul>
-
-<pre><code class="language-R">augment(fit)
-</code></pre>
-
-<table>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">augment</span>(fit)
+</code></pre></div><table>
 <thead>
 <tr>
-<th>t<int></th>
-<th>y<dbl></th>
-<th>.fitted<dbl></th>
-<th>.resid<dbl></th>
+<th>t<!-- raw HTML omitted --></th>
+<th>y<!-- raw HTML omitted --></th>
+<th>.fitted<!-- raw HTML omitted --></th>
+<th>.resid<!-- raw HTML omitted --></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>1</td>
@@ -392,28 +320,24 @@ library(broom)
 <td>47.62422</td>
 <td>4.62879752</td>
 </tr>
-
 <tr>
 <td>2</td>
 <td>51.71440</td>
 <td>47.37469</td>
 <td>4.33971163</td>
 </tr>
-
 <tr>
 <td>3</td>
 <td>51.13971</td>
 <td>47.12515</td>
 <td>4.01455804</td>
 </tr>
-
 <tr>
 <td>4</td>
 <td>50.45188</td>
 <td>46.87562</td>
 <td>3.57625801</td>
 </tr>
-
 <tr>
 <td>…</td>
 <td>…</td>
@@ -422,38 +346,28 @@ library(broom)
 </tr>
 </tbody>
 </table>
-
 <p>You can plot the &lsquo;augmented&rsquo; fit with qplot:</p>
-
-<pre><code class="language-R">qplot(t, y, data = augment(fit)) + geom_line(aes(y = .fitted))
-qplot(t, .resid, data = augment(fit))
-</code></pre>
-
-<p><img src="/images/fitting/augmented1.png" alt="raw_data" /></p>
-
-<p><img src="/images/fitting/augmented2.png" alt="raw_data" /></p>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">qplot</span>(t, y, data = <span style="color:#0a0">augment</span>(fit)) + <span style="color:#0a0">geom_line</span>(<span style="color:#0a0">aes</span>(y = .fitted))
+<span style="color:#0a0">qplot</span>(t, .resid, data = <span style="color:#0a0">augment</span>(fit))
+</code></pre></div><p><img src="/images/fitting/augmented1.png" alt="raw_data"></p>
+<p><img src="/images/fitting/augmented2.png" alt="raw_data"></p>
 <ul>
 <li><strong>glance</strong> shows fit statistics:</li>
 </ul>
-
-<pre><code class="language-R">glance(fit)
-</code></pre>
-
-<table>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">glance</span>(fit)
+</code></pre></div><table>
 <thead>
 <tr>
-<th>sigma<dbl></th>
-<th>isConv<lgl></th>
-<th>finTol<dbl></th>
-<th>logLik<dbl></th>
-<th>AIC<dbl></th>
-<th>BIC<dbl></th>
-<th>deviance<dbl></th>
-<th>df.residual<int></th>
+<th>sigma<!-- raw HTML omitted --></th>
+<th>isConv<!-- raw HTML omitted --></th>
+<th>finTol<!-- raw HTML omitted --></th>
+<th>logLik<!-- raw HTML omitted --></th>
+<th>AIC<!-- raw HTML omitted --></th>
+<th>BIC<!-- raw HTML omitted --></th>
+<th>deviance<!-- raw HTML omitted --></th>
+<th>df.residual<!-- raw HTML omitted --></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>1.840841</td>
@@ -467,33 +381,26 @@ qplot(t, .resid, data = augment(fit))
 </tr>
 </tbody>
 </table>
-
 <h2 id="using-broom-with-dplyr">Using broom with dplyr</h2>
-
 <p>Since broom&rsquo;s functions return data frames, they integrate naturally with magrittr pipelines (<code>%&gt;%</code>) and dplyr. Let&rsquo;s illustrate by grouping the data by sensor id, then producing a fit object for each group. The <code>do</code> function calls <code>nls</code> once for each group, then stores the return value in a column we named <code>fit</code>:</p>
-
-<pre><code class="language-r">fitted &lt;- df %&gt;% 
+<pre><code class="language-{r}" data-lang="{r}">fitted &lt;- df %&gt;% 
   group_by(sensor) %&gt;% 
   do(fit = nls(y ~ a * t + b, data = ., start = list(a = 1, b = 1)))
 fitted
-</code></pre>
-
-<table>
+</code></pre><table>
 <thead>
 <tr>
 <th></th>
-<th>sensor<fctr></th>
-<th>fit<list></th>
+<th>sensor<!-- raw HTML omitted --></th>
+<th>fit<!-- raw HTML omitted --></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>1</td>
 <td>sensor1</td>
 <td><code>&lt;S3: nls&gt;</code></td>
 </tr>
-
 <tr>
 <td>2</td>
 <td>sensor2</td>
@@ -501,25 +408,20 @@ fitted
 </tr>
 </tbody>
 </table>
-
 <p>We now have one nls object per group, which can be fed into either <code>tidy</code> or <code>augment</code>. These functions act on each group separately:</p>
-
-<pre><code class="language-r">fitted %&gt;% 
+<pre><code class="language-{r}" data-lang="{r}">fitted %&gt;% 
   tidy(fit)
-</code></pre>
-
-<table>
+</code></pre><table>
 <thead>
 <tr>
-<th>sensor<fctr></th>
-<th>term<chr></th>
-<th>estimate<dbl></th>
-<th>std.error<dbl></th>
-<th>statistic<dbl></th>
-<th>p.value<dbl></th>
+<th>sensor<!-- raw HTML omitted --></th>
+<th>term<!-- raw HTML omitted --></th>
+<th>estimate<!-- raw HTML omitted --></th>
+<th>std.error<!-- raw HTML omitted --></th>
+<th>statistic<!-- raw HTML omitted --></th>
+<th>p.value<!-- raw HTML omitted --></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>sensor1</td>
@@ -529,7 +431,6 @@ fitted
 <td>-39.12932</td>
 <td>1.267667e-61</td>
 </tr>
-
 <tr>
 <td>sensor1</td>
 <td>b</td>
@@ -538,7 +439,6 @@ fitted
 <td>129.05827</td>
 <td>3.123849e-111</td>
 </tr>
-
 <tr>
 <td>sensor2</td>
 <td>a</td>
@@ -547,7 +447,6 @@ fitted
 <td>-76.12478</td>
 <td>5.400611e-89</td>
 </tr>
-
 <tr>
 <td>sensor2</td>
 <td>b</td>
@@ -558,26 +457,20 @@ fitted
 </tr>
 </tbody>
 </table>
-
 <p>From here, we can use <code>select</code> and <code>spread</code> to generate a more succinct table, as in the TL;DR example, or keep the table as-is to inspect the quality of the fit.</p>
-
 <p>The result of <code>augment</code> is a long data frame that can be used immediately with qplot, also shown in the TL;DR section above:</p>
-
-<pre><code class="language-r">fitted %&gt;% 
+<pre><code class="language-{r}" data-lang="{r}">fitted %&gt;% 
   augment(fit)
-</code></pre>
-
-<table>
+</code></pre><table>
 <thead>
 <tr>
-<th>sensor<fctr></th>
-<th>t<int></th>
-<th>y<dbl></th>
-<th>.fitted<dbl></th>
-<th>.resid<dbl></th>
+<th>sensor<!-- raw HTML omitted --></th>
+<th>t<!-- raw HTML omitted --></th>
+<th>y<!-- raw HTML omitted --></th>
+<th>.fitted<!-- raw HTML omitted --></th>
+<th>.resid<!-- raw HTML omitted --></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>sensor1</td>
@@ -586,7 +479,6 @@ fitted
 <td>47.58220</td>
 <td>4.834645067</td>
 </tr>
-
 <tr>
 <td>sensor1</td>
 <td>2</td>
@@ -594,7 +486,6 @@ fitted
 <td>47.33347</td>
 <td>4.309757950</td>
 </tr>
-
 <tr>
 <td>sensor1</td>
 <td>3</td>
@@ -602,7 +493,6 @@ fitted
 <td>47.08475</td>
 <td>4.011196179</td>
 </tr>
-
 <tr>
 <td>…</td>
 <td>…</td>
@@ -610,7 +500,6 @@ fitted
 <td>…</td>
 <td>…</td>
 </tr>
-
 <tr>
 <td>sensor2</td>
 <td>98</td>
@@ -618,7 +507,6 @@ fitted
 <td>36.72428</td>
 <td>1.336007642</td>
 </tr>
-
 <tr>
 <td>sensor2</td>
 <td>99</td>
@@ -626,7 +514,6 @@ fitted
 <td>36.48926</td>
 <td>1.379642201</td>
 </tr>
-
 <tr>
 <td>sensor2</td>
 <td>100</td>
@@ -636,11 +523,8 @@ fitted
 </tr>
 </tbody>
 </table>
-
 <p>That&rsquo;s it for broom and dplyr. The magic of this approach is that you can add a sensor to your input data then re-run all your code; your new curves will just appear on the plots. Similarly, you can change the formula of your fit, and your new coefficients will appear as a new column in the coefficients table. No need to change your code.</p>
-
 <h2 id="references">References</h2>
-
 <ul>
 <li>R documentation: <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/nls.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/nls.html</a></li>
 <li>Data transformation cheat sheet: <a href="https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf">https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf</a></li>

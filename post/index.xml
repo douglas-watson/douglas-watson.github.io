@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Programming notes</title>
@@ -17,111 +16,77 @@
       <pubDate>Sun, 09 Sep 2018 11:00:00 +0200</pubDate>
       
       <guid>http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/</guid>
-      <description>
-
-&lt;p&gt;Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&amp;rsquo;ll quickly run into a &amp;ldquo;singular gradient&amp;rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.&lt;/p&gt;
-
+      <description>&lt;p&gt;Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&amp;rsquo;ll quickly run into a &amp;ldquo;singular gradient&amp;rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.&lt;/p&gt;
 &lt;p&gt;The formula I&amp;rsquo;ll use in the following examples is:
 $$
 y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
 $$&lt;/p&gt;
-
 &lt;p&gt;The measured value $y$ starts at $y_0$ and decays towards $y_f$ at a rate $\alpha$. Let&amp;rsquo;s generate some artificial data so you can replicate the examples:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(tidyverse)
+&lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(broom)
 
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;library(tidyverse)
-library(broom)
-
-t = 1:100
-y1 = 22 + (53 - 22) * exp(-0.02 * t) %&amp;gt;% jitter(10)
-y2 = 24 + (60 - 22) * exp(-0.01 * t) %&amp;gt;% jitter(10)
+t = &lt;span style=&#34;color:#099&#34;&gt;1&lt;/span&gt;:&lt;span style=&#34;color:#099&#34;&gt;100&lt;/span&gt;
+y1 = &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt; + (&lt;span style=&#34;color:#099&#34;&gt;53&lt;/span&gt; - &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt;) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;-0.02&lt;/span&gt; * t) %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;jitter&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;10&lt;/span&gt;)
+y2 = &lt;span style=&#34;color:#099&#34;&gt;24&lt;/span&gt; + (&lt;span style=&#34;color:#099&#34;&gt;60&lt;/span&gt; - &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt;) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;-0.01&lt;/span&gt; * t) %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;jitter&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;10&lt;/span&gt;)
 
 
-df &amp;lt;- data.frame(t = t, y = y1, sensor = &#39;sensor1&#39;) %&amp;gt;% 
-  rbind(. , data.frame(t = t, y = y2, sensor = &#39;sensor2&#39;))
-sensor1 &amp;lt;- df %&amp;gt;% filter(sensor == &#39;sensor1&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Our data looks like this:&lt;/p&gt;
-
+df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = t, y = y1, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;rbind&lt;/span&gt;(. , &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = t, y = y2, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor2&amp;#39;&lt;/span&gt;))
+sensor1 &amp;lt;- df %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;filter&lt;/span&gt;(sensor == &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our data looks like this:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;qplot(t, y, data = df, colour = sensor)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/raw_data.png&#34; alt=&#34;raw_data&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/raw_data.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;fitting-with-nls&#34;&gt;Fitting with NLS&lt;/h2&gt;
-
 &lt;p&gt;&lt;code&gt;nls&lt;/code&gt; is the standard R base function to fit non-linear equations. Trying to fit the exponential decay with &lt;code&gt;nls&lt;/code&gt; however leads to sadness and disappointment if you pick a bad initial guess for the rate constant ($\alpha$). This code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;nls(y ~ yf + (y0 - yf) * exp(-alpha * t), 
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ yf + (y0 - yf) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(-alpha * t), 
     data = sensor1,
-    start = list(y0 = 54, yf = 25, alpha = 1))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;fails with:&lt;/p&gt;
-
+    start = &lt;span style=&#34;color:#0a0&#34;&gt;list&lt;/span&gt;(y0 = &lt;span style=&#34;color:#099&#34;&gt;54&lt;/span&gt;, yf = &lt;span style=&#34;color:#099&#34;&gt;25&lt;/span&gt;, alpha = &lt;span style=&#34;color:#099&#34;&gt;1&lt;/span&gt;))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;fails with:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;Error in nls(y ~ yf + (y0 - yf) * exp(-alpha * t), data = sensor1, start = list(y0 = 54,  : 
   singular gradient
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;using-ssasymp&#34;&gt;Using SSasymp&lt;/h2&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;using-ssasymp&#34;&gt;Using SSasymp&lt;/h2&gt;
 &lt;p&gt;The solution is to use a &lt;em&gt;self-starting function&lt;/em&gt;, a special function for curve fitting that guesses its own start parameters. The asymptotic regression function, &lt;code&gt;SSasymp&lt;/code&gt; is equivalent to our exponential decay:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;&amp;gt; fit &amp;lt;- nls(y ~ SSasymp(t, yf, y0, log_alpha), data = sensor1)
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&amp;gt; fit &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ &lt;span style=&#34;color:#0a0&#34;&gt;SSasymp&lt;/span&gt;(t, yf, y0, log_alpha), data = sensor1)
 &amp;gt; fit
 Nonlinear regression model
-  model: y ~ SSasymp(t, yf, y0, log_alpha)
+  model: y ~ &lt;span style=&#34;color:#0a0&#34;&gt;SSasymp&lt;/span&gt;(t, yf, y0, log_alpha)
    data: sensor1
        yf        y0 log_alpha 
-   21.884    52.976    -3.921 
- residual sum-of-squares: 0.9205
+   &lt;span style=&#34;color:#099&#34;&gt;21.884&lt;/span&gt;    &lt;span style=&#34;color:#099&#34;&gt;52.976&lt;/span&gt;    &lt;span style=&#34;color:#099&#34;&gt;-3.921&lt;/span&gt; 
+ residual sum-of-squares: &lt;span style=&#34;color:#099&#34;&gt;0.9205&lt;/span&gt;
 
-Number of iterations to convergence: 0 
-Achieved convergence tolerance: 8.788e-07
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Its formula is a little different from ours, instead of fitting the rate constant $\alpha$ directly:
+Number of iterations to convergence: &lt;span style=&#34;color:#099&#34;&gt;0&lt;/span&gt; 
+Achieved convergence tolerance: &lt;span style=&#34;color:#099&#34;&gt;8.788e-07&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Its formula is a little different from ours, instead of fitting the rate constant $\alpha$ directly:
 $$
 y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
 $$&lt;/p&gt;
-
 &lt;p&gt;It searches for the logarithm of $\alpha$:&lt;/p&gt;
-
 &lt;p&gt;$$
 y(t) \sim y_f + (y_0 - y_f) e^{-\exp(\log\alpha) t}
 $$&lt;/p&gt;
-
 &lt;p&gt;From the fit result, you can plot the fitted curve, or extract whichever other information you need:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;qplot(t, y, data = augment(fit)) + geom_line(aes(y = .fitted))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/exponential.png&#34; alt=&#34;Exponentially decaying data, fitted&#34; /&gt;&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)) + &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y = .fitted))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/exponential.png&#34; alt=&#34;Exponentially decaying data, fitted&#34;&gt;&lt;/p&gt;
 &lt;p&gt;For a single curve, it&amp;rsquo;s easy to guess the approximate fit parameters by looking at the plot, or just trying several values. When fitting many curves however, it is quite convenient to automate the process. Self-starting functions are especially useful combined with dplyr, to fit several experimental conditions in one step.&lt;/p&gt;
-
 &lt;p&gt;Here is how we can read out the fit parameters for each sensor in our example data:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;df %&amp;gt;% 
-  group_by(sensor) %&amp;gt;% 
-  do(fit = nls(y ~ SSasymp(t, yf, y0, log_alpha), data = .)) %&amp;gt;% 
-  tidy(fit) %&amp;gt;% 
-  select(sensor, term, estimate) %&amp;gt;% 
-  spread(term, estimate) %&amp;gt;% 
-  mutate(alpha = exp(log_alpha))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;table&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;df %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(sensor) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;do&lt;/span&gt;(fit = &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ &lt;span style=&#34;color:#0a0&#34;&gt;SSasymp&lt;/span&gt;(t, yf, y0, log_alpha), data = .)) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;tidy&lt;/span&gt;(fit) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;select&lt;/span&gt;(sensor, term, estimate) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;spread&lt;/span&gt;(term, estimate) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;mutate&lt;/span&gt;(alpha = &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(log_alpha))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;sensor&lt;fctr&gt;&lt;/th&gt;
-&lt;th&gt;log_alpha&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;y0&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;yf&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;alpha&lt;dbl&gt;&lt;/th&gt;
+&lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;log_alpha&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;y0&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;yf&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;alpha&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
@@ -130,7 +95,6 @@ $$&lt;/p&gt;
 &lt;td&gt;21.88404&lt;/td&gt;
 &lt;td&gt;0.019827795&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
 &lt;td&gt;-4.611703&lt;/td&gt;
@@ -140,9 +104,7 @@ $$&lt;/p&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;p&gt;Now we know at one glance the rate constant for each sensor location, or the $y$ value that each position will stabilise at.&lt;/p&gt;
-
 &lt;p&gt;For more ideas on how to apply curve fitting with dplyr, check out my &lt;a href=&#34;http://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting&#34;&gt;previous article on dplyr&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
@@ -153,80 +115,64 @@ $$&lt;/p&gt;
       <pubDate>Sun, 09 Sep 2018 10:00:00 +0200</pubDate>
       
       <guid>http://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/</guid>
-      <description>
-
-&lt;p&gt;I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.&lt;/p&gt;
-
+      <description>&lt;p&gt;I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.&lt;/p&gt;
 &lt;p&gt;First we&amp;rsquo;ll generate some artificial data so that you can follow along at home. Here&amp;rsquo;s an exponentially decaying value measured by two sensors at different locations:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# if needed&lt;/span&gt;
+&lt;span style=&#34;color:#0a0&#34;&gt;install.packages&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;c&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;tidyverse&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;broom&amp;#34;&lt;/span&gt;))
 
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;# if needed
-install.packages(c(&amp;quot;tidyverse&amp;quot;, &amp;quot;broom&amp;quot;))
+&lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(tidyverse)
+&lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(broom)
 
-library(tidyverse)
-library(broom)
-
-t = 1:100
-y1 = 22 + (53 - 22) * exp(-0.02 * t) %&amp;gt;% jitter(10)
-y2 = 24 + (60 - 22) * exp(-0.01 * t) %&amp;gt;% jitter(10)
-
-
-df &amp;lt;- data.frame(t = t, y = y1, sensor = &#39;sensor1&#39;) %&amp;gt;% 
-  rbind(. , data.frame(t = t, y = y2, sensor = &#39;sensor2&#39;))
+t = &lt;span style=&#34;color:#099&#34;&gt;1&lt;/span&gt;:&lt;span style=&#34;color:#099&#34;&gt;100&lt;/span&gt;
+y1 = &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt; + (&lt;span style=&#34;color:#099&#34;&gt;53&lt;/span&gt; - &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt;) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;-0.02&lt;/span&gt; * t) %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;jitter&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;10&lt;/span&gt;)
+y2 = &lt;span style=&#34;color:#099&#34;&gt;24&lt;/span&gt; + (&lt;span style=&#34;color:#099&#34;&gt;60&lt;/span&gt; - &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt;) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;-0.01&lt;/span&gt; * t) %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;jitter&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;10&lt;/span&gt;)
 
 
-&lt;/code&gt;&lt;/pre&gt;
+df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = t, y = y1, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;rbind&lt;/span&gt;(. , &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = t, y = y2, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor2&amp;#39;&lt;/span&gt;))
 
-&lt;p&gt;Our data frame looks like this:&lt;/p&gt;
 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our data frame looks like this:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;df
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;table&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;t&lt;int&gt;&lt;/th&gt;
-&lt;th&gt;y&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;sensor&lt;fctr&gt;&lt;/th&gt;
+&lt;th&gt;t&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;y&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;1&lt;/td&gt;
 &lt;td&gt;52.25302&lt;/td&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;2&lt;/td&gt;
 &lt;td&gt;51.71440&lt;/td&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;3&lt;/td&gt;
 &lt;td&gt;51.13971&lt;/td&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;…&lt;/td&gt;
 &lt;td&gt;…&lt;/td&gt;
 &lt;td&gt;…&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;98&lt;/td&gt;
 &lt;td&gt;38.13328&lt;/td&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;99&lt;/td&gt;
 &lt;td&gt;38.17017&lt;/td&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;100&lt;/td&gt;
 &lt;td&gt;37.72184&lt;/td&gt;
@@ -234,62 +180,42 @@ df &amp;lt;- data.frame(t = t, y = y1, sensor = &#39;sensor1&#39;) %&amp;gt;%
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;p&gt;And our data looks like this:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;qplot(t, y, data = df, colour = sensor)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/raw_data.png&#34; alt=&#34;raw_data&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/raw_data.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;p&gt;I created the data in &lt;em&gt;long format&lt;/em&gt;, as it works best with dplyr pipelines. You can read more about long format vs wide format data &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;tl-dr&#34;&gt;TL;DR&lt;/h2&gt;
-
+&lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
 &lt;h3 id=&#34;i-want-to-plot-the-fitted-curve-over-my-data-points&#34;&gt;I want to plot the fitted curve over my data points&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;augmented &amp;lt;- df %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(sensor) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;do&lt;/span&gt;(fit = &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ a * t + b, data = .)) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)
 
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;augmented &amp;lt;- df %&amp;gt;% 
-  group_by(sensor) %&amp;gt;% 
-  do(fit = nls(y ~ a * t + b, data = .)) %&amp;gt;% 
-  augment(fit)
+&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = augmented, geom = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;point&amp;#39;&lt;/span&gt;, colour = sensor) +
+  &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y=.fitted))
 
-qplot(t, y, data = augmented, geom = &#39;point&#39;, colour = sensor) +
-  geom_line(aes(y=.fitted))
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/fit.png&#34; alt=&#34;raw_data&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/fit.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;h3 id=&#34;i-want-to-plot-the-residuals&#34;&gt;I want to plot the residuals&lt;/h3&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;qplot(t, .resid, data = augmented, colour = sensor)
-qplot(.fitted, .resid, data = augmented, colour = sensor)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/residuals1.png&#34; alt=&#34;raw_data&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/residuals2.png&#34; alt=&#34;raw_data&#34; /&gt;&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, .resid, data = augmented, colour = sensor)
+&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(.fitted, .resid, data = augmented, colour = sensor)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/residuals1.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/residuals2.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;i-want-a-table-of-my-fit-parameters-for-each-condition&#34;&gt;I want a table of my fit parameters for each condition:&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;df %&amp;gt;% 
-  group_by(sensor) %&amp;gt;% 
-  do(fit = nls(y ~ a * t + b, data = .)) %&amp;gt;% 
-  tidy(fit) %&amp;gt;% 
-  select(sensor, term, estimate) %&amp;gt;% 
-  spread(term, estimate)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;table&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;df %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(sensor) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;do&lt;/span&gt;(fit = &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ a * t + b, data = .)) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;tidy&lt;/span&gt;(fit) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;select&lt;/span&gt;(sensor, term, estimate) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;spread&lt;/span&gt;(term, estimate)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
 &lt;th&gt;&lt;/th&gt;
-&lt;th&gt;sensor&lt;fctr&gt;&lt;/th&gt;
-&lt;th&gt;a&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;b&lt;dbl&gt;&lt;/th&gt;
+&lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;a&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;b&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;1&lt;/td&gt;
@@ -297,7 +223,6 @@ qplot(.fitted, .resid, data = augmented, colour = sensor)
 &lt;td&gt;-0.2495347&lt;/td&gt;
 &lt;td&gt;47.87376&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;2&lt;/td&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
@@ -306,23 +231,14 @@ qplot(.fitted, .resid, data = augmented, colour = sensor)
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;h3 id=&#34;i-want-a-less-horrendous-fit-how-can-i-do-better&#34;&gt;I want a less horrendous fit. How can I do better?&lt;/h3&gt;
-
 &lt;p&gt;Try with an actual exponential. You&amp;rsquo;ll probably want a self-starting function to avoid the &amp;ldquo;singular gradient&amp;rdquo; error — read more in &lt;a href=&#34;http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/&#34;&gt;my post on the subject&lt;/a&gt;.&lt;/p&gt;
-
 &lt;h2 id=&#34;explanation-intro-to-curve-fitting-in-r&#34;&gt;Explanation: intro to curve fitting in R&lt;/h2&gt;
-
 &lt;p&gt;The goal of our fitting example was to find an estimate $\hat{y}(t) = a t + b$ that approximates our measured data $y$. In R, we can directly write that we want to approximate $y$ as a function $a \cdot t + b$, using the very intuitive built-in &lt;strong&gt;formula&lt;/strong&gt; syntax:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;y ~ a * t + b
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;In R&amp;rsquo;s documentation, $a$ and $b$ are the &lt;strong&gt;coefficients&lt;/strong&gt;, $t$ is the &lt;strong&gt;independent variable&lt;/strong&gt; and $y$ is the &lt;strong&gt;dependent variable&lt;/strong&gt; — $t$ can go about its day without every knowing $y$ exists, but $y$ can&amp;rsquo;t progress without knowing the latest trend in $t$.&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;In R&amp;rsquo;s documentation, $a$ and $b$ are the &lt;strong&gt;coefficients&lt;/strong&gt;, $t$ is the &lt;strong&gt;independent variable&lt;/strong&gt; and $y$ is the &lt;strong&gt;dependent variable&lt;/strong&gt; — $t$ can go about its day without every knowing $y$ exists, but $y$ can&amp;rsquo;t progress without knowing the latest trend in $t$.&lt;/p&gt;
 &lt;p&gt;We fit these models using various fitting functions: &lt;code&gt;lm&lt;/code&gt; or &lt;code&gt;glm&lt;/code&gt; for linear models or &lt;code&gt;nls&lt;/code&gt; for non-linear least squares for example. I&amp;rsquo;m using &lt;code&gt;nls&lt;/code&gt; here because I can specify the names of my coefficients, which I find clearer to explain:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;# Select the data from our first sensor:
+&lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;# Select the data from our first sensor:
 sensor1 &amp;lt;- df %&amp;gt;% filter(sensor == &amp;quot;sensor1&amp;quot;)
 
 # Fit our model:
@@ -331,10 +247,7 @@ fit &amp;lt;- nls(y ~ a * t + b, data = sensor1)
 # nls works best if we specify an initial guess for the coefficients, 
 # the &#39;start&#39; point for the optimisation:
 fit &amp;lt;- nls(y ~ a * t + b, data = sensor1, start = list(a = 1, b = 10))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The fitting functions all return a fit object:&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The fitting functions all return a fit object:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;&amp;gt; summary(fit)
 Formula: y ~ a * t + b
 
@@ -349,19 +262,14 @@ Residual standard error: 1.841 on 98 degrees of freedom
 
 Number of iterations to convergence: 1 
 Achieved convergence tolerance: 1.571e-09
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can use one of these base R functions to extract useful data from the fit object:&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;You can use one of these base R functions to extract useful data from the fit object:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;coef(fit)&lt;/code&gt; returns the values of the coefficients $a$ and $b$.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;predict(fit)&lt;/code&gt; returns $\hat{y}(t_i)$, i.e. it applies the fitted model to each of the original data points $t_i$. It can also be applied on new values of $t$.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;resid(fit)&lt;/code&gt; returns the residuals $y_i - \hat{y}(t_i)$ at each point of the original data.&lt;/li&gt;
 &lt;/ul&gt;
-
 &lt;p&gt;Try them out in the console:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;&amp;gt; coef(fit)
+&lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;&amp;gt; coef(fit)
          a          b 
 -0.2495347 47.8737585
 
@@ -373,38 +281,26 @@ Achieved convergence tolerance: 1.571e-09
 
 &amp;gt; resid(fit)
 [1] 4.628798 4.339712 4.014558 3.576258 3.528138 3.001447 ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now these functions all return vectors, which work best with R&amp;rsquo;s native plotting functions. To integrate with dplyr and ggplot, we&amp;rsquo;d rather have data frames. This is where the &lt;em&gt;broom&lt;/em&gt; package comes in.&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now these functions all return vectors, which work best with R&amp;rsquo;s native plotting functions. To integrate with dplyr and ggplot, we&amp;rsquo;d rather have data frames. This is where the &lt;em&gt;broom&lt;/em&gt; package comes in.&lt;/p&gt;
 &lt;h2 id=&#34;introducing-broom&#34;&gt;Introducing broom&lt;/h2&gt;
-
 &lt;p&gt;&lt;em&gt;Broom&lt;/em&gt; is a separate R package that feeds on fit results and produces useful data frames. Install it directly within the R console if you haven&amp;rsquo;t already:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;install.packages(&#39;broom&#39;)
-library(broom)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It provides three useful functions, which are easier to demonstrate than to explain. All of them return data frames:&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;install.packages&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;broom&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(broom)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;It provides three useful functions, which are easier to demonstrate than to explain. All of them return data frames:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;tidy&lt;/strong&gt; extracts the fit coefficients and related information. The &lt;strong&gt;term&lt;/strong&gt; column contains the name of your coefficient, and &lt;strong&gt;estimate&lt;/strong&gt; contains its fitted value:&lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;tidy(fit)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;table&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;tidy&lt;/span&gt;(fit)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;term&lt;chr&gt;&lt;/th&gt;
-&lt;th&gt;estimate&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;std.error&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;statistic&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;p.value&lt;dbl&gt;&lt;/th&gt;
+&lt;th&gt;term&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;estimate&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;std.error&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;statistic&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;p.value&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;a&lt;/td&gt;
@@ -413,7 +309,6 @@ library(broom)
 &lt;td&gt;-39.12932&lt;/td&gt;
 &lt;td&gt;1.267667e-61&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;b&lt;/td&gt;
 &lt;td&gt;47.8737585&lt;/td&gt;
@@ -423,24 +318,19 @@ library(broom)
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;augment&lt;/strong&gt; is equivalent to &lt;code&gt;predict&lt;/code&gt; and &lt;code&gt;resid&lt;/code&gt; combined. The returned data frame contains columns &lt;code&gt;t&lt;/code&gt; and &lt;code&gt;y&lt;/code&gt; with your original data, as well as &lt;code&gt;.fitted&lt;/code&gt;, the fitted curve, and &lt;code&gt;.resid&lt;/code&gt;, the residuals:&lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;augment(fit)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;table&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;t&lt;int&gt;&lt;/th&gt;
-&lt;th&gt;y&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;.fitted&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;.resid&lt;dbl&gt;&lt;/th&gt;
+&lt;th&gt;t&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;y&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;.fitted&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;.resid&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;1&lt;/td&gt;
@@ -448,28 +338,24 @@ library(broom)
 &lt;td&gt;47.62422&lt;/td&gt;
 &lt;td&gt;4.62879752&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;2&lt;/td&gt;
 &lt;td&gt;51.71440&lt;/td&gt;
 &lt;td&gt;47.37469&lt;/td&gt;
 &lt;td&gt;4.33971163&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;3&lt;/td&gt;
 &lt;td&gt;51.13971&lt;/td&gt;
 &lt;td&gt;47.12515&lt;/td&gt;
 &lt;td&gt;4.01455804&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;4&lt;/td&gt;
 &lt;td&gt;50.45188&lt;/td&gt;
 &lt;td&gt;46.87562&lt;/td&gt;
 &lt;td&gt;3.57625801&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;…&lt;/td&gt;
 &lt;td&gt;…&lt;/td&gt;
@@ -478,38 +364,28 @@ library(broom)
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;p&gt;You can plot the &amp;lsquo;augmented&amp;rsquo; fit with qplot:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;qplot(t, y, data = augment(fit)) + geom_line(aes(y = .fitted))
-qplot(t, .resid, data = augment(fit))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/augmented1.png&#34; alt=&#34;raw_data&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/augmented2.png&#34; alt=&#34;raw_data&#34; /&gt;&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)) + &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y = .fitted))
+&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, .resid, data = &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/augmented1.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/augmented2.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;glance&lt;/strong&gt; shows fit statistics:&lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;glance(fit)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;table&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;glance&lt;/span&gt;(fit)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;sigma&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;isConv&lt;lgl&gt;&lt;/th&gt;
-&lt;th&gt;finTol&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;logLik&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;AIC&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;BIC&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;deviance&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;df.residual&lt;int&gt;&lt;/th&gt;
+&lt;th&gt;sigma&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;isConv&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;finTol&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;logLik&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;AIC&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;BIC&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;deviance&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;df.residual&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;1.840841&lt;/td&gt;
@@ -523,33 +399,26 @@ qplot(t, .resid, data = augment(fit))
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;h2 id=&#34;using-broom-with-dplyr&#34;&gt;Using broom with dplyr&lt;/h2&gt;
-
 &lt;p&gt;Since broom&amp;rsquo;s functions return data frames, they integrate naturally with magrittr pipelines (&lt;code&gt;%&amp;gt;%&lt;/code&gt;) and dplyr. Let&amp;rsquo;s illustrate by grouping the data by sensor id, then producing a fit object for each group. The &lt;code&gt;do&lt;/code&gt; function calls &lt;code&gt;nls&lt;/code&gt; once for each group, then stores the return value in a column we named &lt;code&gt;fit&lt;/code&gt;:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;fitted &amp;lt;- df %&amp;gt;% 
+&lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;fitted &amp;lt;- df %&amp;gt;% 
   group_by(sensor) %&amp;gt;% 
   do(fit = nls(y ~ a * t + b, data = ., start = list(a = 1, b = 1)))
 fitted
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;table&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
 &lt;th&gt;&lt;/th&gt;
-&lt;th&gt;sensor&lt;fctr&gt;&lt;/th&gt;
-&lt;th&gt;fit&lt;list&gt;&lt;/th&gt;
+&lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;fit&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;1&lt;/td&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
 &lt;td&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;2&lt;/td&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
@@ -557,25 +426,20 @@ fitted
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;p&gt;We now have one nls object per group, which can be fed into either &lt;code&gt;tidy&lt;/code&gt; or &lt;code&gt;augment&lt;/code&gt;. These functions act on each group separately:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;fitted %&amp;gt;% 
+&lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;fitted %&amp;gt;% 
   tidy(fit)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;table&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;sensor&lt;fctr&gt;&lt;/th&gt;
-&lt;th&gt;term&lt;chr&gt;&lt;/th&gt;
-&lt;th&gt;estimate&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;std.error&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;statistic&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;p.value&lt;dbl&gt;&lt;/th&gt;
+&lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;term&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;estimate&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;std.error&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;statistic&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;p.value&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
@@ -585,7 +449,6 @@ fitted
 &lt;td&gt;-39.12932&lt;/td&gt;
 &lt;td&gt;1.267667e-61&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
 &lt;td&gt;b&lt;/td&gt;
@@ -594,7 +457,6 @@ fitted
 &lt;td&gt;129.05827&lt;/td&gt;
 &lt;td&gt;3.123849e-111&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
 &lt;td&gt;a&lt;/td&gt;
@@ -603,7 +465,6 @@ fitted
 &lt;td&gt;-76.12478&lt;/td&gt;
 &lt;td&gt;5.400611e-89&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
 &lt;td&gt;b&lt;/td&gt;
@@ -614,26 +475,20 @@ fitted
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;p&gt;From here, we can use &lt;code&gt;select&lt;/code&gt; and &lt;code&gt;spread&lt;/code&gt; to generate a more succinct table, as in the TL;DR example, or keep the table as-is to inspect the quality of the fit.&lt;/p&gt;
-
 &lt;p&gt;The result of &lt;code&gt;augment&lt;/code&gt; is a long data frame that can be used immediately with qplot, also shown in the TL;DR section above:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;fitted %&amp;gt;% 
+&lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;fitted %&amp;gt;% 
   augment(fit)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;table&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;sensor&lt;fctr&gt;&lt;/th&gt;
-&lt;th&gt;t&lt;int&gt;&lt;/th&gt;
-&lt;th&gt;y&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;.fitted&lt;dbl&gt;&lt;/th&gt;
-&lt;th&gt;.resid&lt;dbl&gt;&lt;/th&gt;
+&lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;t&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;y&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;.fitted&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;.resid&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
@@ -642,7 +497,6 @@ fitted
 &lt;td&gt;47.58220&lt;/td&gt;
 &lt;td&gt;4.834645067&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
 &lt;td&gt;2&lt;/td&gt;
@@ -650,7 +504,6 @@ fitted
 &lt;td&gt;47.33347&lt;/td&gt;
 &lt;td&gt;4.309757950&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
 &lt;td&gt;3&lt;/td&gt;
@@ -658,7 +511,6 @@ fitted
 &lt;td&gt;47.08475&lt;/td&gt;
 &lt;td&gt;4.011196179&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;…&lt;/td&gt;
 &lt;td&gt;…&lt;/td&gt;
@@ -666,7 +518,6 @@ fitted
 &lt;td&gt;…&lt;/td&gt;
 &lt;td&gt;…&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
 &lt;td&gt;98&lt;/td&gt;
@@ -674,7 +525,6 @@ fitted
 &lt;td&gt;36.72428&lt;/td&gt;
 &lt;td&gt;1.336007642&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
 &lt;td&gt;99&lt;/td&gt;
@@ -682,7 +532,6 @@ fitted
 &lt;td&gt;36.48926&lt;/td&gt;
 &lt;td&gt;1.379642201&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
 &lt;td&gt;100&lt;/td&gt;
@@ -692,11 +541,8 @@ fitted
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;p&gt;That&amp;rsquo;s it for broom and dplyr. The magic of this approach is that you can add a sensor to your input data then re-run all your code; your new curves will just appear on the plots. Similarly, you can change the formula of your fit, and your new coefficients will appear as a new column in the coefficients table. No need to change your code.&lt;/p&gt;
-
 &lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
-
 &lt;ul&gt;
 &lt;li&gt;R documentation: &lt;a href=&#34;https://stat.ethz.ch/R-manual/R-devel/library/stats/html/nls.html&#34;&gt;https://stat.ethz.ch/R-manual/R-devel/library/stats/html/nls.html&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Data transformation cheat sheet: &lt;a href=&#34;https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf&#34;&gt;https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf&lt;/a&gt;&lt;/li&gt;
@@ -712,148 +558,101 @@ fitted
       <pubDate>Thu, 15 Mar 2018 08:12:00 +0100</pubDate>
       
       <guid>http://douglas-watson.github.io/post/2018-03_mass-shootings/</guid>
-      <description>
-
-&lt;blockquote&gt;
+      <description>&lt;blockquote&gt;
 &lt;p&gt;&amp;ldquo;Four? That&amp;rsquo;s barely your average family murder-suicide!&amp;rdquo; - Anonymous American&lt;/p&gt;
 &lt;/blockquote&gt;
-
 &lt;p&gt;The United States saw 427 mass shootings in 2017, making a total of 2571 victims. That&amp;rsquo;s more than one shooting per day.&lt;/p&gt;
-
 &lt;p&gt;Why don&amp;rsquo;t you hear about them on the news every day? Or conversely, if they are so common, why did the recent shooting in Las Vegas or the night club shooting in Orlando get so much attention?&lt;/p&gt;
-
 &lt;p&gt;These numbers are gathered by MassShootingTracker.org, who define a mass shooting as an event with four or more victims, including dead and wounded. I heard several people react along the lines of the quote above, who said that four people is hardly a mass shooting by American standards. So, how would the numbers change if you changed the definition? This question inspired me to make an interactive visualisation of the data, with a slider that lets you pick your own definition of a mass shooting. I then got intrigued by where they were happening: in what states? Can we show them on a map? When are they happening, are there more and more every year? What about Europe, how do their numbers compare? Read on to learn more, or head over to the &lt;a href=&#34;https://moncherwatson.shinyapps.io/mass-shootings/&#34;&gt;interactive app&lt;/a&gt; to answer those questions and play with the data yourself.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://moncherwatson.shinyapps.io/mass-shootings/&#34;&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/overview.png&#34; alt=&#34;Dashboard overview&#34; /&gt;&lt;/a&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;a href=&#34;https://moncherwatson.shinyapps.io/mass-shootings/&#34;&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/overview.png&#34; alt=&#34;Dashboard overview&#34;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;This being a technical blog, however, the goal is not to make a social or political analysis, but rather to explain how I built the app. Read along to learn more about the unexpected challenges I encountered to represent the data on a map and cache location data for online deployment; maybe you&amp;rsquo;ll learn from some of my mistakes.&lt;/p&gt;
-
 &lt;h2 id=&#34;basics&#34;&gt;Basics&lt;/h2&gt;
-
 &lt;p&gt;&lt;em&gt;If you are new to Shiny, you can skim through my first article on the subject &lt;a href=&#34;http://douglas-watson.github.io/post/ggdocs_3_shiny/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
-
 &lt;p&gt;The visualisation is a Shiny application, hosted on the free tier of Shinyapps.io. A couple of filters can select events by date range, or limit the minimum number of victims. A map (shown above) shows the location of every event, marked by a circle whose area is proportional to the total number of victims — you&amp;rsquo;ll notice that the Florida and Nevada circles are much larger than any of the others; these shootings were exceptionally violent. Clicking a marker pops up links to related news articles. Optionally, events can be clustered on the map to reduce clutter. A searchable table shows a list of all events:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/table.png&#34; alt=&#34;Searchable table&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/table.png&#34; alt=&#34;Searchable table&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Two bar graphs show number of shootings and victims per month. Interestingly, they show a cyclic trend: shootings are more common in the summer.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/per_month.png&#34; alt=&#34;Shootings by month&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/per_month.png&#34; alt=&#34;Shootings by month&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Another set of graphs shows the number of shootings and victims per state, optionally normalised by state population. The absolute totals just tend to show that larger states have more shootings. Per capita numbers show that D.C. is the most dangerous state!&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/per_state.png&#34; alt=&#34;Shootings by state&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/per_state.png&#34; alt=&#34;Shootings by state&#34;&gt;&lt;/p&gt;
 &lt;p&gt;The end result is slow, so either my approach or choice of platform probably weren&amp;rsquo;t the best. It would be interesting to deploy the app to a faster service, to see if the issue comes from an inherent slowness of Shiny, or from the limitations of shinyapps.io.&lt;/p&gt;
-
 &lt;h2 id=&#34;data-and-tools&#34;&gt;Data and tools&lt;/h2&gt;
-
 &lt;p&gt;The data is provided by MassShootingTracker.org, in the form of one CSV file per year. The file for the current year is continuously updated on their website, thus my app downloads the latest version every time it is reloaded. Files from previous years are saved to disk.&lt;/p&gt;
-
 &lt;p&gt;The list of shootings contains one row per shooting, with a column for date, city name, state abbreviation, and number of killed and wounded, as well as links to related news articles. I mixed in population data from the US census bureau, and geographical coordinates of each city from OpenStreetMap. On the visual side, maps are handled by &lt;code&gt;leaflet&lt;/code&gt;, plots by &lt;code&gt;ggplot2&lt;/code&gt;, and tables are standard Shiny Data Tables.&lt;/p&gt;
-
 &lt;h2 id=&#34;normalising-by-state-population&#34;&gt;Normalising by State population&lt;/h2&gt;
-
 &lt;p&gt;To normalise values by state population, I first needed to lookup the population of each state. The US census bureau provides this data for each year, freely downloadable in CSV format. I picked out two columns from the census data: the state abbreviation and the population in 2016. The shootings data came pre-labelled by state, so I can left-join it with the census table. The result is a copy of the shootings table, with an extra column for state population:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;data &amp;lt;- left_join(shootings, census, by = &amp;quot;state&amp;quot;) %&amp;gt;%
-   replace_na(list(population = mean(census$population)))
-# census has two columns: state and population
-# shootings has many columns, incuding state
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;I replace missing values (NAs) by the mean state population, to avoid dividing by NA if a poorly formatted state appears in the data in the future.&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;data &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;left_join&lt;/span&gt;(shootings, census, by = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;state&amp;#34;&lt;/span&gt;) %&amp;gt;%
+   &lt;span style=&#34;color:#0a0&#34;&gt;replace_na&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;list&lt;/span&gt;(population = &lt;span style=&#34;color:#0a0&#34;&gt;mean&lt;/span&gt;(census$population)))
+&lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# census has two columns: state and population&lt;/span&gt;
+&lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# shootings has many columns, incuding state&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I replace missing values (NAs) by the mean state population, to avoid dividing by NA if a poorly formatted state appears in the data in the future.&lt;/p&gt;
 &lt;p&gt;The second step is to aggregate, summarise, and normalise the data. Dplyr and the tidyverse package allow me to write these operations in a very fluid syntax. I just group by state, then sum and normalise within each group:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;data %&amp;gt;%
-   group_by(state) %&amp;gt;%
-   summarise(victims = sum(killed + wounded) / first(population))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;aggregating-by-month&#34;&gt;Aggregating by month&lt;/h2&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;data %&amp;gt;%
+   &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(state) %&amp;gt;%
+   &lt;span style=&#34;color:#0a0&#34;&gt;summarise&lt;/span&gt;(victims = &lt;span style=&#34;color:#0a0&#34;&gt;sum&lt;/span&gt;(killed + wounded) / &lt;span style=&#34;color:#0a0&#34;&gt;first&lt;/span&gt;(population))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;aggregating-by-month&#34;&gt;Aggregating by month&lt;/h2&gt;
 &lt;p&gt;For month-by-month data, we first need to create a &amp;lsquo;month&amp;rsquo; and &amp;lsquo;year&amp;rsquo; column from the date, then we can group by those two values and sum:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;monthData &amp;lt;- data %&amp;gt;%
-   mutate(month = format(date, &#39;%m&#39;), year = format(date, &#39;%y&#39;)) %&amp;gt;%  # Create new columns
-   group_by(month, year) %&amp;gt;%
-   summarise(victims = sum(killed + wounded)) # sum all rows within each group
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;map-and-location-data&#34;&gt;Map and location data&lt;/h2&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;monthData &amp;lt;- data %&amp;gt;%
+   &lt;span style=&#34;color:#0a0&#34;&gt;mutate&lt;/span&gt;(month = &lt;span style=&#34;color:#0a0&#34;&gt;format&lt;/span&gt;(date, &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;%m&amp;#39;&lt;/span&gt;), year = &lt;span style=&#34;color:#0a0&#34;&gt;format&lt;/span&gt;(date, &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;%y&amp;#39;&lt;/span&gt;)) %&amp;gt;%  &lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# Create new columns&lt;/span&gt;
+   &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(month, year) %&amp;gt;%
+   &lt;span style=&#34;color:#0a0&#34;&gt;summarise&lt;/span&gt;(victims = &lt;span style=&#34;color:#0a0&#34;&gt;sum&lt;/span&gt;(killed + wounded)) &lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# sum all rows within each group&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;map-and-location-data&#34;&gt;Map and location data&lt;/h2&gt;
 &lt;p&gt;Locating the shootings was the main challenge of this project; once their latitude and longitude was known, displaying them on a map was handled in a couple lines of code by the Leaflet library. Since the list of shootings is pulled live from a data source updated every day, new cities are likely to appear in the future. I had two options: build a table of all cities in the US, with their latitude and longitude, or find a location service that I can query every time a new city name appears in the database. I discarded the first option due to the shear number of cities in the US and instead used the Nominatim API of OpenStreetMap to query the coordinates of each city. Inspired by &lt;a href=&#34;https://www.r-bloggers.com/search-and-draw-cities-on-a-map-using-openstreetmap-and-r/&#34;&gt;r-bloggers&lt;/a&gt;, I used this code:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;locateCity &amp;lt;- function(city, state) {
-  url = paste(&#39;http://nominatim.openstreetmap.org/search?&#39;,
-              &#39;city=&#39;,  gsub(&#39; &#39;, &#39;%20&#39;, city), 
-              &#39;&amp;amp;state=&#39;, gsub(&#39; &#39;, &#39;%20&#39;, state),
-              &#39;&amp;amp;country=USA&#39;,
-              &#39;&amp;amp;limit=1&amp;amp;format=json&#39;,
-              sep=&amp;quot;&amp;quot;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;locateCity &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;function&lt;/span&gt;(city, state) {
+  url = &lt;span style=&#34;color:#0a0&#34;&gt;paste&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;http://nominatim.openstreetmap.org/search?&amp;#39;&lt;/span&gt;,
+              &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;city=&amp;#39;&lt;/span&gt;,  &lt;span style=&#34;color:#0a0&#34;&gt;gsub&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;%20&amp;#39;&lt;/span&gt;, city), 
+              &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;&amp;amp;state=&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#0a0&#34;&gt;gsub&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#39; &amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;%20&amp;#39;&lt;/span&gt;, state),
+              &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;&amp;amp;country=USA&amp;#39;&lt;/span&gt;,
+              &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;&amp;amp;limit=1&amp;amp;format=json&amp;#39;&lt;/span&gt;,
+              sep=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;
               )
-  resOSM = RJSONIO::fromJSON(url)
-  if(length(resOSM) &amp;gt; 0) {
-    return(c(resOSM[[1]]$lon, resOSM[[1]]$lat))
-  } else return(rep(NA,2)) 
+  resOSM = RJSONIO::&lt;span style=&#34;color:#0a0&#34;&gt;fromJSON&lt;/span&gt;(url)
+  &lt;span style=&#34;color:#0a0&#34;&gt;if&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;length&lt;/span&gt;(resOSM) &amp;gt; &lt;span style=&#34;color:#099&#34;&gt;0&lt;/span&gt;) {
+    &lt;span style=&#34;color:#0a0&#34;&gt;return&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;c&lt;/span&gt;(resOSM[[1]]$lon, resOSM[[1]]$lat))
+  } else &lt;span style=&#34;color:#0a0&#34;&gt;return&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;rep&lt;/span&gt;(&lt;span style=&#34;color:#00a&#34;&gt;NA&lt;/span&gt;,&lt;span style=&#34;color:#099&#34;&gt;2&lt;/span&gt;)) 
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;With hindsight, this probably wasn&amp;rsquo;t the easiest solution. Speed and rate limits on the API made caching necessary, and caching on shinyapps.io gets complicated.&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With hindsight, this probably wasn&amp;rsquo;t the easiest solution. Speed and rate limits on the API made caching necessary, and caching on shinyapps.io gets complicated.&lt;/p&gt;
 &lt;h3 id=&#34;memoizing&#34;&gt;Memoizing&lt;/h3&gt;
-
 &lt;p&gt;The Nominatim API restricts the number of requests you can execute every hour, so I needed to cache the responses locally to avoid asking the same question repeatedly to the API. The easiest way to achieve this is to &lt;em&gt;memoise&lt;/em&gt; the search function, by keeping a dictionary that maps the function argument to their return value. In our case:&lt;/p&gt;
-
 &lt;ul&gt;
-&lt;li&gt;&lt;p&gt;The function&amp;rsquo;s arguments are city name and state, and the return value is a set of geographical coordinates.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;Before calling the function, check if the arguments already exist in the dictionary keys. If they do, return the associated value. If they don&amp;rsquo;t, call the function and store the result.&lt;/p&gt;&lt;/li&gt;
-
-&lt;li&gt;&lt;p&gt;The next time these arguments appear, we don&amp;rsquo;t need to query the API again, we just return the values from the dictionary. Thus we only call the API once for every city.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The function&amp;rsquo;s arguments are city name and state, and the return value is a set of geographical coordinates.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Before calling the function, check if the arguments already exist in the dictionary keys. If they do, return the associated value. If they don&amp;rsquo;t, call the function and store the result.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The next time these arguments appear, we don&amp;rsquo;t need to query the API again, we just return the values from the dictionary. Thus we only call the API once for every city.&lt;/p&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
-
 &lt;p&gt;This concept is most naturally expressed in Python. If you don&amp;rsquo;t know python, just skip ahead:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-python&#34;&gt;cache = {}
-def memoized(arg):
-    if not arg in cache:
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;cache = {}
+&lt;span style=&#34;color:#00a&#34;&gt;def&lt;/span&gt; &lt;span style=&#34;color:#0a0&#34;&gt;memoized&lt;/span&gt;(arg):
+    &lt;span style=&#34;color:#00a&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color:#00a&#34;&gt;not&lt;/span&gt; arg &lt;span style=&#34;color:#00a&#34;&gt;in&lt;/span&gt; cache:
         cache[arg] = slow_function(arg)
-    return cache[arg]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;An additional challenge of deploying on shinyapps.io is that we can&amp;rsquo;t reliably store the lookup table as a local file: every time an instance of the application is started or put to sleep, the files are reset to their initial state at the time of upload: &lt;a href=&#34;http://docs.rstudio.com/shinyapps.io/Storage.html&#34;&gt;http://docs.rstudio.com/shinyapps.io/Storage.html&lt;/a&gt;. Thus, if we kept the cache stored on disk, we would loose it every time a new instance is spun up.&lt;/p&gt;
-
+    &lt;span style=&#34;color:#00a&#34;&gt;return&lt;/span&gt; cache[arg]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;An additional challenge of deploying on shinyapps.io is that we can&amp;rsquo;t reliably store the lookup table as a local file: every time an instance of the application is started or put to sleep, the files are reset to their initial state at the time of upload: &lt;a href=&#34;http://docs.rstudio.com/shinyapps.io/Storage.html&#34;&gt;http://docs.rstudio.com/shinyapps.io/Storage.html&lt;/a&gt;. Thus, if we kept the cache stored on disk, we would loose it every time a new instance is spun up.&lt;/p&gt;
 &lt;p&gt;Enter the R &lt;code&gt;memoize&lt;/code&gt; package. It takes a regular function and wraps the caching part around it. It can save the cache to Amazon S3, and thus doesn&amp;rsquo;t depend on the local filesystem. The downside is that it still requires an HTTP request every time the function is called, i.e. once per row of data. We just traded a request to Nominatim for a request to Amazon S3. It&amp;rsquo;s almost as slow as direct calls to the API, the main advantage is that we avoid overloading OpenStreetMap.&lt;/p&gt;
-
 &lt;p&gt;I compromised by storing a local copy of location for past events, and only calling the (memoized) Nominatim API for newer events — those that weren&amp;rsquo;t in the database at the time the application was published. In practice, I manually call a &amp;ldquo;rebuild cache&amp;rdquo; function before publishing the app, which fetches and geotags all currently available data, then saves it as an RDS file on disk. At run-time, my server.R file reloads the RDS file, then fetches remote data and only geotags the newest, unknown data. This approach ended up convoluted but functional enough for a weekend hack.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;loadDataWithLocalCache &amp;lt;- function() {
-  localCache &amp;lt;- readRDS(&amp;quot;data/localCache.rds&amp;quot;) 
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;loadDataWithLocalCache &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;function&lt;/span&gt;() {
+  localCache &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;readRDS&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;data/localCache.rds&amp;#34;&lt;/span&gt;) 
   
-  newRemoteData &amp;lt;-  loadRemoteData() %&amp;gt;%
-    formatData() %&amp;gt;% 
-    filter(date &amp;gt;= first(localCache$date))
+  newRemoteData &amp;lt;-  &lt;span style=&#34;color:#0a0&#34;&gt;loadRemoteData&lt;/span&gt;() %&amp;gt;%
+    &lt;span style=&#34;color:#0a0&#34;&gt;formatData&lt;/span&gt;() %&amp;gt;% 
+    &lt;span style=&#34;color:#0a0&#34;&gt;filter&lt;/span&gt;(date &amp;gt;= &lt;span style=&#34;color:#0a0&#34;&gt;first&lt;/span&gt;(localCache$date))
   
-  if ( nrow(newRemoteData) == 0 ) {
+  &lt;span style=&#34;color:#0a0&#34;&gt;if &lt;/span&gt;( &lt;span style=&#34;color:#0a0&#34;&gt;nrow&lt;/span&gt;(newRemoteData) == &lt;span style=&#34;color:#099&#34;&gt;0&lt;/span&gt; ) {
     localCache
   } else {
-    newRemoteData %&amp;gt;%      # Start with new, un-geotagged data
-    locateData() %&amp;gt;%       # Fetch coordinates on Nominatim API, cached through Amazon S3
-    rbind(localCache) %&amp;gt;%  # Append cached, already geo-tagged data
-    unique()               # Remove duplicates
+    newRemoteData %&amp;gt;%      &lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# Start with new, un-geotagged data&lt;/span&gt;
+    &lt;span style=&#34;color:#0a0&#34;&gt;locateData&lt;/span&gt;() %&amp;gt;%       &lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# Fetch coordinates on Nominatim API, cached through Amazon S3&lt;/span&gt;
+    &lt;span style=&#34;color:#0a0&#34;&gt;rbind&lt;/span&gt;(localCache) %&amp;gt;%  &lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# Append cached, already geo-tagged data&lt;/span&gt;
+    &lt;span style=&#34;color:#0a0&#34;&gt;unique&lt;/span&gt;()               &lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# Remove duplicates&lt;/span&gt;
   }
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;europe&#34;&gt;Europe&lt;/h2&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;europe&#34;&gt;Europe&lt;/h2&gt;
 &lt;p&gt;After working on the American map, I was interested in comparing with European data. I found data for 2016, aggregated by a &lt;a href=&#34;https://www.vice.com/en_us/article/4wb9p3/mass-shootings-in-europe-in-2016&#34;&gt;Vice journalist&lt;/a&gt;. The result was rather boring: Russia saw the most shootings, but per capita the victims are fewer than the safest US state. Cyprus has such a small population that a single event skewed the statistics.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/europe_events.png&#34; alt=&#34;Total number of shootings in 2016, comparing USA to Europe&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/europe_victims.png&#34; alt=&#34;Total shooting victims in 2016, comparing USA to Europe&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/europe_events.png&#34; alt=&#34;Total number of shootings in 2016, comparing USA to Europe&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/europe_victims.png&#34; alt=&#34;Total shooting victims in 2016, comparing USA to Europe&#34;&gt;&lt;/p&gt;
 </description>
     </item>
     
@@ -863,48 +662,32 @@ def memoized(arg):
       <pubDate>Wed, 21 Feb 2018 22:00:00 +0100</pubDate>
       
       <guid>http://douglas-watson.github.io/post/2018-02_shiny_google_analytics/</guid>
-      <description>
-
-&lt;p&gt;I recently wanted to add a Google Analytics tracker to a Shiny dashboard, and I found that the official documentation doesn&amp;rsquo;t explain how to include &amp;ldquo;Global Site Tag&amp;rdquo; tracking code, which seems to be the current default setting in Analytics. The process is simple, we just have to include the tracking code as an HTML snippet in &lt;code&gt;ui.R&lt;/code&gt;. The process requires only two steps:&lt;/p&gt;
-
+      <description>&lt;p&gt;I recently wanted to add a Google Analytics tracker to a Shiny dashboard, and I found that the official documentation doesn&amp;rsquo;t explain how to include &amp;ldquo;Global Site Tag&amp;rdquo; tracking code, which seems to be the current default setting in Analytics. The process is simple, we just have to include the tracking code as an HTML snippet in &lt;code&gt;ui.R&lt;/code&gt;. The process requires only two steps:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Copy the analytics HTML snippet into a text file&lt;/li&gt;
 &lt;li&gt;Reference the file in &lt;code&gt;ui.R&lt;/code&gt;&lt;/li&gt;
 &lt;/ol&gt;
-
 &lt;h2 id=&#34;1-find-and-copy-the-tracker-snippet&#34;&gt;1. Find and copy the tracker snippet&lt;/h2&gt;
-
 &lt;p&gt;You&amp;rsquo;ll find this snippet on your Analytics console, in Admin &amp;gt; Tracking Info &amp;gt; Tracking Code. You may need to create a Property first, from the drop-down menu of the Property column in the Admin console.&lt;/p&gt;
-
 &lt;p&gt;I created a file named &lt;code&gt;google-analytics.html&lt;/code&gt;, in the same directory as &lt;code&gt;ui.R&lt;/code&gt;, and copied into it the HTML snippet, which looks like this:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-html&#34; data-lang=&#34;html&#34;&gt;&lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;&amp;lt;!-- Global site tag (gtag.js) - Google Analytics --&amp;gt;&lt;/span&gt;
+&amp;lt;&lt;span style=&#34;color:#1e90ff;font-weight:bold&#34;&gt;script&lt;/span&gt; &lt;span style=&#34;color:#1e90ff&#34;&gt;async&lt;/span&gt; &lt;span style=&#34;color:#1e90ff&#34;&gt;src&lt;/span&gt;=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;https://www.googletagmanager.com/gtag/js?id=UA-xxxxxxxx-x&amp;#34;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span style=&#34;color:#1e90ff;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&amp;lt;&lt;span style=&#34;color:#1e90ff;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+  &lt;span style=&#34;color:#0aa&#34;&gt;window&lt;/span&gt;.dataLayer = &lt;span style=&#34;color:#0aa&#34;&gt;window&lt;/span&gt;.dataLayer || [];
+  &lt;span style=&#34;color:#00a&#34;&gt;function&lt;/span&gt; gtag(){dataLayer.push(arguments);}
+  gtag(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;js&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#00a&#34;&gt;new&lt;/span&gt; &lt;span style=&#34;color:#0aa&#34;&gt;Date&lt;/span&gt;());
 
-&lt;pre&gt;&lt;code class=&#34;language-html&#34;&gt;&amp;lt;!-- Global site tag (gtag.js) - Google Analytics --&amp;gt;
-&amp;lt;script async src=&amp;quot;https://www.googletagmanager.com/gtag/js?id=UA-xxxxxxxx-x&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
-&amp;lt;script&amp;gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag(&#39;js&#39;, new Date());
-
-  gtag(&#39;config&#39;, &#39;UA-xxxxxxxx-x&#39;);
-&amp;lt;/script&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The x&amp;rsquo;s should of course be replaced by your own id.&lt;/p&gt;
-
-&lt;h2 id=&#34;2-reference-the-file-in-ui-r&#34;&gt;2. Reference the file in ui.R&lt;/h2&gt;
-
+  gtag(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;config&amp;#39;&lt;/span&gt;, &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;UA-xxxxxxxx-x&amp;#39;&lt;/span&gt;);
+&amp;lt;/&lt;span style=&#34;color:#1e90ff;font-weight:bold&#34;&gt;script&lt;/span&gt;&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The x&amp;rsquo;s should of course be replaced by your own id.&lt;/p&gt;
+&lt;h2 id=&#34;2-reference-the-file-in-uir&#34;&gt;2. Reference the file in ui.R&lt;/h2&gt;
 &lt;p&gt;Next, include the file in &lt;code&gt;ui.R&lt;/code&gt;, towards the top of your fluidPage:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-r&#34;&gt;shinyUI(fluidPage(
-  tags$head(includeHTML((&amp;quot;google-analytics.html&amp;quot;))),
-  ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That&amp;rsquo;s all! Your published app will now send visitor statistics to Google Analytics.&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-r&#34; data-lang=&#34;r&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;shinyUI&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;fluidPage&lt;/span&gt;(
+  tags$&lt;span style=&#34;color:#0a0&#34;&gt;head&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;includeHTML&lt;/span&gt;((&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;google-analytics.html&amp;#34;&lt;/span&gt;))),
+  &lt;span style=&#34;color:#00a&#34;&gt;...&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;That&amp;rsquo;s all! Your published app will now send visitor statistics to Google Analytics.&lt;/p&gt;
 &lt;h2 id=&#34;further-reading&#34;&gt;Further reading&lt;/h2&gt;
-
-&lt;p&gt;The official Shiny docs are still relevant for more information on creating Properties (&lt;a href=&#34;https://shiny.rstudio.com/articles/google-analytics.html&#34;&gt;https://shiny.rstudio.com/articles/google-analytics.html&lt;/a&gt;) and more advanced usage, such as tracking individual events on the page (&lt;a href=&#34;https://shiny.rstudio.com/articles/usage-metrics.html&#34;&gt;https://shiny.rstudio.com/articles/usage-metrics.html&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;The official Shiny docs are still relevant for more information on creating Properties (&lt;a href=&#34;https://shiny.rstudio.com/articles/google-analytics.html&#34;&gt;https://shiny.rstudio.com/articles/google-analytics.html&lt;/a&gt;) and more advanced usage, such as tracking individual events on the page (&lt;a href=&#34;https://shiny.rstudio.com/articles/usage-metrics.html)&#34;&gt;https://shiny.rstudio.com/articles/usage-metrics.html)&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
     
@@ -914,21 +697,12 @@ def memoized(arg):
       <pubDate>Sat, 06 May 2017 07:33:58 +0200</pubDate>
       
       <guid>http://douglas-watson.github.io/post/2017-05_ggplot_datetime/</guid>
-      <description>
-
-&lt;p&gt;It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;scale_x_datetime(date_breaks = &amp;quot;12 hours&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This places a break every 12 hours. The interval can be any value accepted by the &lt;code&gt;scales&lt;/code&gt; package: &amp;ldquo;sec&amp;rdquo;, &amp;ldquo;min&amp;rdquo;, &amp;ldquo;hour&amp;rdquo;, &amp;ldquo;day&amp;rdquo;, &amp;ldquo;week&amp;rdquo;, &amp;ldquo;month&amp;rdquo;, or &amp;ldquo;year&amp;rdquo;. The trailing &lt;code&gt;s&lt;/code&gt; is ignored. Read along for examples and instructions on how to rotate the label text.&lt;/p&gt;
-
+      <description>&lt;p&gt;It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;scale_x_datetime&lt;/span&gt;(date_breaks = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;12 hours&amp;#34;&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This places a break every 12 hours. The interval can be any value accepted by the &lt;code&gt;scales&lt;/code&gt; package: &amp;ldquo;sec&amp;rdquo;, &amp;ldquo;min&amp;rdquo;, &amp;ldquo;hour&amp;rdquo;, &amp;ldquo;day&amp;rdquo;, &amp;ldquo;week&amp;rdquo;, &amp;ldquo;month&amp;rdquo;, or &amp;ldquo;year&amp;rdquo;. The trailing &lt;code&gt;s&lt;/code&gt; is ignored. Read along for examples and instructions on how to rotate the label text.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Updated 2 Feb 2018: changed from using &lt;code&gt;breaks&lt;/code&gt; argument to using &lt;code&gt;date_breaks&lt;/code&gt; argument.&lt;/em&gt;&lt;/p&gt;
-
 &lt;h1 id=&#34;examples&#34;&gt;Examples&lt;/h1&gt;
-
 &lt;p&gt;Let&amp;rsquo;s illustrate with some fake data. I&amp;rsquo;ve re-used the CSV data from my Shiny tutorial. You can download the file &lt;a href=&#34;http://douglas-watson.github.io/data/datetime/data.csv&#34;&gt;here&lt;/a&gt;. The format looks like this:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;&amp;quot;timestamp&amp;quot;,&amp;quot;date&amp;quot;,&amp;quot;origin&amp;quot;,&amp;quot;variable&amp;quot;,&amp;quot;value&amp;quot;
 1448315085.07,2015-11-23 21:44:45,&amp;quot;kitchen&amp;quot;,&amp;quot;temperature&amp;quot;,24.4
 1448315085.07,2015-11-23 21:44:45,&amp;quot;kitchen&amp;quot;,&amp;quot;humidity&amp;quot;,44.9
@@ -940,78 +714,55 @@ def memoized(arg):
 1448318685.07,2015-11-23 22:44:45,&amp;quot;bedroom&amp;quot;,&amp;quot;humidity&amp;quot;,45.7
 1448322285.07,2015-11-23 23:44:45,&amp;quot;kitchen&amp;quot;,&amp;quot;temperature&amp;quot;,23.4
 ...
-&lt;/code&gt;&lt;/pre&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Let&amp;rsquo;s load it into an R dataframe, making sure to convert the date column to an R datetime object (see my &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r&#34;&gt;previous post&lt;/a&gt; on the subject), then create a simple plot of temperature versus time:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(ggplot2)
+&lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(scales)
+&lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(dplyr)
 
-&lt;p&gt;Let&amp;rsquo;s load it into an R dataframe, making sure to convert the date column to an R datetime object (see my &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r&#34;&gt;previous post&lt;/a&gt; on the subject), then create a simple plot of temperature versus time:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;library(ggplot2)
-library(scales)
-library(dplyr)
-
-data &amp;lt;- read.csv(&amp;quot;data.csv&amp;quot;)
-data$date &amp;lt;- as.POSIXct(data$date)
-temperatures &amp;lt;- filter(data, variable == &amp;quot;temperature&amp;quot;, origin == &amp;quot;kitchen&amp;quot;)
+data &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;read.csv&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;data.csv&amp;#34;&lt;/span&gt;)
+data$date &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;as.POSIXct&lt;/span&gt;(data$date)
+temperatures &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;filter&lt;/span&gt;(data, variable == &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;temperature&amp;#34;&lt;/span&gt;, origin == &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;kitchen&amp;#34;&lt;/span&gt;)
 
 
-qplot(date, value, data = temperatures, geom=&amp;quot;line&amp;quot;, ylab = &amp;quot;Temperature [C]&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/1_baseplot.png&#34; alt=&#34;Default date scale&#34; /&gt;&lt;/p&gt;
-
+&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(date, value, data = temperatures, geom=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;line&amp;#34;&lt;/span&gt;, ylab = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;Temperature [C]&amp;#34;&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/1_baseplot.png&#34; alt=&#34;Default date scale&#34;&gt;&lt;/p&gt;
 &lt;p&gt;The default breaks are quite sensible, but for the sake of illustration let&amp;rsquo;s change them to a break every two days. The label format follows strftime syntax (see &lt;a href=&#34;http://www.foragoodstrftime.com/&#34;&gt;http://www.foragoodstrftime.com/&lt;/a&gt; for help building them):&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;qplot(date, value, data = temperatures, geom=&amp;quot;line&amp;quot;, ylab = &amp;quot;Temperature [C]&amp;quot;) +
-  scale_x_datetime(date_breaks = &amp;quot;2 day&amp;quot;, labels = date_format(&amp;quot;%b %d&amp;quot;))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/2_datetime.png&#34; alt=&#34;Reduced number of ticks&#34; /&gt;&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(date, value, data = temperatures, geom=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;line&amp;#34;&lt;/span&gt;, ylab = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;Temperature [C]&amp;#34;&lt;/span&gt;) +
+  &lt;span style=&#34;color:#0a0&#34;&gt;scale_x_datetime&lt;/span&gt;(date_breaks = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;2 day&amp;#34;&lt;/span&gt;, labels = &lt;span style=&#34;color:#0a0&#34;&gt;date_format&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;%b %d&amp;#34;&lt;/span&gt;))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/2_datetime.png&#34; alt=&#34;Reduced number of ticks&#34;&gt;&lt;/p&gt;
 &lt;p&gt;You can see the number of breaks has changed. Most of the time, I&amp;rsquo;m more interested in increasing their density. Let&amp;rsquo;s switch to an interval in hours, and also include the time in the labels:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;qplot(date, value, data = temperatures, geom=&amp;quot;line&amp;quot;, ylab = &amp;quot;Temperature [C]&amp;quot;) +
-  scale_x_datetime(date_breaks = &amp;quot;12 hour&amp;quot;, labels = date_format(&amp;quot;%b %d - %H:%M&amp;quot;))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/3_hours.png&#34; alt=&#34;Increased number of ticks&#34; /&gt;&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(date, value, data = temperatures, geom=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;line&amp;#34;&lt;/span&gt;, ylab = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;Temperature [C]&amp;#34;&lt;/span&gt;) +
+  &lt;span style=&#34;color:#0a0&#34;&gt;scale_x_datetime&lt;/span&gt;(date_breaks = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;12 hour&amp;#34;&lt;/span&gt;, labels = &lt;span style=&#34;color:#0a0&#34;&gt;date_format&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;%b %d - %H:%M&amp;#34;&lt;/span&gt;))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/3_hours.png&#34; alt=&#34;Increased number of ticks&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Ouch! The labels are unreadable. Thankfully we can rotate the text to prevent them from overlapping:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;qplot(date, value, data = temperatures, geom=&amp;quot;line&amp;quot;, ylab = &amp;quot;Temperature [C]&amp;quot;) +
-  scale_x_datetime(date_breaks = &amp;quot;12 hour&amp;quot;, labels = date_format(&amp;quot;%b %d - %H:%M&amp;quot;)) +
-  theme(axis.text.x = element_text(angle = 25, vjust = 1.0, hjust = 1.0))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/4_hours_rotation.png&#34; alt=&#34;Increased number of ticks&#34; /&gt;&lt;/p&gt;
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(date, value, data = temperatures, geom=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;line&amp;#34;&lt;/span&gt;, ylab = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;Temperature [C]&amp;#34;&lt;/span&gt;) +
+  &lt;span style=&#34;color:#0a0&#34;&gt;scale_x_datetime&lt;/span&gt;(date_breaks = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;12 hour&amp;#34;&lt;/span&gt;, labels = &lt;span style=&#34;color:#0a0&#34;&gt;date_format&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;%b %d - %H:%M&amp;#34;&lt;/span&gt;)) +
+  &lt;span style=&#34;color:#0a0&#34;&gt;theme&lt;/span&gt;(axis.text.x = &lt;span style=&#34;color:#0a0&#34;&gt;element_text&lt;/span&gt;(angle = &lt;span style=&#34;color:#099&#34;&gt;25&lt;/span&gt;, vjust = &lt;span style=&#34;color:#099&#34;&gt;1.0&lt;/span&gt;, hjust = &lt;span style=&#34;color:#099&#34;&gt;1.0&lt;/span&gt;))
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/4_hours_rotation.png&#34; alt=&#34;Increased number of ticks&#34;&gt;&lt;/p&gt;
 &lt;p&gt;That&amp;rsquo;s a lot better! If you set the angle to 90 degrees, or if you have an older version of R, you will need to play with the &lt;code&gt;vjust&lt;/code&gt; and &lt;code&gt;hjust&lt;/code&gt; values until the labels line up correctly. Try adding &lt;code&gt;debug = TRUE&lt;/code&gt; to &lt;code&gt;element_text&lt;/code&gt; to display the text anchor point.&lt;/p&gt;
-
 &lt;h1 id=&#34;including-these-in-a-library&#34;&gt;Including these in a library&lt;/h1&gt;
-
 &lt;p&gt;I found myself loading the same data format and making similar graphs across many R notebooks, so I wrote a small library of functions that I could re-use in all of my analyses. &lt;a href=&#34;https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/&#34;&gt;Hillary Parker&amp;rsquo;s guide&lt;/a&gt; explains everything you need to write your own. My functions resemble the code below, where I can optionally specify a tick interval. The labels include the time automatically if I specify an interval in hours. If I leave the argument blank, ggplot keeps its defaults:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-R&#34;&gt;plot_temperature &amp;lt;- function(data, title = &amp;quot;&amp;quot;, breaks = &amp;quot;&amp;quot;, angle = 25) {
-    p &amp;lt;- ggplot2::qplot(date, value, data = data, ylab=&amp;quot;Temperature [C]&amp;quot;) 
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;plot_temperature &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;function&lt;/span&gt;(data, title = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, breaks = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;&amp;#34;&lt;/span&gt;, angle = &lt;span style=&#34;color:#099&#34;&gt;25&lt;/span&gt;) {
+    p &amp;lt;- ggplot2::&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(date, value, data = data, ylab=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;Temperature [C]&amp;#34;&lt;/span&gt;) 
     
-    if (title != &#39;&#39;) {
-      p &amp;lt;- p + ggplot2::ggtitle(title)
+    &lt;span style=&#34;color:#0a0&#34;&gt;if &lt;/span&gt;(title != &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt;) {
+      p &amp;lt;- p + ggplot2::&lt;span style=&#34;color:#0a0&#34;&gt;ggtitle&lt;/span&gt;(title)
     }
     
-    if ( breaks != &#39;&#39; ) {
-      if ( grepl(&amp;quot;hour&amp;quot;, breaks) ) {
-        fmt &amp;lt;- &amp;quot;%b %d - %H:%M&amp;quot;
+    &lt;span style=&#34;color:#0a0&#34;&gt;if &lt;/span&gt;( breaks != &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;&amp;#39;&lt;/span&gt; ) {
+      &lt;span style=&#34;color:#0a0&#34;&gt;if &lt;/span&gt;( &lt;span style=&#34;color:#0a0&#34;&gt;grepl&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;hour&amp;#34;&lt;/span&gt;, breaks) ) {
+        fmt &amp;lt;- &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;%b %d - %H:%M&amp;#34;&lt;/span&gt;
       } else {
-        fmt &amp;lt;- &amp;quot;%b %d&amp;quot;
+        fmt &amp;lt;- &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;%b %d&amp;#34;&lt;/span&gt;
       }
-      p &amp;lt;- p + ggplot2::scale_x_datetime(date_breaks = breaks, date_labels = fmt) +
-        ggplot2::theme(axis.text.x = ggplot2::element_text(
-          angle = angle, vjust = 1.0, hjust = 1.0
+      p &amp;lt;- p + ggplot2::&lt;span style=&#34;color:#0a0&#34;&gt;scale_x_datetime&lt;/span&gt;(date_breaks = breaks, date_labels = fmt) +
+        ggplot2::&lt;span style=&#34;color:#0a0&#34;&gt;theme&lt;/span&gt;(axis.text.x = ggplot2::&lt;span style=&#34;color:#0a0&#34;&gt;element_text&lt;/span&gt;(
+          angle = angle, vjust = &lt;span style=&#34;color:#099&#34;&gt;1.0&lt;/span&gt;, hjust = &lt;span style=&#34;color:#099&#34;&gt;1.0&lt;/span&gt;
         ))
     }
-    return(p)
+    &lt;span style=&#34;color:#0a0&#34;&gt;return&lt;/span&gt;(p)
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When you move your function to an external library, it&amp;rsquo;s important to specify the namespace of every function you call. Hence the &lt;code&gt;ggplot2::&lt;/code&gt; scattered all over.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;When you move your function to an external library, it&amp;rsquo;s important to specify the namespace of every function you call. Hence the &lt;code&gt;ggplot2::&lt;/code&gt; scattered all over.&lt;/p&gt;
 </description>
     </item>
     
@@ -1021,26 +772,15 @@ qplot(date, value, data = temperatures, geom=&amp;quot;line&amp;quot;, ylab = &a
       <pubDate>Sun, 27 Dec 2015 13:21:42 +0100</pubDate>
       
       <guid>http://douglas-watson.github.io/post/gdocs_3_shiny/</guid>
-      <description>
-
-&lt;p&gt;This is the third and final part of the Shiny + Google Docs dashboard tutorial, where I explain how to build a live web dashboard for connected &amp;ldquo;Internet of Things&amp;rdquo; sensors, using Google Sheets as a data server. &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;Part one&lt;/a&gt; covered setting up a Google Sheet to store and serve data through HTTP requests; &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt; covered reading, filtering, and plotting that data in R. In this part, we&amp;rsquo;ll create the actual dashboard and host it online.&lt;/p&gt;
-
+      <description>&lt;p&gt;This is the third and final part of the Shiny + Google Docs dashboard tutorial, where I explain how to build a live web dashboard for connected &amp;ldquo;Internet of Things&amp;rdquo; sensors, using Google Sheets as a data server. &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;Part one&lt;/a&gt; covered setting up a Google Sheet to store and serve data through HTTP requests; &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt; covered reading, filtering, and plotting that data in R. In this part, we&amp;rsquo;ll create the actual dashboard and host it online.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Chinese translation: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-
 &lt;p&gt;Shiny adds a web server and an interactive web front end to R code and graphics. We&amp;rsquo;ll use it to make a web-based dashboard, in other words a collection of plots that display the latest sensor data with some widgets to modify the plots. In this section, we&amp;rsquo;ll first build a simple page that shows a time series and boxplot with the latest data from Google Sheets. We&amp;rsquo;ll then add a date selection widget that narrows down the time period to be displayed.&lt;/p&gt;
-
 &lt;p&gt;The finished shiny app is on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
-
 &lt;h2 id=&#34;setting-up-shiny&#34;&gt;Setting up Shiny&lt;/h2&gt;
-
 &lt;p&gt;I recommend you follow the official tutorial (&lt;a href=&#34;http://shiny.rstudio.com/tutorial/&#34;&gt;http://shiny.rstudio.com/tutorial/&lt;/a&gt;) for the latest installation instructions. If you have time, follow the entire tutorial for a complete overview of the Shiny way of thinking.&lt;/p&gt;
-
 &lt;h2 id=&#34;our-first-dashboard-no-interactivity&#34;&gt;Our first dashboard: no interactivity&lt;/h2&gt;
-
 &lt;p&gt;Our first dashboard will simply display two plots, which show the latest data fetched from Google Sheets. Shiny applications consist of two files: &lt;code&gt;ui.R&lt;/code&gt; and &lt;code&gt;server.R&lt;/code&gt;. The UI file defines the layout of the dashboard: what visualizations are shown, and where they are placed on the page. In this file, we only name the visualizations and define their type (table, plot, &amp;hellip;); the actual contents of the visualizations will be defined in &lt;code&gt;server.R&lt;/code&gt;.&lt;/p&gt;
-
 &lt;p&gt;The code example below defines a container: &lt;code&gt;shinyUI(fluidPage(....))&lt;/code&gt;. Inside the container is a vertical layout box, which lays out its children in a vertical stack. Inside the layout, we placed three items: a title bar and two plot items.&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;# ui.R
 
 shinyUI(fluidPage(
@@ -1050,20 +790,14 @@ shinyUI(fluidPage(
     plotOutput(&amp;quot;boxplot&amp;quot;)
   )  
 ))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The next step is to render graphics that can be displayed in the plotOutputs; we do this in &lt;code&gt;server.R&lt;/code&gt;. The server code is broken down into code that is run:&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The next step is to render graphics that can be displayed in the plotOutputs; we do this in &lt;code&gt;server.R&lt;/code&gt;. The server code is broken down into code that is run:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;when the server is started;&lt;/li&gt;
 &lt;li&gt;each time a page is accessed;&lt;/li&gt;
 &lt;li&gt;each time an interactive widget is changed.&lt;/li&gt;
 &lt;/ol&gt;
-
 &lt;p&gt;In our case, when the server is started, we only want to import the helper code (data loading and plotting functions), but not execute any of it. Each time a page is loaded, we want to fetch new data and draw the plots. We have no widgets yet, and therefore, no code in the third category.&lt;/p&gt;
-
 &lt;p&gt;The first draft of server code, below, does just that: code outside of the &lt;code&gt;shinyServer(...)&lt;/code&gt; block is executed just once, code inside it is executed every time the page is accessed. This last block fetches the raw data, creates a time series plot and places it into the the &lt;code&gt;plotOuput&lt;/code&gt; named &amp;ldquo;timeseries&amp;rdquo; which we defined in &lt;code&gt;ui.R&lt;/code&gt;, then renders a boxplot into the &amp;ldquo;boxplot&amp;rdquo; &lt;code&gt;plotOutput&lt;/code&gt;.&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;# server.R
 
 source(&amp;quot;helpers.R&amp;quot;)
@@ -1083,33 +817,20 @@ shinyServer(function(input, output) {
   })
 
 })
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Create the &lt;code&gt;ui.R&lt;/code&gt; and &lt;code&gt;server.R&lt;/code&gt; files in the same directory as &lt;code&gt;helpers.R&lt;/code&gt;, which you created at the end of the previous section. RStudio automatically detects that the files are Shiny application and adds a &amp;ldquo;Run App&amp;rdquo; button the toolbar above the editor.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/33_run_btn.png&#34; alt=&#34;RStudio adds a run button to Shiny applications&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Create the &lt;code&gt;ui.R&lt;/code&gt; and &lt;code&gt;server.R&lt;/code&gt; files in the same directory as &lt;code&gt;helpers.R&lt;/code&gt;, which you created at the end of the previous section. RStudio automatically detects that the files are Shiny application and adds a &amp;ldquo;Run App&amp;rdquo; button the toolbar above the editor.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/33_run_btn.png&#34; alt=&#34;RStudio adds a run button to Shiny applications&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Use that button to preview the application. It should pop up a window similar to the one below:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/31_basicui.png&#34; alt=&#34;Our first dashboard, with two static graphs&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/31_basicui.png&#34; alt=&#34;Our first dashboard, with two static graphs&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Note that none of our code detects changes on the google document; you still need to refresh the page to get the latest data.&lt;/p&gt;
-
 &lt;h2 id=&#34;add-a-grid-layout-and-filter-by-date&#34;&gt;Add a grid layout and filter by date&lt;/h2&gt;
-
-&lt;p&gt;Let&amp;rsquo;s now add some date selection widgets that restrict the displayed date range. We&amp;rsquo;ll first extend the layout from a simple vertical stack to a &lt;em&gt;fluid grid&lt;/em&gt;. On sufficiently wide displays, this layout shows up as a grid. On narrower displays, it reverts to a vertical stack, to avoid lateral scrolling. Grids are specified as &lt;code&gt;fluidRow&lt;/code&gt; elements which contain &lt;code&gt;column&lt;/code&gt; elements. Each column is assigned a width (in units of &lt;sup&gt;1&lt;/sup&gt;&amp;frasl;&lt;sub&gt;12&lt;/sub&gt; of the screen width) and can contain another widget (an input, a plot, or another grid). The new &lt;code&gt;ui.R&lt;/code&gt; file below now shows a layout with nested rows and columns.&lt;/p&gt;
-
+&lt;p&gt;Let&amp;rsquo;s now add some date selection widgets that restrict the displayed date range. We&amp;rsquo;ll first extend the layout from a simple vertical stack to a &lt;em&gt;fluid grid&lt;/em&gt;. On sufficiently wide displays, this layout shows up as a grid. On narrower displays, it reverts to a vertical stack, to avoid lateral scrolling. Grids are specified as &lt;code&gt;fluidRow&lt;/code&gt; elements which contain &lt;code&gt;column&lt;/code&gt; elements. Each column is assigned a width (in units of 1/12 of the screen width) and can contain another widget (an input, a plot, or another grid). The new &lt;code&gt;ui.R&lt;/code&gt; file below now shows a layout with nested rows and columns.&lt;/p&gt;
 &lt;p&gt;Our second modification is to add input widgets. Inputs allow users to interact with the visualization by entering text, number, dates, selecting from radio boxes&amp;hellip;You can browse the full gallery &lt;a href=&#34;http://shiny.rstudio.com/gallery/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
-
 &lt;p&gt;We&amp;rsquo;ll use two kinds of inputs:&lt;/p&gt;
-
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;dateRangeInput&lt;/code&gt;: a drop-down calendar to chose a start and end date.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;numericInput&lt;/code&gt;: a box which accepts only numbers, and shows an up- and down-arrow to change the numbers.&lt;/li&gt;
 &lt;/ul&gt;
-
 &lt;p&gt;We use the dateRangeInput to specify the date range of data to plot, and four numeric inputs to specify the hours and minutes of the start day, and the hours and minutes of the end day.&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;# ui.R
 
 shinyUI(fluidPage(
@@ -1137,14 +858,9 @@ shinyUI(fluidPage(
     )
   )
 ))
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The server-side code can access the values of the input widgets through the &lt;code&gt;input&lt;/code&gt; argument of &lt;code&gt;ShinyServers&lt;/code&gt;&amp;rsquo;s callback. When one of the inputs is changed on the UI, Shiny automatically re-executes any of the server&amp;rsquo;s &lt;code&gt;renderPlot&lt;/code&gt; or &lt;code&gt;reactive&lt;/code&gt; code blocks that access that value. The &lt;code&gt;reactive&lt;/code&gt; blocks are useful to transform data according to input values; we will thus use one to apply the date range filter.&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The server-side code can access the values of the input widgets through the &lt;code&gt;input&lt;/code&gt; argument of &lt;code&gt;ShinyServers&lt;/code&gt;&#39;s callback. When one of the inputs is changed on the UI, Shiny automatically re-executes any of the server&amp;rsquo;s &lt;code&gt;renderPlot&lt;/code&gt; or &lt;code&gt;reactive&lt;/code&gt; code blocks that access that value. The &lt;code&gt;reactive&lt;/code&gt; blocks are useful to transform data according to input values; we will thus use one to apply the date range filter.&lt;/p&gt;
 &lt;p&gt;The &lt;code&gt;reactive&lt;/code&gt; block in the new code example below converts our inputs to two POSIXct date objects, then uses them as lower and upper bounds to filter the data frame. We assign the reactive code block to &lt;code&gt;data.filt&lt;/code&gt;, and modify the &lt;code&gt;renderPlot&lt;/code&gt; calls to plot &lt;code&gt;data.filt()&lt;/code&gt; instead of the original &lt;code&gt;data&lt;/code&gt;. Note the syntax: &lt;code&gt;data.filt()&lt;/code&gt; returns the value of the code block passed to &lt;code&gt;reactive&lt;/code&gt;. As explained above, each time one of the inputs used inside the &lt;code&gt;reactive&lt;/code&gt; block is updated, any other code block which calls &lt;code&gt;data.filt()&lt;/code&gt; is also updated. In the example below, both &lt;code&gt;renderPlot&lt;/code&gt; blocks are re-executed on update.&lt;/p&gt;
-
 &lt;p&gt;&lt;strong&gt;Warning:&lt;/strong&gt; make sure to include the parenthesis each time you call &lt;code&gt;data.filt()&lt;/code&gt;!&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;# server.R
 
 source(&amp;quot;helpers.R&amp;quot;)
@@ -1172,40 +888,24 @@ shinyServer(function(input, output) {
   })
 
 })
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Run the application again. The new result should resemble my example below:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;Our improved dashboard, now with date range selection&#34; /&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;publish-to-shinyapps-io&#34;&gt;Publish to Shinyapps.io&lt;/h2&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Run the application again. The new result should resemble my example below:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;Our improved dashboard, now with date range selection&#34;&gt;&lt;/p&gt;
+&lt;h2 id=&#34;publish-to-shinyappsio&#34;&gt;Publish to Shinyapps.io&lt;/h2&gt;
 &lt;p&gt;ShinyApps.io provides a hosting service for Shiny apps, and is another product by the makers of RStudio. Their developers integrated the service into RStudio: simply click &amp;ldquo;Publish&amp;rdquo; in the upper right corner of your Shiny app preview, and follow the instructions! Create a free account and upload your dashboard.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/35_publish_btn.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/34_publish.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/35_publish_btn.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/34_publish.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Once the app is published, you will notice a problem remains: nothing shows up on your dashboard. If you check the server logs, you&amp;rsquo;ll notice that HTTPS requests from R to Google Sheets failed. The final section of our tutorial, below, will explain how to work around that.&lt;/p&gt;
-
 &lt;h2 id=&#34;using-an-https-to-http-proxy&#34;&gt;Using an https to http proxy&lt;/h2&gt;
-
 &lt;p&gt;Sadly, ShinyApps (at the time of writing) doesn&amp;rsquo;t support https URLs, and thus blocks the request to Google Sheets. To work around this, we need to route the requests through an external server (a proxy) which is accessible through HTTP, can fetch the target HTTPS page, and return it back to R&amp;rsquo;s &lt;code&gt;read.csv&lt;/code&gt; request through HTTP. Doing this goes against the security benefits of HTTPS, but since we are making a public dashboard from data publicly available on a Google Sheet, and mostly for demonstration only, I&amp;rsquo;m not concerned about it.&lt;/p&gt;
-
 &lt;p&gt;To save you the work, I set up a HTTPS-to-HTTP proxy server. In the &lt;code&gt;server.R&lt;/code&gt; code, add &lt;code&gt;shinyproxy.appspot.com/&lt;/code&gt; before &lt;code&gt;script.google.com/&lt;/code&gt;. In my case, the URL becomes:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;# fragment of helpers.R
 
 data &amp;lt;- read.csv(
   url(&amp;quot;https://shinyproxy.appspot.com/script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&amp;quot;),
   strip.white = TRUE
 )
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Re-publish your dashboard, and you are done!&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Re-publish your dashboard, and you are done!&lt;/p&gt;
 &lt;h3 id=&#34;more-on-the-proxy&#34;&gt;More on the proxy&lt;/h3&gt;
-
 &lt;p&gt;The HTTPS proxy is a simple piece of Go code hosted on App Engine. I put the code on github, here: &lt;a href=&#34;https://github.com/douglas-watson/httpsproxy&#34;&gt;https://github.com/douglas-watson/httpsproxy&lt;/a&gt;&lt;/p&gt;
 </description>
     </item>
@@ -1216,27 +916,16 @@ data &amp;lt;- read.csv(
       <pubDate>Sun, 27 Dec 2015 13:21:38 +0100</pubDate>
       
       <guid>http://douglas-watson.github.io/post/gdocs_2_r/</guid>
-      <description>
-
-&lt;p&gt;This is the second installment of the Shiny + GDocs dashboard tutorial, where we learn how to use a Google Sheet spreadsheet to store data from connected &amp;ldquo;Internet of Things&amp;rdquo; data and use Shiny to create a web page to show the data. The &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;first part&lt;/a&gt; showed you how to set up a Google Sheet to serve as a data server that accepts POST and GET HTTP requests, as well as how to use pivot tables and filters on the sheets directly. In this section, I&amp;rsquo;ll walk you through the specific aspects of R that we will wrap in Shiny code. We&amp;rsquo;ll cover: how to download CSV data from the web, handling date fields, and making various plots with ggplot2. I assume if you are reading tutorial that you already are using R and found the tutorial through a desire to connect to Google Sheets data. If not, I hope this overview will motivate you to learn more R!&lt;/p&gt;
-
+      <description>&lt;p&gt;This is the second installment of the Shiny + GDocs dashboard tutorial, where we learn how to use a Google Sheet spreadsheet to store data from connected &amp;ldquo;Internet of Things&amp;rdquo; data and use Shiny to create a web page to show the data. The &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;first part&lt;/a&gt; showed you how to set up a Google Sheet to serve as a data server that accepts POST and GET HTTP requests, as well as how to use pivot tables and filters on the sheets directly. In this section, I&amp;rsquo;ll walk you through the specific aspects of R that we will wrap in Shiny code. We&amp;rsquo;ll cover: how to download CSV data from the web, handling date fields, and making various plots with ggplot2. I assume if you are reading tutorial that you already are using R and found the tutorial through a desire to connect to Google Sheets data. If not, I hope this overview will motivate you to learn more R!&lt;/p&gt;
 &lt;p&gt;If you want to skip to using Shiny, head over to &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny&#34;&gt;part 3&lt;/a&gt;. The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
-
 &lt;p&gt;&lt;em&gt;Chinese translation: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-
 &lt;h2 id=&#34;recommended-setup&#34;&gt;Recommended setup&lt;/h2&gt;
-
 &lt;p&gt;If you are an experienced R user, you already know what development environment you prefer. Use that one. If not, I recommend RStudio, available for Linux, Mac, and Windows. It has a decent editor (with Vim mode!) and integrates with Shiny. Head over to &lt;a href=&#34;https://www.rstudio.com/products/rstudio/#Desktop&#34;&gt;https://www.rstudio.com/products/rstudio/#Desktop&lt;/a&gt; to download it.&lt;/p&gt;
-
 &lt;p&gt;You will also need R and the ggplot2. Install R from your package manager on Linux, or download it from here on other platforms: &lt;a href=&#34;https://www.r-project.org/&#34;&gt;https://www.r-project.org/&lt;/a&gt;. Once R and RStudio are installed, open RStudio, and install ggplot2 from the R console:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;install.packages(&#39;ggplot2&#39;)
 &lt;/code&gt;&lt;/pre&gt;
-
 &lt;h2 id=&#34;import-a-csv-file-from-a-web-url&#34;&gt;Import a CSV file from a web URL&lt;/h2&gt;
-
 &lt;p&gt;Fetching CSV data from the web is trivial: just feed &lt;code&gt;read.csv&lt;/code&gt; a &lt;code&gt;url&lt;/code&gt; parameter, it automatically downloads the data and makes a data frame with the correct header names. Create a &amp;ldquo;helpers.R&amp;rdquo; file, and write the following code in it:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;getRaw &amp;lt;- function () {
   data &amp;lt;- read.csv(
     url(&amp;quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&amp;quot;),
@@ -1244,10 +933,7 @@ data &amp;lt;- read.csv(
   )
   data
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;We call the file helpers.R, as it will be used later by the Shiny app. The &lt;code&gt;getRaw&lt;/code&gt; function returns a data frame with five variables, named identically to the spreadsheet&amp;rsquo;s headers:&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;We call the file helpers.R, as it will be used later by the Shiny app. The &lt;code&gt;getRaw&lt;/code&gt; function returns a data frame with five variables, named identically to the spreadsheet&amp;rsquo;s headers:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;&amp;gt; data &amp;lt;- getRaw()
 &amp;gt; summary(data)
    timestamp                                              date         origin           variable       value      
@@ -1259,12 +945,8 @@ data &amp;lt;- read.csv(
  Max.   :1.449e+09   Thu Nov 26 2015 03:44:45 GMT+0100 (CET):  4                                   Max.   :49.90  
                      (Other)                                :216                                                  
 &amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;convert-date-time-column&#34;&gt;Convert date-time column&lt;/h2&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;convert-date-time-column&#34;&gt;Convert date-time column&lt;/h2&gt;
 &lt;p&gt;Let&amp;rsquo;s now convert the date-time data to a proper R date object. The easiest way is to transform the UNIX timestamp column into a &lt;code&gt;POSIXct&lt;/code&gt; object and replace the &amp;ldquo;date&amp;rdquo; column. Since we generated UTC dates, we set the time zone to &amp;ldquo;GMT&amp;rdquo;. Complete the getRaw function:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;getRaw &amp;lt;- function () {
   data &amp;lt;- read.csv(
     url(&amp;quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&amp;quot;),
@@ -1273,85 +955,42 @@ data &amp;lt;- read.csv(
   data$date = as.POSIXct(data$timestamp, tz=&amp;quot;GMT&amp;quot;, origin=&amp;quot;1970-01-01&amp;quot;)
   data
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You&amp;rsquo;re now ready to rock!&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;You&amp;rsquo;re now ready to rock!&lt;/p&gt;
 &lt;h2 id=&#34;play-with-ggplot2&#34;&gt;Play with ggplot2&lt;/h2&gt;
-
 &lt;p&gt;The ggplot2 library provides the brilliant &lt;code&gt;qplot&lt;/code&gt; function. A single line of code can produce a huge variety of plots, which makes R my favourite tool to  play with data.&lt;/p&gt;
-
 &lt;p&gt;To start off, let&amp;rsquo;s plot all the values we recorded as a function of time. If you haven&amp;rsquo;t already, import ggplot2 and helpers.R, and load the CSV data in a data frame.&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;import(ggplot2)
 source(&amp;quot;helpers.R&amp;quot;)
 data &amp;lt;- getRaw()
 qplot(date, value, data = data)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/21_all.png&#34; alt=&#34;All points on a single plot, a good start, but not very clear.&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/21_all.png&#34; alt=&#34;All points on a single plot, a good start, but not very clear.&#34;&gt;&lt;/p&gt;
 &lt;p&gt;We can clarify the plot a little by colouring points according to sensor location:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/22_colours.png&#34; alt=&#34;Colouring the points as a function of sensor locations clarifies the plot a bit.&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/22_colours.png&#34; alt=&#34;Colouring the points as a function of sensor locations clarifies the plot a bit.&#34;&gt;&lt;/p&gt;
 &lt;p&gt;We still can&amp;rsquo;t distinguish temperature from humidity. Let&amp;rsquo;s separate those variables into different panels using &amp;ldquo;facets&amp;rdquo;. We&amp;rsquo;ll add the &amp;ldquo;free_y&amp;rdquo; option to allow each y to scale independently:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/23_facets.png&#34; alt=&#34;Faceted by variable.&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/23_facets.png&#34; alt=&#34;Faceted by variable.&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Since there is a lot of noise, joining the points with a line makes the plot easier to read:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin, geom = &amp;quot;line&amp;quot;) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/24_timeseries.png&#34; alt=&#34;Points replaced by lines&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/24_timeseries.png&#34; alt=&#34;Points replaced by lines&#34;&gt;&lt;/p&gt;
 &lt;p&gt;If you add a sensor in a new room, a new line colour will automatically appear on the plot. If you add a new type of data (such as &amp;ldquo;power&amp;rdquo; for a power meter), a third facet will appear. Try it! Just modify the Python script to send data from a new location and re-run the python script, the &lt;code&gt;data &amp;lt;- getRaw()&lt;/code&gt; line, and the latest qplot instruction.&lt;/p&gt;
-
 &lt;p&gt;If the date scale looks wrong, with one tick per point on the x axis, try adding &lt;code&gt;scale_x_datetime&lt;/code&gt;:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin, geom = &amp;quot;line&amp;quot;) + scale_x_datetime() + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;other-forms-of-plots&#34;&gt;Other forms of plots.&lt;/h2&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;other-forms-of-plots&#34;&gt;Other forms of plots.&lt;/h2&gt;
 &lt;p&gt;How about box plots to observe variations in temperature and humidity? Easy: just change x axis to &amp;ldquo;origin&amp;rdquo;, ditch the colours, and change geometry to &amp;ldquo;boxplot&amp;rdquo;:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;qplot(origin, value, data = data, geom = &amp;quot;boxplot&amp;quot;) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/25_boxplots.png&#34; alt=&#34;Box plots are even easier than time series&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/25_boxplots.png&#34; alt=&#34;Box plots are even easier than time series&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Have a look at the qplot official documents for more inspiration on plot types: &lt;a href=&#34;http://docs.ggplot2.org/current&#34;&gt;http://docs.ggplot2.org/current&lt;/a&gt;&lt;/p&gt;
-
 &lt;h2 id=&#34;filtering-by-date&#34;&gt;Filtering by date&lt;/h2&gt;
-
 &lt;p&gt;We&amp;rsquo;ll cover a final R topic before moving on: filtering data frames, and in particular filtering by date. To filter a data frame, we extract a &lt;em&gt;subset&lt;/em&gt; of the data that fulfills a condition. For example, if we want to retrieve all the lines of &lt;code&gt;data&lt;/code&gt; that contain a &lt;code&gt;temperature&lt;/code&gt; measurement, pick the subset:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;data.filt &amp;lt;- subset(data, variable == &#39;temperature&#39;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now let&amp;rsquo;s keep all the data from the second half of our measurement period. Pick a timestamp from the middle of the data frame and create a &lt;code&gt;POSIXct object from it&lt;/code&gt;.&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now let&amp;rsquo;s keep all the data from the second half of our measurement period. Pick a timestamp from the middle of the data frame and create a &lt;code&gt;POSIXct object from it&lt;/code&gt;.&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;ts &amp;lt;- data$timestamp[nrow(data) / 2]
 mindate &amp;lt;- as.POSIXct(ts, tz = &amp;quot;GMT&amp;quot;, origin = &amp;quot;1970-01-01&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;POSIXct objects allow comparisons (&lt;code&gt;&amp;gt;&lt;/code&gt; and &lt;code&gt;&amp;lt;&lt;/code&gt;), so we can use &lt;code&gt;mindate&lt;/code&gt; to filter the data:&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;POSIXct objects allow comparisons (&lt;code&gt;&amp;gt;&lt;/code&gt; and &lt;code&gt;&amp;lt;&lt;/code&gt;), so we can use &lt;code&gt;mindate&lt;/code&gt; to filter the data:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;data.filt &amp;lt;- subset(data, date &amp;gt; mindate)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;wrapping-them-in-functions-for-shiny&#34;&gt;Wrapping them in functions for Shiny&lt;/h2&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;wrapping-them-in-functions-for-shiny&#34;&gt;Wrapping them in functions for Shiny&lt;/h2&gt;
 &lt;p&gt;For easy access later in Shiny, we&amp;rsquo;ll just shove the two &lt;code&gt;qplot&lt;/code&gt; calls in a function. Our &lt;code&gt;helpers.R&lt;/code&gt; file now looks like this, with the library import statement added:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;library(ggplot2)
 
 getRaw &amp;lt;- function () {
@@ -1371,8 +1010,7 @@ timeseriesPlot &amp;lt;- function(data) {
 boxPlot &amp;lt;- function(data) {
   qplot(origin, value, data = data, geom = &amp;quot;boxplot&amp;quot;) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
 }
-&lt;/code&gt;&lt;/pre&gt;
-</description>
+&lt;/code&gt;&lt;/pre&gt;</description>
     </item>
     
     <item>
@@ -1381,20 +1019,12 @@ boxPlot &amp;lt;- function(data) {
       <pubDate>Sun, 27 Dec 2015 13:21:30 +0100</pubDate>
       
       <guid>http://douglas-watson.github.io/post/gdocs_1_gdocs/</guid>
-      <description>
-
-&lt;p&gt;In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&amp;rsquo;s data using an HTTP GET requests. Along the way, you will also experiment with some of the spreadsheet&amp;rsquo;s built-in analytics tools: filters, pivot tables, and charts.&lt;/p&gt;
-
+      <description>&lt;p&gt;In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&amp;rsquo;s data using an HTTP GET requests. Along the way, you will also experiment with some of the spreadsheet&amp;rsquo;s built-in analytics tools: filters, pivot tables, and charts.&lt;/p&gt;
 &lt;p&gt;Skip to &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part 2&lt;/a&gt; to learn how to fetch and manipulate this data in R, or &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part 3&lt;/a&gt; to learn how to use Shiny.&lt;/p&gt;
-
 &lt;p&gt;&lt;em&gt;Chinese translation: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-
 &lt;p&gt;The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
-
 &lt;h1 id=&#34;prelude-data-storage-format&#34;&gt;Prelude: data storage format&lt;/h1&gt;
-
 &lt;p&gt;For each data point logged from the sensors,  we will store: a timestamp, the device ID, a variable name (&amp;ldquo;temperature&amp;rdquo;, or &amp;ldquo;humidity&amp;rdquo;), and finally the value of that reading. This means each reading of the sensor produces two lines: one for temperature and one for humidity. This format is what R users call &amp;ldquo;long format&amp;rdquo;. In the example below, we monitor two rooms every three seconds:&lt;/p&gt;
-
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -1404,7 +1034,6 @@ boxPlot &amp;lt;- function(data) {
 &lt;th&gt;value&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;1448227096&lt;/td&gt;
@@ -1412,49 +1041,42 @@ boxPlot &amp;lt;- function(data) {
 &lt;td&gt;temperature&lt;/td&gt;
 &lt;td&gt;22.3&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;1448227096&lt;/td&gt;
 &lt;td&gt;kitchen&lt;/td&gt;
 &lt;td&gt;humidity&lt;/td&gt;
 &lt;td&gt;45&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;1448227096&lt;/td&gt;
 &lt;td&gt;bedroom&lt;/td&gt;
 &lt;td&gt;temperature&lt;/td&gt;
 &lt;td&gt;24.0&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;1448227096&lt;/td&gt;
 &lt;td&gt;bedroom&lt;/td&gt;
 &lt;td&gt;humidity&lt;/td&gt;
 &lt;td&gt;46&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;1448227099&lt;/td&gt;
 &lt;td&gt;kitchen&lt;/td&gt;
 &lt;td&gt;temperature&lt;/td&gt;
 &lt;td&gt;22.4&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;1448227099&lt;/td&gt;
 &lt;td&gt;kitchen&lt;/td&gt;
 &lt;td&gt;humidity&lt;/td&gt;
 &lt;td&gt;45&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;1448227099&lt;/td&gt;
 &lt;td&gt;bedroom&lt;/td&gt;
 &lt;td&gt;temperature&lt;/td&gt;
 &lt;td&gt;23.9&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;1448227099&lt;/td&gt;
 &lt;td&gt;bedroom&lt;/td&gt;
@@ -1463,9 +1085,7 @@ boxPlot &amp;lt;- function(data) {
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;p&gt;Contrast this to the &amp;ldquo;wide&amp;rdquo; format, where each variable has its own column:&lt;/p&gt;
-
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -1476,7 +1096,6 @@ boxPlot &amp;lt;- function(data) {
 &lt;th&gt;bedroom humidity&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
-
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;1448227096&lt;/td&gt;
@@ -1485,7 +1104,6 @@ boxPlot &amp;lt;- function(data) {
 &lt;td&gt;24.0&lt;/td&gt;
 &lt;td&gt;46&lt;/td&gt;
 &lt;/tr&gt;
-
 &lt;tr&gt;
 &lt;td&gt;1448227099&lt;/td&gt;
 &lt;td&gt;22.4&lt;/td&gt;
@@ -1495,30 +1113,20 @@ boxPlot &amp;lt;- function(data) {
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-
 &lt;p&gt;The wide format is more obvious to work with and more compact, but isn&amp;rsquo;t easily extensible: if we add a new sensor to our system, we need to add a column to the file. With the long format, we just keep appending new lines. The long format also suits R analysis well and can be transformed into the wide format using a pivot table in a spreadsheet.&lt;/p&gt;
-
 &lt;p&gt;Finally, we&amp;rsquo;ll exchange data in Comma-Separated Values (CSV) format because it is easy to generate from an embedded device, easy to store as a text file, and easy to read in any text editor or spreadsheet application.&lt;/p&gt;
-
 &lt;h1 id=&#34;preparing-a-spreadsheet-to-receive-data&#34;&gt;Preparing a spreadsheet to receive data&lt;/h1&gt;
-
 &lt;p&gt;If you don&amp;rsquo;t have a google drive account, create one. Then:&lt;/p&gt;
-
 &lt;ol&gt;
 &lt;li&gt;Create a new spreadsheet in Google drive&lt;/li&gt;
 &lt;li&gt;Rename the first sheet (a sheet is a tab in the document) to &amp;ldquo;Raw&amp;rdquo;. This is where the data will be logged to.&lt;/li&gt;
 &lt;li&gt;Create the header row. Each line of data, will have: a unix timestamp (number of seconds since 1 January 1970), a separate column as a human-readable date, then the columns &amp;ldquo;id&amp;rdquo;, &amp;ldquo;variable&amp;rdquo;, and &amp;ldquo;value&amp;rdquo; explained above. You can freeze the row, to keep it visible when scrolling, with &amp;ldquo;View&amp;rdquo; &amp;gt; &amp;ldquo;Freeze&amp;rdquo; &amp;gt; &amp;ldquo;1 Row&amp;rdquo;.&lt;/li&gt;
 &lt;li&gt;Open the script editor, in the &amp;ldquo;Tools&amp;rdquo; &amp;gt; &amp;ldquo;Script editor&amp;hellip;&amp;rdquo; menu.&lt;/li&gt;
 &lt;/ol&gt;
-
 &lt;p&gt;You are now ready to code!&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/0_gdoc_init.png&#34; alt=&#34;Create a header row, then open the script editor.&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/0_gdoc_init.png&#34; alt=&#34;Create a header row, then open the script editor.&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;appending-a-line-from-google-script&#34;&gt;Appending a line from google script&lt;/h2&gt;
-
 &lt;p&gt;You should now be looking at the script editor. This tool allows you to write custom spreadsheet functions (which are called as&lt;code&gt;=SUM(A1:A5)&lt;/code&gt;), and to write simple web applications. Our first step will be to write a function that appends CSV data to the spreadsheet. Copy this code into the script editor:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;function appendLines(worksheet, csvData) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(worksheet);
@@ -1534,31 +1142,20 @@ function test() {
   Logger.log(&amp;quot;Appending fake data&amp;quot;);
   appendLines(&amp;quot;Raw&amp;quot;, &amp;quot;12345, Monday, kitchen, temperature, 30\n12346, Tuesday, living room, humidity, 50&amp;quot;);
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Our appendLine function does this:&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Our appendLine function does this:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Open the current spreadsheet (full document);&lt;/li&gt;
 &lt;li&gt;select a sheet within the document, as identified by the first argument (we currently only have one, named Raw);&lt;/li&gt;
 &lt;li&gt;parse the CSV data given as the second argument;&lt;/li&gt;
 &lt;li&gt;for each line in the CSV data, append the line to the sheet.&lt;/li&gt;
 &lt;/ul&gt;
-
 &lt;p&gt;We additionally wrote a small &lt;code&gt;test&lt;/code&gt; function which calls appendLines, to make sure everything works. To run it, select the &lt;code&gt;test&lt;/code&gt; function in the toolbar and click the run button. If you are asked to authorize the script, do so. This should have appended two lines to the spreadsheet. You can also view the log output with &amp;ldquo;View&amp;rdquo; &amp;gt; &amp;ldquo;Logs&amp;rdquo; in the script editor.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/1_code_editor.png&#34; alt=&#34;To test your code from the script editor, click the run button.&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/1_code_editor.png&#34; alt=&#34;To test your code from the script editor, click the run button.&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Two lines of data should be added to the spreadsheet:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/2_appended_data.png&#34; alt=&#34;Two lines of data should be added to the spreadsheet&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/2_appended_data.png&#34; alt=&#34;Two lines of data should be added to the spreadsheet&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Our code has a critical flaw, however. Later, when we&amp;rsquo;ll call it as a web service, the script will have no active spreadsheet associated. We need to change the code to fetch the spreadsheet from its unique ID. Find the document ID in the URL of spreadsheet:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/3_id.png&#34; alt=&#34;Find the document ID in its URL&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/3_id.png&#34; alt=&#34;Find the document ID in its URL&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Then modify &lt;code&gt;appendLines&lt;/code&gt; to fetch the document by ID:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;function appendLines(worksheet, csvData) {
   var ss = SpreadsheetApp.openById(&amp;quot;13_BUd7WJlA8Z9B5Vc-5tyf3vyRUYmIx67sDz7ZmyPG4&amp;quot;);
   var sheet = ss.getSheetByName(worksheet);
@@ -1569,58 +1166,35 @@ function test() {
     sheet.appendRow(rows[i]);
   }
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Run the test function again, it should append another two lines to the &amp;ldquo;Raw&amp;rdquo; tab.&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Run the test function again, it should append another two lines to the &amp;ldquo;Raw&amp;rdquo; tab.&lt;/p&gt;
 &lt;h2 id=&#34;receiving-post-data&#34;&gt;Receiving POST data&lt;/h2&gt;
-
 &lt;p&gt;Let&amp;rsquo;s now expose this function to the web. Google scripts accept two special functions that handle GET and POST HTTP requests: &lt;code&gt;doGet&lt;/code&gt; and &lt;code&gt;doPost&lt;/code&gt;, respectively. These functions take a single argument of type &lt;code&gt;Event&lt;/code&gt; (which we will get to), and must return a special object from the &lt;code&gt;ContentService&lt;/code&gt; or &lt;code&gt;HtmlService&lt;/code&gt;. To explore the API, we&amp;rsquo;ll first make a function that responds to POST requests by returning the contents of the Event object in JSON format. Add the following code to the script editor:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;function doPost(e) {
   var params = JSON.stringify(e);
   return ContentService.createTextOutput(params);
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now publish it with &amp;ldquo;Publish&amp;rdquo; &amp;gt; &amp;ldquo;Deploy as web app&amp;hellip;&amp;rdquo;. Give the version a brief description, ask to execute it as yourself, and allow anonymous access, so that you can post to the spreadsheet without authentication, then deploy:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/4_publish.png&#34; alt=&#34;Publishing our first web app!&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now publish it with &amp;ldquo;Publish&amp;rdquo; &amp;gt; &amp;ldquo;Deploy as web app&amp;hellip;&amp;quot;. Give the version a brief description, ask to execute it as yourself, and allow anonymous access, so that you can post to the spreadsheet without authentication, then deploy:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/4_publish.png&#34; alt=&#34;Publishing our first web app!&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Copy the URL:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/5_published.png&#34; alt=&#34;Publishing our first web app!&#34; /&gt;&lt;/p&gt;
-
-&lt;p&gt;There&amp;rsquo;s one last thing you need to do before sending HTTP requests to this new web server. Share the spreadsheet publicly. Return to the spreadsheet tab, and open &amp;ldquo;File&amp;rdquo; &amp;gt; &amp;ldquo;Share&amp;hellip;&amp;rdquo;. Click &amp;ldquo;Get shareable link&amp;rdquo;, and allow anyone with the link to edit:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/6_share.png&#34; alt=&#34;Share the spreadsheet publicly to avoid authentication errors&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/5_published.png&#34; alt=&#34;Publishing our first web app!&#34;&gt;&lt;/p&gt;
+&lt;p&gt;There&amp;rsquo;s one last thing you need to do before sending HTTP requests to this new web server. Share the spreadsheet publicly. Return to the spreadsheet tab, and open &amp;ldquo;File&amp;rdquo; &amp;gt; &amp;ldquo;Share&amp;hellip;&amp;quot;. Click &amp;ldquo;Get shareable link&amp;rdquo;, and allow anyone with the link to edit:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/6_share.png&#34; alt=&#34;Share the spreadsheet publicly to avoid authentication errors&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Now, fire up your favourite HTTP client (the Postman Chrome extension is a great graphical tool). I&amp;rsquo;ll be using CURL, from the console. Send a first POST request to the URL you copied above. If using CURL make sure to add the &lt;code&gt;-L&lt;/code&gt; option to follow redirects, and the &lt;code&gt;--data&lt;/code&gt; option to make a POST request. For my URL, I get:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;$ curl --data &amp;quot;hello, world&amp;quot; &amp;quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec&amp;quot;
 
 {&amp;quot;parameter&amp;quot;:{&amp;quot;hello, world&amp;quot;:&amp;quot;&amp;quot;},&amp;quot;contextPath&amp;quot;:&amp;quot;&amp;quot;,&amp;quot;contentLength&amp;quot;:12,&amp;quot;queryString&amp;quot;:null,&amp;quot;parameters&amp;quot;:{&amp;quot;hello, world&amp;quot;:[&amp;quot;&amp;quot;]},&amp;quot;postData&amp;quot;:{&amp;quot;length&amp;quot;:12,&amp;quot;type&amp;quot;:&amp;quot;application/x-www-form-urlencoded&amp;quot;,&amp;quot;contents&amp;quot;:&amp;quot;hello, world&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;postData&amp;quot;}}%
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;My POST request received some JSON as response. This JSON shows us the structure of the &lt;code&gt;e&lt;/code&gt; argument passed to &lt;code&gt;doPost&lt;/code&gt;. You&amp;rsquo;ll recognize the &amp;ldquo;hello, world&amp;rdquo; POST data stored in &lt;code&gt;e[&amp;quot;postData&amp;quot;][&amp;quot;contents&amp;quot;]&lt;/code&gt;.&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;My POST request received some JSON as response. This JSON shows us the structure of the &lt;code&gt;e&lt;/code&gt; argument passed to &lt;code&gt;doPost&lt;/code&gt;. You&amp;rsquo;ll recognize the &amp;ldquo;hello, world&amp;rdquo; POST data stored in &lt;code&gt;e[&amp;quot;postData&amp;quot;][&amp;quot;contents&amp;quot;]&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;We can use the URL to pass arguments to &lt;code&gt;doPost&lt;/code&gt;. Repeat the same request, but append &lt;code&gt;?sheet=Raw&lt;/code&gt; to the URL (make sure the URL is quoted):&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;$ curl -L --data &amp;quot;hello, world&amp;quot; &amp;quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&amp;quot;
 
 {&amp;quot;parameter&amp;quot;:{&amp;quot;sheet&amp;quot;:&amp;quot;Raw&amp;quot;,&amp;quot;hello, world&amp;quot;:&amp;quot;&amp;quot;},&amp;quot;contextPath&amp;quot;:&amp;quot;&amp;quot;,&amp;quot;contentLength&amp;quot;:12,&amp;quot;queryString&amp;quot;:&amp;quot;sheet=Raw&amp;quot;,&amp;quot;parameters&amp;quot;:{&amp;quot;sheet&amp;quot;:[&amp;quot;Raw&amp;quot;],&amp;quot;hello, world&amp;quot;:[&amp;quot;&amp;quot;]},&amp;quot;postData&amp;quot;:{&amp;quot;length&amp;quot;:12,&amp;quot;type&amp;quot;:&amp;quot;application/x-www-form-urlencoded&amp;quot;,&amp;quot;contents&amp;quot;:&amp;quot;hello, world&amp;quot;,&amp;quot;name&amp;quot;:&amp;quot;postData&amp;quot;}}%
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The URL parameter appeared as &lt;code&gt;e[&amp;quot;parameter&amp;quot;][&amp;quot;sheet&amp;quot;]&lt;/code&gt;.&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The URL parameter appeared as &lt;code&gt;e[&amp;quot;parameter&amp;quot;][&amp;quot;sheet&amp;quot;]&lt;/code&gt;.&lt;/p&gt;
 &lt;p&gt;Now that we understand the structure of the event object, we can modify &lt;code&gt;doPost&lt;/code&gt; to:&lt;/p&gt;
-
 &lt;ul&gt;
 &lt;li&gt;Look for a &amp;ldquo;sheet&amp;rdquo; argument in the URL&lt;/li&gt;
 &lt;li&gt;Extract CSV data from the POST request payload&lt;/li&gt;
 &lt;li&gt;Append all lines in the CSV data to the designated sheet.&lt;/li&gt;
 &lt;/ul&gt;
-
 &lt;pre&gt;&lt;code&gt;function doPost(e) {
   var contents = e.postData.contents;
   var sheetName = e.parameter[&#39;sheet&#39;];
@@ -1632,23 +1206,15 @@ function test() {
   return ContentService.createTextOutput(params);
 
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Publish a new version of the app (&amp;ldquo;Publish&amp;rdquo; &amp;gt; &amp;ldquo;Deploy as web app&amp;hellip;&amp;rdquo;, set &amp;ldquo;Project Version&amp;rdquo; to &amp;ldquo;new&amp;rdquo;, describe it, and click &amp;ldquo;update&amp;rdquo;). You can now append lines to the spreadsheet through an HTTP Post request! Rerun the last curl command, and observe the newest line added to your spreadsheet:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/7_post_append.png&#34; alt=&#34;You recorded data from an HTTP request!&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Publish a new version of the app (&amp;ldquo;Publish&amp;rdquo; &amp;gt; &amp;ldquo;Deploy as web app&amp;hellip;&amp;quot;, set &amp;ldquo;Project Version&amp;rdquo; to &amp;ldquo;new&amp;rdquo;, describe it, and click &amp;ldquo;update&amp;rdquo;). You can now append lines to the spreadsheet through an HTTP Post request! Rerun the last curl command, and observe the newest line added to your spreadsheet:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/7_post_append.png&#34; alt=&#34;You recorded data from an HTTP request!&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Clear the spreadsheet now: delete all rows except for the header.&lt;/p&gt;
-
 &lt;ul&gt;
 &lt;li&gt;More on &lt;code&gt;doGet&lt;/code&gt; and &lt;code&gt;doPost&lt;/code&gt;: &lt;a href=&#34;https://developers.google.com/apps-script/guides/web&#34;&gt;https://developers.google.com/apps-script/guides/web&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;More on Event objects: &lt;a href=&#34;https://developers.google.com/apps-script/guides/triggers/events&#34;&gt;https://developers.google.com/apps-script/guides/triggers/events&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-
 &lt;h1 id=&#34;uploading-data-from-python&#34;&gt;Uploading data from python&lt;/h1&gt;
-
 &lt;p&gt;In practice, you&amp;rsquo;ll be uploading data using POST requests from the language of choice of your IOT platform. To generate data for this tutorial, I used a python script which creates some random humidity and temperature data for two rooms, in one hour intervals, and uploads them to the spreadsheet. Feel free to skip this section; if you wish to follow the last part of the tutorial, you may also generate data by hand or with other tools.&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;import time
 import datetime
 import random
@@ -1683,54 +1249,28 @@ if __name__ == &#39;__main__&#39;:
         ]
 
         gdoc_post(data)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To run this example, you&amp;rsquo;ll need the Python language and the &lt;code&gt;requests&lt;/code&gt; library. Python should be installed by default on most Linux distributions and OS X. On Windows, I recommend installing the Anaconda distribution, or Python (x, y). Install &lt;code&gt;requests&lt;/code&gt; with &lt;code&gt;easy_install&lt;/code&gt; (or &lt;code&gt;pip&lt;/code&gt; if you have it):&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;To run this example, you&amp;rsquo;ll need the Python language and the &lt;code&gt;requests&lt;/code&gt; library. Python should be installed by default on most Linux distributions and OS X. On Windows, I recommend installing the Anaconda distribution, or Python (x, y). Install &lt;code&gt;requests&lt;/code&gt; with &lt;code&gt;easy_install&lt;/code&gt; (or &lt;code&gt;pip&lt;/code&gt; if you have it):&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;easy_install requests
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Now, replace the URL in the code above with your web app URL, save it as &lt;code&gt;uploads.py&lt;/code&gt;, and run:&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now, replace the URL in the code above with your web app URL, save it as &lt;code&gt;uploads.py&lt;/code&gt;, and run:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;python uploads.py
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Return to the spreadsheet. You should see the lines appearing as the script sends them:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/8_python_append.png&#34; alt=&#34;Fake data uploaded from a Python script&#34; /&gt;&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Return to the spreadsheet. You should see the lines appearing as the script sends them:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/8_python_append.png&#34; alt=&#34;Fake data uploaded from a Python script&#34;&gt;&lt;/p&gt;
 &lt;h1 id=&#34;analytics-within-the-spreadsheet&#34;&gt;Analytics within the spreadsheet&lt;/h1&gt;
-
 &lt;p&gt;Before we move on to exporting the data, let&amp;rsquo;s play with the built-in analytical capabilities of the spreadsheet: we can apply simple filters to the data, extract information with pivot tables, and display it with various charts. Being a web-based application, Sheets even allows those charts to be embedded on web pages directly.&lt;/p&gt;
-
 &lt;h2 id=&#34;filters&#34;&gt;Filters&lt;/h2&gt;
-
 &lt;p&gt;Filters allow you to show or hide rows of data based on one or several criteria. They are ridiculously simple to use: select the columns you want to filter, then click the funnel symbol in the toolbar. Little arrow icons appear next to each column header. Clicking these pops down a menu from which you can choose filtering criteria. Try restricting the data to only today&amp;rsquo;s data or only temperature measurements.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/9_filters.png&#34; alt=&#34;Filters hide rows based on a search criteria. Here, we filter based on date, to show only today&#39;s data.&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/9_filters.png&#34; alt=&#34;Filters hide rows based on a search criteria. Here, we filter based on date, to show only today&amp;rsquo;s data.&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;pivot-tables&#34;&gt;Pivot tables&lt;/h2&gt;
-
 &lt;p&gt;Pivot tables transform long-format data into wide-format data. Select columns A:G, by clicking the A letter above the header row and dragging to the G letter. Go to the &amp;ldquo;Data&amp;rdquo; &amp;gt; &amp;ldquo;Pivot table&amp;rdquo; menu option. This opens a new blank sheet with a right-hand-side menu to configure the pivot table. Select the &amp;ldquo;date&amp;rdquo; column for rows, &amp;ldquo;origin&amp;rdquo; for the columns, and &amp;ldquo;value&amp;rdquo; for the values &amp;ndash; summarize by AVERAGE for the totals to make sense. Finally, filter by &amp;ldquo;variable&amp;rdquo;, showing only &amp;ldquo;temperature&amp;rdquo;. Your configuration and pivot table should look similar to the screenshot below:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/10_pivot_table.png&#34; alt=&#34;Pivot tables&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/10_pivot_table.png&#34; alt=&#34;Pivot tables&#34;&gt;&lt;/p&gt;
 &lt;p&gt;You now have a table that extracts only temperature data and presents them by room. If you kept the &amp;ldquo;show totals&amp;rdquo; option checked, you&amp;rsquo;ll also have an average temperature at each point in time, and an average per room. Note that it updates live, as soon as new data arrives!&lt;/p&gt;
-
 &lt;p&gt;As an exercise, try making a pivot table that displays, for each room, the average, standard deviation, and measurement count for both temperature and humidity.&lt;/p&gt;
-
 &lt;h2 id=&#34;graphs&#34;&gt;Graphs&lt;/h2&gt;
-
 &lt;p&gt;We can make graphs from a pivot table in the usual &amp;ldquo;spreadsheet&amp;rdquo; way: select the columns of interest, and click the chart icon on the toolbar. Again, these charts are updated live, as new data is posted to the sheet.&lt;/p&gt;
-
 &lt;p&gt;The screenshot below shows a &lt;em&gt;time line chart&lt;/em&gt;, moved to its own sheet. This chart can interactively zoom onto date ranges, and is thus ideal to represent time series data from a sensor. You could even embed the chart directly on a web page to make a monitoring dashboard (which could be hosted on google sites, if you are really lazy), using the &amp;ldquo;Publish chart&amp;rdquo; option.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Graphs&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Graphs&#34;&gt;&lt;/p&gt;
 &lt;h1 id=&#34;get-data-in-csv-format&#34;&gt;GET data in CSV format&lt;/h1&gt;
-
 &lt;p&gt;The spreadsheet is a powerful analytics tool on its own, but our end goal in this tutorial is to retrieve the sensor data from other tools. We&amp;rsquo;ll do this by letting GET requests download a sheet in CSV format. To enable this, add a &lt;code&gt;doGet&lt;/code&gt; function in the Script Editor (make sure to replace the sheet ID by your own).&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;function doGet(e) {
   var sheetName = e.parameter[&#39;sheet&#39;];
 
@@ -1765,12 +1305,8 @@ if __name__ == &#39;__main__&#39;:
 
   return ContentService.createTextOutput(csvFile);
 }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This function is similar to doPost, in reverse: it opens the specified sheet, reads all data in the sheet, then encodes it in CSV format, and finally returns the CSV data. The scripting API doesn&amp;rsquo;t include a CSV encoding function, so instead we re-used a procedure shown in the official documentation.&lt;/p&gt;
-
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;This function is similar to doPost, in reverse: it opens the specified sheet, reads all data in the sheet, then encodes it in CSV format, and finally returns the CSV data. The scripting API doesn&amp;rsquo;t include a CSV encoding function, so instead we re-used a procedure shown in the official documentation.&lt;/p&gt;
 &lt;p&gt;Deploy this new version of the web app. You can now download the data in CSV format! With curl, make sure to add the &lt;code&gt;-L&lt;/code&gt; option again, append &lt;code&gt;?sheet=Raw&lt;/code&gt; to the web app URL, and quote the URL:&lt;/p&gt;
-
 &lt;pre&gt;&lt;code&gt;$ curl -L &#39;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&#39;
 
 timestamp,date,origin,variable,value
@@ -1783,9 +1319,7 @@ timestamp,date,origin,variable,value
 1448318685.07,Mon Nov 23 2015 23:44:45 GMT+0100 (CET),bedroom,temperature,23.6
 1448318685.07,Mon Nov 23 2015 23:44:45 GMT+0100 (CET),bedroom,humidity,45.7
 ...
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If you have a single sheet to export, you could also experiment with the &amp;ldquo;Publish to the web&amp;rdquo; function of Spreadsheets. In my own application, I needed access to several sheets, so I created my own export function.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;If you have a single sheet to export, you could also experiment with the &amp;ldquo;Publish to the web&amp;rdquo; function of Spreadsheets. In my own application, I needed access to several sheets, so I created my own export function.&lt;/p&gt;
 </description>
     </item>
     
@@ -1795,27 +1329,16 @@ timestamp,date,origin,variable,value
       <pubDate>Sun, 27 Dec 2015 13:21:24 +0100</pubDate>
       
       <guid>http://douglas-watson.github.io/post/gdocs_0_intro/</guid>
-      <description>
-
-&lt;p&gt;Logging data to a central server and displaying it online is a common task in Internet of Things applications. This usually requires deploying and maintaining your own servers, with a database for storage and a web server for display. System administration tasks are no fun to me, so instead I found a way to use Google Sheets as a server, and ShinyApps.io as a visualization platform. Uploading data to Google docs is relatively simple and well documented, but connecting Shiny to Google Docs was a little more tricky; this motivated me to write this tutorial to show others how to set up a similar system.&lt;/p&gt;
-
+      <description>&lt;p&gt;Logging data to a central server and displaying it online is a common task in Internet of Things applications. This usually requires deploying and maintaining your own servers, with a database for storage and a web server for display. System administration tasks are no fun to me, so instead I found a way to use Google Sheets as a server, and ShinyApps.io as a visualization platform. Uploading data to Google docs is relatively simple and well documented, but connecting Shiny to Google Docs was a little more tricky; this motivated me to write this tutorial to show others how to set up a similar system.&lt;/p&gt;
 &lt;p&gt;In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;part one&lt;/a&gt;, I&amp;rsquo;ll explain how to set up a Google spreadsheet as data storage and use it as an elementary dashboard. In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt;, I&amp;rsquo;ll teach you how to retrieve that data in R, and plot it with the ggplot2 library. In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part three&lt;/a&gt;, I&amp;rsquo;ll walk you through making a simple interactive visualization in Shiny and publishing it online to ShinyApps.io.&lt;/p&gt;
-
 &lt;p&gt;During the tutorial, we&amp;rsquo;ll pretend to have a network of several temperature and humidity sensors. Each sensor is named after its location name (such as &amp;ldquo;bedroom&amp;rdquo; or &amp;ldquo;living room&amp;rdquo;), and records the temperature every hour. I assume you know how to program your IOT hardware to make HTTP requests; for the sake of the tutorial I provide a Python script to upload fake temperature and humidity values.&lt;/p&gt;
-
 &lt;p&gt;&lt;em&gt;This tutorial series has kindly been translated to Chinese by Harry Zhu: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
-
 &lt;h2 id=&#34;why-use-google-sheets&#34;&gt;Why use Google Sheets?&lt;/h2&gt;
-
 &lt;p&gt;Google spreadsheets can serve as a simple server to store and retrieve data, while writing surprisingly little code. We avoid maintaining our own servers, and we additionally benefit from easy access to the raw data. On top of that, the spreadsheets on their own are powerful analysis tools, with statistics, pivot tables, filters, and interactive charts which can be embedded on external websites.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Google Sheets on their own are a powerful analytics tool for distributed data&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Google Sheets on their own are a powerful analytics tool for distributed data&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;why-use-r-and-shiny&#34;&gt;Why use R and Shiny?&lt;/h2&gt;
-
 &lt;p&gt;R is a powerful language specifically designed for data analysis. Combined with the ggplot2 graphing library, it provides an ideal package to explore and visualize large amounts data. Once you have figured out what you want to show, Shiny allows you to take your visualizations, make them interactive, and publish them on the web. RStudio, the makers of Shiny, even provide free hosting for visualizations, which makes the service quite convenient to experiment with.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;The final product of our tutorial: a live interactive web-based dashboard&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;The final product of our tutorial: a live interactive web-based dashboard&#34;&gt;&lt;/p&gt;
 </description>
     </item>
     

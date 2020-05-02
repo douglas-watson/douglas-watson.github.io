@@ -66,7 +66,7 @@
       <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
       
       
-      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
       
       
       
@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2020 <a href="http://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -97,21 +97,12 @@
     <br/>
     
     </span>
-    
-
-<p>It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax:</p>
-
-<pre><code class="language-R">scale_x_datetime(date_breaks = &quot;12 hours&quot;)
-</code></pre>
-
-<p>This places a break every 12 hours. The interval can be any value accepted by the <code>scales</code> package: &ldquo;sec&rdquo;, &ldquo;min&rdquo;, &ldquo;hour&rdquo;, &ldquo;day&rdquo;, &ldquo;week&rdquo;, &ldquo;month&rdquo;, or &ldquo;year&rdquo;. The trailing <code>s</code> is ignored. Read along for examples and instructions on how to rotate the label text.</p>
-
+    <p>It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">scale_x_datetime</span>(date_breaks = <span style="color:#a50">&#34;12 hours&#34;</span>)
+</code></pre></div><p>This places a break every 12 hours. The interval can be any value accepted by the <code>scales</code> package: &ldquo;sec&rdquo;, &ldquo;min&rdquo;, &ldquo;hour&rdquo;, &ldquo;day&rdquo;, &ldquo;week&rdquo;, &ldquo;month&rdquo;, or &ldquo;year&rdquo;. The trailing <code>s</code> is ignored. Read along for examples and instructions on how to rotate the label text.</p>
 <p><em>Updated 2 Feb 2018: changed from using <code>breaks</code> argument to using <code>date_breaks</code> argument.</em></p>
-
 <h1 id="examples">Examples</h1>
-
 <p>Let&rsquo;s illustrate with some fake data. I&rsquo;ve re-used the CSV data from my Shiny tutorial. You can download the file <a href="/data/datetime/data.csv">here</a>. The format looks like this:</p>
-
 <pre><code>&quot;timestamp&quot;,&quot;date&quot;,&quot;origin&quot;,&quot;variable&quot;,&quot;value&quot;
 1448315085.07,2015-11-23 21:44:45,&quot;kitchen&quot;,&quot;temperature&quot;,24.4
 1448315085.07,2015-11-23 21:44:45,&quot;kitchen&quot;,&quot;humidity&quot;,44.9
@@ -123,78 +114,55 @@
 1448318685.07,2015-11-23 22:44:45,&quot;bedroom&quot;,&quot;humidity&quot;,45.7
 1448322285.07,2015-11-23 23:44:45,&quot;kitchen&quot;,&quot;temperature&quot;,23.4
 ...
-</code></pre>
+</code></pre><p>Let&rsquo;s load it into an R dataframe, making sure to convert the date column to an R datetime object (see my <a href="/post/gdocs_2_r">previous post</a> on the subject), then create a simple plot of temperature versus time:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">library</span>(ggplot2)
+<span style="color:#0a0">library</span>(scales)
+<span style="color:#0a0">library</span>(dplyr)
 
-<p>Let&rsquo;s load it into an R dataframe, making sure to convert the date column to an R datetime object (see my <a href="/post/gdocs_2_r">previous post</a> on the subject), then create a simple plot of temperature versus time:</p>
-
-<pre><code class="language-R">library(ggplot2)
-library(scales)
-library(dplyr)
-
-data &lt;- read.csv(&quot;data.csv&quot;)
-data$date &lt;- as.POSIXct(data$date)
-temperatures &lt;- filter(data, variable == &quot;temperature&quot;, origin == &quot;kitchen&quot;)
+data &lt;- <span style="color:#0a0">read.csv</span>(<span style="color:#a50">&#34;data.csv&#34;</span>)
+data$date &lt;- <span style="color:#0a0">as.POSIXct</span>(data$date)
+temperatures &lt;- <span style="color:#0a0">filter</span>(data, variable == <span style="color:#a50">&#34;temperature&#34;</span>, origin == <span style="color:#a50">&#34;kitchen&#34;</span>)
 
 
-qplot(date, value, data = temperatures, geom=&quot;line&quot;, ylab = &quot;Temperature [C]&quot;)
-</code></pre>
-
-<p><img src="/images/datetime/1_baseplot.png" alt="Default date scale" /></p>
-
+<span style="color:#0a0">qplot</span>(date, value, data = temperatures, geom=<span style="color:#a50">&#34;line&#34;</span>, ylab = <span style="color:#a50">&#34;Temperature [C]&#34;</span>)
+</code></pre></div><p><img src="/images/datetime/1_baseplot.png" alt="Default date scale"></p>
 <p>The default breaks are quite sensible, but for the sake of illustration let&rsquo;s change them to a break every two days. The label format follows strftime syntax (see <a href="http://www.foragoodstrftime.com/">http://www.foragoodstrftime.com/</a> for help building them):</p>
-
-<pre><code class="language-R">qplot(date, value, data = temperatures, geom=&quot;line&quot;, ylab = &quot;Temperature [C]&quot;) +
-  scale_x_datetime(date_breaks = &quot;2 day&quot;, labels = date_format(&quot;%b %d&quot;))
-</code></pre>
-
-<p><img src="/images/datetime/2_datetime.png" alt="Reduced number of ticks" /></p>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">qplot</span>(date, value, data = temperatures, geom=<span style="color:#a50">&#34;line&#34;</span>, ylab = <span style="color:#a50">&#34;Temperature [C]&#34;</span>) +
+  <span style="color:#0a0">scale_x_datetime</span>(date_breaks = <span style="color:#a50">&#34;2 day&#34;</span>, labels = <span style="color:#0a0">date_format</span>(<span style="color:#a50">&#34;%b %d&#34;</span>))
+</code></pre></div><p><img src="/images/datetime/2_datetime.png" alt="Reduced number of ticks"></p>
 <p>You can see the number of breaks has changed. Most of the time, I&rsquo;m more interested in increasing their density. Let&rsquo;s switch to an interval in hours, and also include the time in the labels:</p>
-
-<pre><code class="language-R">qplot(date, value, data = temperatures, geom=&quot;line&quot;, ylab = &quot;Temperature [C]&quot;) +
-  scale_x_datetime(date_breaks = &quot;12 hour&quot;, labels = date_format(&quot;%b %d - %H:%M&quot;))
-</code></pre>
-
-<p><img src="/images/datetime/3_hours.png" alt="Increased number of ticks" /></p>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">qplot</span>(date, value, data = temperatures, geom=<span style="color:#a50">&#34;line&#34;</span>, ylab = <span style="color:#a50">&#34;Temperature [C]&#34;</span>) +
+  <span style="color:#0a0">scale_x_datetime</span>(date_breaks = <span style="color:#a50">&#34;12 hour&#34;</span>, labels = <span style="color:#0a0">date_format</span>(<span style="color:#a50">&#34;%b %d - %H:%M&#34;</span>))
+</code></pre></div><p><img src="/images/datetime/3_hours.png" alt="Increased number of ticks"></p>
 <p>Ouch! The labels are unreadable. Thankfully we can rotate the text to prevent them from overlapping:</p>
-
-<pre><code class="language-R">qplot(date, value, data = temperatures, geom=&quot;line&quot;, ylab = &quot;Temperature [C]&quot;) +
-  scale_x_datetime(date_breaks = &quot;12 hour&quot;, labels = date_format(&quot;%b %d - %H:%M&quot;)) +
-  theme(axis.text.x = element_text(angle = 25, vjust = 1.0, hjust = 1.0))
-</code></pre>
-
-<p><img src="/images/datetime/4_hours_rotation.png" alt="Increased number of ticks" /></p>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">qplot</span>(date, value, data = temperatures, geom=<span style="color:#a50">&#34;line&#34;</span>, ylab = <span style="color:#a50">&#34;Temperature [C]&#34;</span>) +
+  <span style="color:#0a0">scale_x_datetime</span>(date_breaks = <span style="color:#a50">&#34;12 hour&#34;</span>, labels = <span style="color:#0a0">date_format</span>(<span style="color:#a50">&#34;%b %d - %H:%M&#34;</span>)) +
+  <span style="color:#0a0">theme</span>(axis.text.x = <span style="color:#0a0">element_text</span>(angle = <span style="color:#099">25</span>, vjust = <span style="color:#099">1.0</span>, hjust = <span style="color:#099">1.0</span>))
+</code></pre></div><p><img src="/images/datetime/4_hours_rotation.png" alt="Increased number of ticks"></p>
 <p>That&rsquo;s a lot better! If you set the angle to 90 degrees, or if you have an older version of R, you will need to play with the <code>vjust</code> and <code>hjust</code> values until the labels line up correctly. Try adding <code>debug = TRUE</code> to <code>element_text</code> to display the text anchor point.</p>
-
 <h1 id="including-these-in-a-library">Including these in a library</h1>
-
 <p>I found myself loading the same data format and making similar graphs across many R notebooks, so I wrote a small library of functions that I could re-use in all of my analyses. <a href="https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/">Hillary Parker&rsquo;s guide</a> explains everything you need to write your own. My functions resemble the code below, where I can optionally specify a tick interval. The labels include the time automatically if I specify an interval in hours. If I leave the argument blank, ggplot keeps its defaults:</p>
-
-<pre><code class="language-R">plot_temperature &lt;- function(data, title = &quot;&quot;, breaks = &quot;&quot;, angle = 25) {
-    p &lt;- ggplot2::qplot(date, value, data = data, ylab=&quot;Temperature [C]&quot;) 
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">plot_temperature &lt;- <span style="color:#0a0">function</span>(data, title = <span style="color:#a50">&#34;&#34;</span>, breaks = <span style="color:#a50">&#34;&#34;</span>, angle = <span style="color:#099">25</span>) {
+    p &lt;- ggplot2::<span style="color:#0a0">qplot</span>(date, value, data = data, ylab=<span style="color:#a50">&#34;Temperature [C]&#34;</span>) 
     
-    if (title != '') {
-      p &lt;- p + ggplot2::ggtitle(title)
+    <span style="color:#0a0">if </span>(title != <span style="color:#a50">&#39;&#39;</span>) {
+      p &lt;- p + ggplot2::<span style="color:#0a0">ggtitle</span>(title)
     }
     
-    if ( breaks != '' ) {
-      if ( grepl(&quot;hour&quot;, breaks) ) {
-        fmt &lt;- &quot;%b %d - %H:%M&quot;
+    <span style="color:#0a0">if </span>( breaks != <span style="color:#a50">&#39;&#39;</span> ) {
+      <span style="color:#0a0">if </span>( <span style="color:#0a0">grepl</span>(<span style="color:#a50">&#34;hour&#34;</span>, breaks) ) {
+        fmt &lt;- <span style="color:#a50">&#34;%b %d - %H:%M&#34;</span>
       } else {
-        fmt &lt;- &quot;%b %d&quot;
+        fmt &lt;- <span style="color:#a50">&#34;%b %d&#34;</span>
       }
-      p &lt;- p + ggplot2::scale_x_datetime(date_breaks = breaks, date_labels = fmt) +
-        ggplot2::theme(axis.text.x = ggplot2::element_text(
-          angle = angle, vjust = 1.0, hjust = 1.0
+      p &lt;- p + ggplot2::<span style="color:#0a0">scale_x_datetime</span>(date_breaks = breaks, date_labels = fmt) +
+        ggplot2::<span style="color:#0a0">theme</span>(axis.text.x = ggplot2::<span style="color:#0a0">element_text</span>(
+          angle = angle, vjust = <span style="color:#099">1.0</span>, hjust = <span style="color:#099">1.0</span>
         ))
     }
-    return(p)
+    <span style="color:#0a0">return</span>(p)
 }
-</code></pre>
-
-<p>When you move your function to an external library, it&rsquo;s important to specify the namespace of every function you call. Hence the <code>ggplot2::</code> scattered all over.</p>
+</code></pre></div><p>When you move your function to an external library, it&rsquo;s important to specify the namespace of every function you call. Hence the <code>ggplot2::</code> scattered all over.</p>
 
   </div>
   

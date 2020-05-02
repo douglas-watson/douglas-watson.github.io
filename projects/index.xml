@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Projects on Programming notes</title>
@@ -18,16 +17,11 @@
       
       <guid>http://douglas-watson.github.io/projects/parliament/</guid>
       <description>&lt;p&gt;&lt;a href=&#34;https://github.com/douglas-watson/parl-scraping&#34;&gt;https://github.com/douglas-watson/parl-scraping&lt;/a&gt;&lt;/p&gt;
-
 &lt;p&gt;With a team of fellow hackers during the &lt;a href=&#34;http://make.opendata.ch/wiki/event:2015-09&#34;&gt;OpenData Election Hackdays&lt;/a&gt;, and in partnership with the newspaper Le Temps, we compiled a full-text-searchable index of the transcriptions of all parliamentary interventions of the Swiss government, since 1990. The result can be browsed online at &lt;a href=&#34;http://parlement.letemps.ch&#34;&gt;parlement.letemps.ch&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/projects/raclette_search.png&#34; alt=&#34;Search results&#34; /&gt;&lt;/p&gt;
-
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/projects/raclette_search.png&#34; alt=&#34;Search results&#34;&gt;&lt;/p&gt;
 &lt;p&gt;The core of the project is a web scraper, which retrieved all the transcriptions from the official Swiss website, and combined the transcription with biographical information about the speakers (moslty party affiliations and canton of origin). The product is a large database of machine-readable transcriptions which can easily be re-used by researchers by using their favorite tools. We produced the data in two formats: CSV and JSON. The CSV data can be imported in R and Tableau, as well as other natural language processing and graphing tools. The JSON data can be imported into ElasticSearch. We additionally set up a Kibana interface for quick searches and analytics, hosted at &lt;a href=&#34;http://parlement.letemps.ch&#34;&gt;parlement.letemps.ch&lt;/a&gt;. Check out the &lt;a href=&#34;https://github.com/douglas-watson/parl-scraping&#34;&gt;github page&lt;/a&gt; for instructions on using Kibana, on settings up your own ElasticSearch server (including docker files), and rebuilding the index with a web scraper.&lt;/p&gt;
-
 &lt;p&gt;More information about the project on the hackathon wiki: &lt;a href=&#34;http://make.opendata.ch/wiki/project:chparlscraping&#34;&gt;http://make.opendata.ch/wiki/project:chparlscraping&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/projects/raclette_search.png&#34; alt=&#34;Visualization on Kibana&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/projects/raclette_search.png&#34; alt=&#34;Visualization on Kibana&#34;&gt;&lt;/p&gt;
 </description>
     </item>
     

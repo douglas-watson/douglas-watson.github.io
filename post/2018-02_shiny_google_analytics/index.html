@@ -66,7 +66,7 @@
       <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
       
       
-      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
       
       
       
@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2020 <a href="http://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -97,48 +97,32 @@
     <br/>
     
     </span>
-    
-
-<p>I recently wanted to add a Google Analytics tracker to a Shiny dashboard, and I found that the official documentation doesn&rsquo;t explain how to include &ldquo;Global Site Tag&rdquo; tracking code, which seems to be the current default setting in Analytics. The process is simple, we just have to include the tracking code as an HTML snippet in <code>ui.R</code>. The process requires only two steps:</p>
-
+    <p>I recently wanted to add a Google Analytics tracker to a Shiny dashboard, and I found that the official documentation doesn&rsquo;t explain how to include &ldquo;Global Site Tag&rdquo; tracking code, which seems to be the current default setting in Analytics. The process is simple, we just have to include the tracking code as an HTML snippet in <code>ui.R</code>. The process requires only two steps:</p>
 <ol>
 <li>Copy the analytics HTML snippet into a text file</li>
 <li>Reference the file in <code>ui.R</code></li>
 </ol>
-
 <h2 id="1-find-and-copy-the-tracker-snippet">1. Find and copy the tracker snippet</h2>
-
 <p>You&rsquo;ll find this snippet on your Analytics console, in Admin &gt; Tracking Info &gt; Tracking Code. You may need to create a Property first, from the drop-down menu of the Property column in the Admin console.</p>
-
 <p>I created a file named <code>google-analytics.html</code>, in the same directory as <code>ui.R</code>, and copied into it the HTML snippet, which looks like this:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html"><span style="color:#aaa;font-style:italic">&lt;!-- Global site tag (gtag.js) - Google Analytics --&gt;</span>
+&lt;<span style="color:#1e90ff;font-weight:bold">script</span> <span style="color:#1e90ff">async</span> <span style="color:#1e90ff">src</span>=<span style="color:#a50">&#34;https://www.googletagmanager.com/gtag/js?id=UA-xxxxxxxx-x&#34;</span>&gt;&lt;/<span style="color:#1e90ff;font-weight:bold">script</span>&gt;
+&lt;<span style="color:#1e90ff;font-weight:bold">script</span>&gt;
+  <span style="color:#0aa">window</span>.dataLayer = <span style="color:#0aa">window</span>.dataLayer || [];
+  <span style="color:#00a">function</span> gtag(){dataLayer.push(arguments);}
+  gtag(<span style="color:#a50">&#39;js&#39;</span>, <span style="color:#00a">new</span> <span style="color:#0aa">Date</span>());
 
-<pre><code class="language-html">&lt;!-- Global site tag (gtag.js) - Google Analytics --&gt;
-&lt;script async src=&quot;https://www.googletagmanager.com/gtag/js?id=UA-xxxxxxxx-x&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-xxxxxxxx-x');
-&lt;/script&gt;
-</code></pre>
-
-<p>The x&rsquo;s should of course be replaced by your own id.</p>
-
-<h2 id="2-reference-the-file-in-ui-r">2. Reference the file in ui.R</h2>
-
+  gtag(<span style="color:#a50">&#39;config&#39;</span>, <span style="color:#a50">&#39;UA-xxxxxxxx-x&#39;</span>);
+&lt;/<span style="color:#1e90ff;font-weight:bold">script</span>&gt;
+</code></pre></div><p>The x&rsquo;s should of course be replaced by your own id.</p>
+<h2 id="2-reference-the-file-in-uir">2. Reference the file in ui.R</h2>
 <p>Next, include the file in <code>ui.R</code>, towards the top of your fluidPage:</p>
-
-<pre><code class="language-r">shinyUI(fluidPage(
-  tags$head(includeHTML((&quot;google-analytics.html&quot;))),
-  ...
-</code></pre>
-
-<p>That&rsquo;s all! Your published app will now send visitor statistics to Google Analytics.</p>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#0a0">shinyUI</span>(<span style="color:#0a0">fluidPage</span>(
+  tags$<span style="color:#0a0">head</span>(<span style="color:#0a0">includeHTML</span>((<span style="color:#a50">&#34;google-analytics.html&#34;</span>))),
+  <span style="color:#00a">...</span>
+</code></pre></div><p>That&rsquo;s all! Your published app will now send visitor statistics to Google Analytics.</p>
 <h2 id="further-reading">Further reading</h2>
-
-<p>The official Shiny docs are still relevant for more information on creating Properties (<a href="https://shiny.rstudio.com/articles/google-analytics.html">https://shiny.rstudio.com/articles/google-analytics.html</a>) and more advanced usage, such as tracking individual events on the page (<a href="https://shiny.rstudio.com/articles/usage-metrics.html">https://shiny.rstudio.com/articles/usage-metrics.html</a>).</p>
+<p>The official Shiny docs are still relevant for more information on creating Properties (<a href="https://shiny.rstudio.com/articles/google-analytics.html">https://shiny.rstudio.com/articles/google-analytics.html</a>) and more advanced usage, such as tracking individual events on the page (<a href="https://shiny.rstudio.com/articles/usage-metrics.html)">https://shiny.rstudio.com/articles/usage-metrics.html)</a>.</p>
 
   </div>
   

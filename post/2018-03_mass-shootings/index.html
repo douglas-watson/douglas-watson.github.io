@@ -66,7 +66,7 @@
       <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
       
       
-      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
       
       
       
@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2020 <a href="http://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -97,148 +97,101 @@
     <br/>
     
     </span>
-    
-
-<blockquote>
+    <blockquote>
 <p>&ldquo;Four? That&rsquo;s barely your average family murder-suicide!&rdquo; - Anonymous American</p>
 </blockquote>
-
 <p>The United States saw 427 mass shootings in 2017, making a total of 2571 victims. That&rsquo;s more than one shooting per day.</p>
-
 <p>Why don&rsquo;t you hear about them on the news every day? Or conversely, if they are so common, why did the recent shooting in Las Vegas or the night club shooting in Orlando get so much attention?</p>
-
 <p>These numbers are gathered by MassShootingTracker.org, who define a mass shooting as an event with four or more victims, including dead and wounded. I heard several people react along the lines of the quote above, who said that four people is hardly a mass shooting by American standards. So, how would the numbers change if you changed the definition? This question inspired me to make an interactive visualisation of the data, with a slider that lets you pick your own definition of a mass shooting. I then got intrigued by where they were happening: in what states? Can we show them on a map? When are they happening, are there more and more every year? What about Europe, how do their numbers compare? Read on to learn more, or head over to the <a href="https://moncherwatson.shinyapps.io/mass-shootings/">interactive app</a> to answer those questions and play with the data yourself.</p>
-
-<p><a href="https://moncherwatson.shinyapps.io/mass-shootings/"><img src="/images/shootings/overview.png" alt="Dashboard overview" /></a></p>
-
+<p><a href="https://moncherwatson.shinyapps.io/mass-shootings/"><img src="/images/shootings/overview.png" alt="Dashboard overview"></a></p>
 <p>This being a technical blog, however, the goal is not to make a social or political analysis, but rather to explain how I built the app. Read along to learn more about the unexpected challenges I encountered to represent the data on a map and cache location data for online deployment; maybe you&rsquo;ll learn from some of my mistakes.</p>
-
 <h2 id="basics">Basics</h2>
-
 <p><em>If you are new to Shiny, you can skim through my first article on the subject <a href="/post/ggdocs_3_shiny/">here</a></em>.</p>
-
 <p>The visualisation is a Shiny application, hosted on the free tier of Shinyapps.io. A couple of filters can select events by date range, or limit the minimum number of victims. A map (shown above) shows the location of every event, marked by a circle whose area is proportional to the total number of victims — you&rsquo;ll notice that the Florida and Nevada circles are much larger than any of the others; these shootings were exceptionally violent. Clicking a marker pops up links to related news articles. Optionally, events can be clustered on the map to reduce clutter. A searchable table shows a list of all events:</p>
-
-<p><img src="/images/shootings/table.png" alt="Searchable table" /></p>
-
+<p><img src="/images/shootings/table.png" alt="Searchable table"></p>
 <p>Two bar graphs show number of shootings and victims per month. Interestingly, they show a cyclic trend: shootings are more common in the summer.</p>
-
-<p><img src="/images/shootings/per_month.png" alt="Shootings by month" /></p>
-
+<p><img src="/images/shootings/per_month.png" alt="Shootings by month"></p>
 <p>Another set of graphs shows the number of shootings and victims per state, optionally normalised by state population. The absolute totals just tend to show that larger states have more shootings. Per capita numbers show that D.C. is the most dangerous state!</p>
-
-<p><img src="/images/shootings/per_state.png" alt="Shootings by state" /></p>
-
+<p><img src="/images/shootings/per_state.png" alt="Shootings by state"></p>
 <p>The end result is slow, so either my approach or choice of platform probably weren&rsquo;t the best. It would be interesting to deploy the app to a faster service, to see if the issue comes from an inherent slowness of Shiny, or from the limitations of shinyapps.io.</p>
-
 <h2 id="data-and-tools">Data and tools</h2>
-
 <p>The data is provided by MassShootingTracker.org, in the form of one CSV file per year. The file for the current year is continuously updated on their website, thus my app downloads the latest version every time it is reloaded. Files from previous years are saved to disk.</p>
-
 <p>The list of shootings contains one row per shooting, with a column for date, city name, state abbreviation, and number of killed and wounded, as well as links to related news articles. I mixed in population data from the US census bureau, and geographical coordinates of each city from OpenStreetMap. On the visual side, maps are handled by <code>leaflet</code>, plots by <code>ggplot2</code>, and tables are standard Shiny Data Tables.</p>
-
 <h2 id="normalising-by-state-population">Normalising by State population</h2>
-
 <p>To normalise values by state population, I first needed to lookup the population of each state. The US census bureau provides this data for each year, freely downloadable in CSV format. I picked out two columns from the census data: the state abbreviation and the population in 2016. The shootings data came pre-labelled by state, so I can left-join it with the census table. The result is a copy of the shootings table, with an extra column for state population:</p>
-
-<pre><code class="language-R">data &lt;- left_join(shootings, census, by = &quot;state&quot;) %&gt;%
-   replace_na(list(population = mean(census$population)))
-# census has two columns: state and population
-# shootings has many columns, incuding state
-</code></pre>
-
-<p>I replace missing values (NAs) by the mean state population, to avoid dividing by NA if a poorly formatted state appears in the data in the future.</p>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">data &lt;- <span style="color:#0a0">left_join</span>(shootings, census, by = <span style="color:#a50">&#34;state&#34;</span>) %&gt;%
+   <span style="color:#0a0">replace_na</span>(<span style="color:#0a0">list</span>(population = <span style="color:#0a0">mean</span>(census$population)))
+<span style="color:#aaa;font-style:italic"># census has two columns: state and population</span>
+<span style="color:#aaa;font-style:italic"># shootings has many columns, incuding state</span>
+</code></pre></div><p>I replace missing values (NAs) by the mean state population, to avoid dividing by NA if a poorly formatted state appears in the data in the future.</p>
 <p>The second step is to aggregate, summarise, and normalise the data. Dplyr and the tidyverse package allow me to write these operations in a very fluid syntax. I just group by state, then sum and normalise within each group:</p>
-
-<pre><code class="language-R">data %&gt;%
-   group_by(state) %&gt;%
-   summarise(victims = sum(killed + wounded) / first(population))
-</code></pre>
-
-<h2 id="aggregating-by-month">Aggregating by month</h2>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">data %&gt;%
+   <span style="color:#0a0">group_by</span>(state) %&gt;%
+   <span style="color:#0a0">summarise</span>(victims = <span style="color:#0a0">sum</span>(killed + wounded) / <span style="color:#0a0">first</span>(population))
+</code></pre></div><h2 id="aggregating-by-month">Aggregating by month</h2>
 <p>For month-by-month data, we first need to create a &lsquo;month&rsquo; and &lsquo;year&rsquo; column from the date, then we can group by those two values and sum:</p>
-
-<pre><code class="language-R">monthData &lt;- data %&gt;%
-   mutate(month = format(date, '%m'), year = format(date, '%y')) %&gt;%  # Create new columns
-   group_by(month, year) %&gt;%
-   summarise(victims = sum(killed + wounded)) # sum all rows within each group
-</code></pre>
-
-<h2 id="map-and-location-data">Map and location data</h2>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">monthData &lt;- data %&gt;%
+   <span style="color:#0a0">mutate</span>(month = <span style="color:#0a0">format</span>(date, <span style="color:#a50">&#39;%m&#39;</span>), year = <span style="color:#0a0">format</span>(date, <span style="color:#a50">&#39;%y&#39;</span>)) %&gt;%  <span style="color:#aaa;font-style:italic"># Create new columns</span>
+   <span style="color:#0a0">group_by</span>(month, year) %&gt;%
+   <span style="color:#0a0">summarise</span>(victims = <span style="color:#0a0">sum</span>(killed + wounded)) <span style="color:#aaa;font-style:italic"># sum all rows within each group</span>
+</code></pre></div><h2 id="map-and-location-data">Map and location data</h2>
 <p>Locating the shootings was the main challenge of this project; once their latitude and longitude was known, displaying them on a map was handled in a couple lines of code by the Leaflet library. Since the list of shootings is pulled live from a data source updated every day, new cities are likely to appear in the future. I had two options: build a table of all cities in the US, with their latitude and longitude, or find a location service that I can query every time a new city name appears in the database. I discarded the first option due to the shear number of cities in the US and instead used the Nominatim API of OpenStreetMap to query the coordinates of each city. Inspired by <a href="https://www.r-bloggers.com/search-and-draw-cities-on-a-map-using-openstreetmap-and-r/">r-bloggers</a>, I used this code:</p>
-
-<pre><code class="language-R">locateCity &lt;- function(city, state) {
-  url = paste('http://nominatim.openstreetmap.org/search?',
-              'city=',  gsub(' ', '%20', city), 
-              '&amp;state=', gsub(' ', '%20', state),
-              '&amp;country=USA',
-              '&amp;limit=1&amp;format=json',
-              sep=&quot;&quot;
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">locateCity &lt;- <span style="color:#0a0">function</span>(city, state) {
+  url = <span style="color:#0a0">paste</span>(<span style="color:#a50">&#39;http://nominatim.openstreetmap.org/search?&#39;</span>,
+              <span style="color:#a50">&#39;city=&#39;</span>,  <span style="color:#0a0">gsub</span>(<span style="color:#a50">&#39; &#39;</span>, <span style="color:#a50">&#39;%20&#39;</span>, city), 
+              <span style="color:#a50">&#39;&amp;state=&#39;</span>, <span style="color:#0a0">gsub</span>(<span style="color:#a50">&#39; &#39;</span>, <span style="color:#a50">&#39;%20&#39;</span>, state),
+              <span style="color:#a50">&#39;&amp;country=USA&#39;</span>,
+              <span style="color:#a50">&#39;&amp;limit=1&amp;format=json&#39;</span>,
+              sep=<span style="color:#a50">&#34;&#34;</span>
               )
-  resOSM = RJSONIO::fromJSON(url)
-  if(length(resOSM) &gt; 0) {
-    return(c(resOSM[[1]]$lon, resOSM[[1]]$lat))
-  } else return(rep(NA,2)) 
+  resOSM = RJSONIO::<span style="color:#0a0">fromJSON</span>(url)
+  <span style="color:#0a0">if</span>(<span style="color:#0a0">length</span>(resOSM) &gt; <span style="color:#099">0</span>) {
+    <span style="color:#0a0">return</span>(<span style="color:#0a0">c</span>(resOSM[[1]]$lon, resOSM[[1]]$lat))
+  } else <span style="color:#0a0">return</span>(<span style="color:#0a0">rep</span>(<span style="color:#00a">NA</span>,<span style="color:#099">2</span>)) 
 }
-</code></pre>
-
-<p>With hindsight, this probably wasn&rsquo;t the easiest solution. Speed and rate limits on the API made caching necessary, and caching on shinyapps.io gets complicated.</p>
-
+</code></pre></div><p>With hindsight, this probably wasn&rsquo;t the easiest solution. Speed and rate limits on the API made caching necessary, and caching on shinyapps.io gets complicated.</p>
 <h3 id="memoizing">Memoizing</h3>
-
 <p>The Nominatim API restricts the number of requests you can execute every hour, so I needed to cache the responses locally to avoid asking the same question repeatedly to the API. The easiest way to achieve this is to <em>memoise</em> the search function, by keeping a dictionary that maps the function argument to their return value. In our case:</p>
-
 <ul>
-<li><p>The function&rsquo;s arguments are city name and state, and the return value is a set of geographical coordinates.</p></li>
-
-<li><p>Before calling the function, check if the arguments already exist in the dictionary keys. If they do, return the associated value. If they don&rsquo;t, call the function and store the result.</p></li>
-
-<li><p>The next time these arguments appear, we don&rsquo;t need to query the API again, we just return the values from the dictionary. Thus we only call the API once for every city.</p></li>
+<li>
+<p>The function&rsquo;s arguments are city name and state, and the return value is a set of geographical coordinates.</p>
+</li>
+<li>
+<p>Before calling the function, check if the arguments already exist in the dictionary keys. If they do, return the associated value. If they don&rsquo;t, call the function and store the result.</p>
+</li>
+<li>
+<p>The next time these arguments appear, we don&rsquo;t need to query the API again, we just return the values from the dictionary. Thus we only call the API once for every city.</p>
+</li>
 </ul>
-
 <p>This concept is most naturally expressed in Python. If you don&rsquo;t know python, just skip ahead:</p>
-
-<pre><code class="language-python">cache = {}
-def memoized(arg):
-    if not arg in cache:
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">cache = {}
+<span style="color:#00a">def</span> <span style="color:#0a0">memoized</span>(arg):
+    <span style="color:#00a">if</span> <span style="color:#00a">not</span> arg <span style="color:#00a">in</span> cache:
         cache[arg] = slow_function(arg)
-    return cache[arg]
-</code></pre>
-
-<p>An additional challenge of deploying on shinyapps.io is that we can&rsquo;t reliably store the lookup table as a local file: every time an instance of the application is started or put to sleep, the files are reset to their initial state at the time of upload: <a href="http://docs.rstudio.com/shinyapps.io/Storage.html">http://docs.rstudio.com/shinyapps.io/Storage.html</a>. Thus, if we kept the cache stored on disk, we would loose it every time a new instance is spun up.</p>
-
+    <span style="color:#00a">return</span> cache[arg]
+</code></pre></div><p>An additional challenge of deploying on shinyapps.io is that we can&rsquo;t reliably store the lookup table as a local file: every time an instance of the application is started or put to sleep, the files are reset to their initial state at the time of upload: <a href="http://docs.rstudio.com/shinyapps.io/Storage.html">http://docs.rstudio.com/shinyapps.io/Storage.html</a>. Thus, if we kept the cache stored on disk, we would loose it every time a new instance is spun up.</p>
 <p>Enter the R <code>memoize</code> package. It takes a regular function and wraps the caching part around it. It can save the cache to Amazon S3, and thus doesn&rsquo;t depend on the local filesystem. The downside is that it still requires an HTTP request every time the function is called, i.e. once per row of data. We just traded a request to Nominatim for a request to Amazon S3. It&rsquo;s almost as slow as direct calls to the API, the main advantage is that we avoid overloading OpenStreetMap.</p>
-
 <p>I compromised by storing a local copy of location for past events, and only calling the (memoized) Nominatim API for newer events — those that weren&rsquo;t in the database at the time the application was published. In practice, I manually call a &ldquo;rebuild cache&rdquo; function before publishing the app, which fetches and geotags all currently available data, then saves it as an RDS file on disk. At run-time, my server.R file reloads the RDS file, then fetches remote data and only geotags the newest, unknown data. This approach ended up convoluted but functional enough for a weekend hack.</p>
-
-<pre><code class="language-R">loadDataWithLocalCache &lt;- function() {
-  localCache &lt;- readRDS(&quot;data/localCache.rds&quot;) 
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">loadDataWithLocalCache &lt;- <span style="color:#0a0">function</span>() {
+  localCache &lt;- <span style="color:#0a0">readRDS</span>(<span style="color:#a50">&#34;data/localCache.rds&#34;</span>) 
   
-  newRemoteData &lt;-  loadRemoteData() %&gt;%
-    formatData() %&gt;% 
-    filter(date &gt;= first(localCache$date))
+  newRemoteData &lt;-  <span style="color:#0a0">loadRemoteData</span>() %&gt;%
+    <span style="color:#0a0">formatData</span>() %&gt;% 
+    <span style="color:#0a0">filter</span>(date &gt;= <span style="color:#0a0">first</span>(localCache$date))
   
-  if ( nrow(newRemoteData) == 0 ) {
+  <span style="color:#0a0">if </span>( <span style="color:#0a0">nrow</span>(newRemoteData) == <span style="color:#099">0</span> ) {
     localCache
   } else {
-    newRemoteData %&gt;%      # Start with new, un-geotagged data
-    locateData() %&gt;%       # Fetch coordinates on Nominatim API, cached through Amazon S3
-    rbind(localCache) %&gt;%  # Append cached, already geo-tagged data
-    unique()               # Remove duplicates
+    newRemoteData %&gt;%      <span style="color:#aaa;font-style:italic"># Start with new, un-geotagged data</span>
+    <span style="color:#0a0">locateData</span>() %&gt;%       <span style="color:#aaa;font-style:italic"># Fetch coordinates on Nominatim API, cached through Amazon S3</span>
+    <span style="color:#0a0">rbind</span>(localCache) %&gt;%  <span style="color:#aaa;font-style:italic"># Append cached, already geo-tagged data</span>
+    <span style="color:#0a0">unique</span>()               <span style="color:#aaa;font-style:italic"># Remove duplicates</span>
   }
 }
-</code></pre>
-
-<h2 id="europe">Europe</h2>
-
+</code></pre></div><h2 id="europe">Europe</h2>
 <p>After working on the American map, I was interested in comparing with European data. I found data for 2016, aggregated by a <a href="https://www.vice.com/en_us/article/4wb9p3/mass-shootings-in-europe-in-2016">Vice journalist</a>. The result was rather boring: Russia saw the most shootings, but per capita the victims are fewer than the safest US state. Cyprus has such a small population that a single event skewed the statistics.</p>
-
-<p><img src="/images/shootings/europe_events.png" alt="Total number of shootings in 2016, comparing USA to Europe" /></p>
-
-<p><img src="/images/shootings/europe_victims.png" alt="Total shooting victims in 2016, comparing USA to Europe" /></p>
+<p><img src="/images/shootings/europe_events.png" alt="Total number of shootings in 2016, comparing USA to Europe"></p>
+<p><img src="/images/shootings/europe_victims.png" alt="Total shooting victims in 2016, comparing USA to Europe"></p>
 
   </div>
   

@@ -66,7 +66,7 @@
       <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
       
       
-      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
       
       
       
@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2020 <a href="http://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -94,26 +94,15 @@
     <h1 class="post-title">Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3</h1>
     <span class="post-date">Dec 27, 2015 &middot; 7 minute read &middot; <a href="http://douglas-watson.github.io/post/gdocs_3_shiny/#disqus_thread">Comments</a>
     </span>
-    
-
-<p>This is the third and final part of the Shiny + Google Docs dashboard tutorial, where I explain how to build a live web dashboard for connected &ldquo;Internet of Things&rdquo; sensors, using Google Sheets as a data server. <a href="/post/gdocs_1_gdocs/">Part one</a> covered setting up a Google Sheet to store and serve data through HTTP requests; <a href="/post/gdocs_2_r/">part two</a> covered reading, filtering, and plotting that data in R. In this part, we&rsquo;ll create the actual dashboard and host it online.</p>
-
+    <p>This is the third and final part of the Shiny + Google Docs dashboard tutorial, where I explain how to build a live web dashboard for connected &ldquo;Internet of Things&rdquo; sensors, using Google Sheets as a data server. <a href="/post/gdocs_1_gdocs/">Part one</a> covered setting up a Google Sheet to store and serve data through HTTP requests; <a href="/post/gdocs_2_r/">part two</a> covered reading, filtering, and plotting that data in R. In this part, we&rsquo;ll create the actual dashboard and host it online.</p>
 <p><em>Chinese translation: <a href="https://segmentfault.com/a/1190000004426828">https://segmentfault.com/a/1190000004426828</a></em></p>
-
 <p>Shiny adds a web server and an interactive web front end to R code and graphics. We&rsquo;ll use it to make a web-based dashboard, in other words a collection of plots that display the latest sensor data with some widgets to modify the plots. In this section, we&rsquo;ll first build a simple page that shows a time series and boxplot with the latest data from Google Sheets. We&rsquo;ll then add a date selection widget that narrows down the time period to be displayed.</p>
-
 <p>The finished shiny app is on Github: <a href="https://github.com/douglas-watson/shiny-gdocs">https://github.com/douglas-watson/shiny-gdocs</a></p>
-
 <h2 id="setting-up-shiny">Setting up Shiny</h2>
-
 <p>I recommend you follow the official tutorial (<a href="http://shiny.rstudio.com/tutorial/">http://shiny.rstudio.com/tutorial/</a>) for the latest installation instructions. If you have time, follow the entire tutorial for a complete overview of the Shiny way of thinking.</p>
-
 <h2 id="our-first-dashboard-no-interactivity">Our first dashboard: no interactivity</h2>
-
 <p>Our first dashboard will simply display two plots, which show the latest data fetched from Google Sheets. Shiny applications consist of two files: <code>ui.R</code> and <code>server.R</code>. The UI file defines the layout of the dashboard: what visualizations are shown, and where they are placed on the page. In this file, we only name the visualizations and define their type (table, plot, &hellip;); the actual contents of the visualizations will be defined in <code>server.R</code>.</p>
-
 <p>The code example below defines a container: <code>shinyUI(fluidPage(....))</code>. Inside the container is a vertical layout box, which lays out its children in a vertical stack. Inside the layout, we placed three items: a title bar and two plot items.</p>
-
 <pre><code># ui.R
 
 shinyUI(fluidPage(
@@ -123,20 +112,14 @@ shinyUI(fluidPage(
     plotOutput(&quot;boxplot&quot;)
   )  
 ))
-</code></pre>
-
-<p>The next step is to render graphics that can be displayed in the plotOutputs; we do this in <code>server.R</code>. The server code is broken down into code that is run:</p>
-
+</code></pre><p>The next step is to render graphics that can be displayed in the plotOutputs; we do this in <code>server.R</code>. The server code is broken down into code that is run:</p>
 <ol>
 <li>when the server is started;</li>
 <li>each time a page is accessed;</li>
 <li>each time an interactive widget is changed.</li>
 </ol>
-
 <p>In our case, when the server is started, we only want to import the helper code (data loading and plotting functions), but not execute any of it. Each time a page is loaded, we want to fetch new data and draw the plots. We have no widgets yet, and therefore, no code in the third category.</p>
-
 <p>The first draft of server code, below, does just that: code outside of the <code>shinyServer(...)</code> block is executed just once, code inside it is executed every time the page is accessed. This last block fetches the raw data, creates a time series plot and places it into the the <code>plotOuput</code> named &ldquo;timeseries&rdquo; which we defined in <code>ui.R</code>, then renders a boxplot into the &ldquo;boxplot&rdquo; <code>plotOutput</code>.</p>
-
 <pre><code># server.R
 
 source(&quot;helpers.R&quot;)
@@ -156,33 +139,20 @@ shinyServer(function(input, output) {
   })
 
 })
-</code></pre>
-
-<p>Create the <code>ui.R</code> and <code>server.R</code> files in the same directory as <code>helpers.R</code>, which you created at the end of the previous section. RStudio automatically detects that the files are Shiny application and adds a &ldquo;Run App&rdquo; button the toolbar above the editor.</p>
-
-<p><img src="/images/gdocs/33_run_btn.png" alt="RStudio adds a run button to Shiny applications" /></p>
-
+</code></pre><p>Create the <code>ui.R</code> and <code>server.R</code> files in the same directory as <code>helpers.R</code>, which you created at the end of the previous section. RStudio automatically detects that the files are Shiny application and adds a &ldquo;Run App&rdquo; button the toolbar above the editor.</p>
+<p><img src="/images/gdocs/33_run_btn.png" alt="RStudio adds a run button to Shiny applications"></p>
 <p>Use that button to preview the application. It should pop up a window similar to the one below:</p>
-
-<p><img src="/images/gdocs/31_basicui.png" alt="Our first dashboard, with two static graphs" /></p>
-
+<p><img src="/images/gdocs/31_basicui.png" alt="Our first dashboard, with two static graphs"></p>
 <p>Note that none of our code detects changes on the google document; you still need to refresh the page to get the latest data.</p>
-
 <h2 id="add-a-grid-layout-and-filter-by-date">Add a grid layout and filter by date</h2>
-
-<p>Let&rsquo;s now add some date selection widgets that restrict the displayed date range. We&rsquo;ll first extend the layout from a simple vertical stack to a <em>fluid grid</em>. On sufficiently wide displays, this layout shows up as a grid. On narrower displays, it reverts to a vertical stack, to avoid lateral scrolling. Grids are specified as <code>fluidRow</code> elements which contain <code>column</code> elements. Each column is assigned a width (in units of <sup>1</sup>&frasl;<sub>12</sub> of the screen width) and can contain another widget (an input, a plot, or another grid). The new <code>ui.R</code> file below now shows a layout with nested rows and columns.</p>
-
+<p>Let&rsquo;s now add some date selection widgets that restrict the displayed date range. We&rsquo;ll first extend the layout from a simple vertical stack to a <em>fluid grid</em>. On sufficiently wide displays, this layout shows up as a grid. On narrower displays, it reverts to a vertical stack, to avoid lateral scrolling. Grids are specified as <code>fluidRow</code> elements which contain <code>column</code> elements. Each column is assigned a width (in units of 1/12 of the screen width) and can contain another widget (an input, a plot, or another grid). The new <code>ui.R</code> file below now shows a layout with nested rows and columns.</p>
 <p>Our second modification is to add input widgets. Inputs allow users to interact with the visualization by entering text, number, dates, selecting from radio boxes&hellip;You can browse the full gallery <a href="http://shiny.rstudio.com/gallery/">here</a>.</p>
-
 <p>We&rsquo;ll use two kinds of inputs:</p>
-
 <ul>
 <li><code>dateRangeInput</code>: a drop-down calendar to chose a start and end date.</li>
 <li><code>numericInput</code>: a box which accepts only numbers, and shows an up- and down-arrow to change the numbers.</li>
 </ul>
-
 <p>We use the dateRangeInput to specify the date range of data to plot, and four numeric inputs to specify the hours and minutes of the start day, and the hours and minutes of the end day.</p>
-
 <pre><code># ui.R
 
 shinyUI(fluidPage(
@@ -210,14 +180,9 @@ shinyUI(fluidPage(
     )
   )
 ))
-</code></pre>
-
-<p>The server-side code can access the values of the input widgets through the <code>input</code> argument of <code>ShinyServers</code>&rsquo;s callback. When one of the inputs is changed on the UI, Shiny automatically re-executes any of the server&rsquo;s <code>renderPlot</code> or <code>reactive</code> code blocks that access that value. The <code>reactive</code> blocks are useful to transform data according to input values; we will thus use one to apply the date range filter.</p>
-
+</code></pre><p>The server-side code can access the values of the input widgets through the <code>input</code> argument of <code>ShinyServers</code>'s callback. When one of the inputs is changed on the UI, Shiny automatically re-executes any of the server&rsquo;s <code>renderPlot</code> or <code>reactive</code> code blocks that access that value. The <code>reactive</code> blocks are useful to transform data according to input values; we will thus use one to apply the date range filter.</p>
 <p>The <code>reactive</code> block in the new code example below converts our inputs to two POSIXct date objects, then uses them as lower and upper bounds to filter the data frame. We assign the reactive code block to <code>data.filt</code>, and modify the <code>renderPlot</code> calls to plot <code>data.filt()</code> instead of the original <code>data</code>. Note the syntax: <code>data.filt()</code> returns the value of the code block passed to <code>reactive</code>. As explained above, each time one of the inputs used inside the <code>reactive</code> block is updated, any other code block which calls <code>data.filt()</code> is also updated. In the example below, both <code>renderPlot</code> blocks are re-executed on update.</p>
-
 <p><strong>Warning:</strong> make sure to include the parenthesis each time you call <code>data.filt()</code>!</p>
-
 <pre><code># server.R
 
 source(&quot;helpers.R&quot;)
@@ -245,40 +210,24 @@ shinyServer(function(input, output) {
   })
 
 })
-</code></pre>
-
-<p>Run the application again. The new result should resemble my example below:</p>
-
-<p><img src="/images/gdocs/32_fullui.png" alt="Our improved dashboard, now with date range selection" /></p>
-
-<h2 id="publish-to-shinyapps-io">Publish to Shinyapps.io</h2>
-
+</code></pre><p>Run the application again. The new result should resemble my example below:</p>
+<p><img src="/images/gdocs/32_fullui.png" alt="Our improved dashboard, now with date range selection"></p>
+<h2 id="publish-to-shinyappsio">Publish to Shinyapps.io</h2>
 <p>ShinyApps.io provides a hosting service for Shiny apps, and is another product by the makers of RStudio. Their developers integrated the service into RStudio: simply click &ldquo;Publish&rdquo; in the upper right corner of your Shiny app preview, and follow the instructions! Create a free account and upload your dashboard.</p>
-
-<p><img src="/images/gdocs/35_publish_btn.png" alt="Publish your dashboard to ShinyApps.io from RStudio" /></p>
-
-<p><img src="/images/gdocs/34_publish.png" alt="Publish your dashboard to ShinyApps.io from RStudio" /></p>
-
+<p><img src="/images/gdocs/35_publish_btn.png" alt="Publish your dashboard to ShinyApps.io from RStudio"></p>
+<p><img src="/images/gdocs/34_publish.png" alt="Publish your dashboard to ShinyApps.io from RStudio"></p>
 <p>Once the app is published, you will notice a problem remains: nothing shows up on your dashboard. If you check the server logs, you&rsquo;ll notice that HTTPS requests from R to Google Sheets failed. The final section of our tutorial, below, will explain how to work around that.</p>
-
 <h2 id="using-an-https-to-http-proxy">Using an https to http proxy</h2>
-
 <p>Sadly, ShinyApps (at the time of writing) doesn&rsquo;t support https URLs, and thus blocks the request to Google Sheets. To work around this, we need to route the requests through an external server (a proxy) which is accessible through HTTP, can fetch the target HTTPS page, and return it back to R&rsquo;s <code>read.csv</code> request through HTTP. Doing this goes against the security benefits of HTTPS, but since we are making a public dashboard from data publicly available on a Google Sheet, and mostly for demonstration only, I&rsquo;m not concerned about it.</p>
-
 <p>To save you the work, I set up a HTTPS-to-HTTP proxy server. In the <code>server.R</code> code, add <code>shinyproxy.appspot.com/</code> before <code>script.google.com/</code>. In my case, the URL becomes:</p>
-
 <pre><code># fragment of helpers.R
 
 data &lt;- read.csv(
   url(&quot;https://shinyproxy.appspot.com/script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&quot;),
   strip.white = TRUE
 )
-</code></pre>
-
-<p>Re-publish your dashboard, and you are done!</p>
-
+</code></pre><p>Re-publish your dashboard, and you are done!</p>
 <h3 id="more-on-the-proxy">More on the proxy</h3>
-
 <p>The HTTPS proxy is a simple piece of Go code hosted on App Engine. I put the code on github, here: <a href="https://github.com/douglas-watson/httpsproxy">https://github.com/douglas-watson/httpsproxy</a></p>
 
   </div>

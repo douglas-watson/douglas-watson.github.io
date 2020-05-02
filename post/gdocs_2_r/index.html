@@ -66,7 +66,7 @@
       <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
       
       
-      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
       
       
       
@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2020 <a href="http://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -94,27 +94,16 @@
     <h1 class="post-title">Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3</h1>
     <span class="post-date">Dec 27, 2015 &middot; 6 minute read &middot; <a href="http://douglas-watson.github.io/post/gdocs_2_r/#disqus_thread">Comments</a>
     </span>
-    
-
-<p>This is the second installment of the Shiny + GDocs dashboard tutorial, where we learn how to use a Google Sheet spreadsheet to store data from connected &ldquo;Internet of Things&rdquo; data and use Shiny to create a web page to show the data. The <a href="/post/gdocs_1_gdocs/">first part</a> showed you how to set up a Google Sheet to serve as a data server that accepts POST and GET HTTP requests, as well as how to use pivot tables and filters on the sheets directly. In this section, I&rsquo;ll walk you through the specific aspects of R that we will wrap in Shiny code. We&rsquo;ll cover: how to download CSV data from the web, handling date fields, and making various plots with ggplot2. I assume if you are reading tutorial that you already are using R and found the tutorial through a desire to connect to Google Sheets data. If not, I hope this overview will motivate you to learn more R!</p>
-
+    <p>This is the second installment of the Shiny + GDocs dashboard tutorial, where we learn how to use a Google Sheet spreadsheet to store data from connected &ldquo;Internet of Things&rdquo; data and use Shiny to create a web page to show the data. The <a href="/post/gdocs_1_gdocs/">first part</a> showed you how to set up a Google Sheet to serve as a data server that accepts POST and GET HTTP requests, as well as how to use pivot tables and filters on the sheets directly. In this section, I&rsquo;ll walk you through the specific aspects of R that we will wrap in Shiny code. We&rsquo;ll cover: how to download CSV data from the web, handling date fields, and making various plots with ggplot2. I assume if you are reading tutorial that you already are using R and found the tutorial through a desire to connect to Google Sheets data. If not, I hope this overview will motivate you to learn more R!</p>
 <p>If you want to skip to using Shiny, head over to <a href="/post/gdocs_3_shiny">part 3</a>. The finished code files are available on Github: <a href="https://github.com/douglas-watson/shiny-gdocs">https://github.com/douglas-watson/shiny-gdocs</a></p>
-
 <p><em>Chinese translation: <a href="https://segmentfault.com/a/1190000004426828">https://segmentfault.com/a/1190000004426828</a></em></p>
-
 <h2 id="recommended-setup">Recommended setup</h2>
-
 <p>If you are an experienced R user, you already know what development environment you prefer. Use that one. If not, I recommend RStudio, available for Linux, Mac, and Windows. It has a decent editor (with Vim mode!) and integrates with Shiny. Head over to <a href="https://www.rstudio.com/products/rstudio/#Desktop">https://www.rstudio.com/products/rstudio/#Desktop</a> to download it.</p>
-
 <p>You will also need R and the ggplot2. Install R from your package manager on Linux, or download it from here on other platforms: <a href="https://www.r-project.org/">https://www.r-project.org/</a>. Once R and RStudio are installed, open RStudio, and install ggplot2 from the R console:</p>
-
 <pre><code>install.packages('ggplot2')
 </code></pre>
-
 <h2 id="import-a-csv-file-from-a-web-url">Import a CSV file from a web URL</h2>
-
 <p>Fetching CSV data from the web is trivial: just feed <code>read.csv</code> a <code>url</code> parameter, it automatically downloads the data and makes a data frame with the correct header names. Create a &ldquo;helpers.R&rdquo; file, and write the following code in it:</p>
-
 <pre><code>getRaw &lt;- function () {
   data &lt;- read.csv(
     url(&quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&quot;),
@@ -122,10 +111,7 @@
   )
   data
 }
-</code></pre>
-
-<p>We call the file helpers.R, as it will be used later by the Shiny app. The <code>getRaw</code> function returns a data frame with five variables, named identically to the spreadsheet&rsquo;s headers:</p>
-
+</code></pre><p>We call the file helpers.R, as it will be used later by the Shiny app. The <code>getRaw</code> function returns a data frame with five variables, named identically to the spreadsheet&rsquo;s headers:</p>
 <pre><code>&gt; data &lt;- getRaw()
 &gt; summary(data)
    timestamp                                              date         origin           variable       value      
@@ -137,12 +123,8 @@
  Max.   :1.449e+09   Thu Nov 26 2015 03:44:45 GMT+0100 (CET):  4                                   Max.   :49.90  
                      (Other)                                :216                                                  
 &gt;
-</code></pre>
-
-<h2 id="convert-date-time-column">Convert date-time column</h2>
-
+</code></pre><h2 id="convert-date-time-column">Convert date-time column</h2>
 <p>Let&rsquo;s now convert the date-time data to a proper R date object. The easiest way is to transform the UNIX timestamp column into a <code>POSIXct</code> object and replace the &ldquo;date&rdquo; column. Since we generated UTC dates, we set the time zone to &ldquo;GMT&rdquo;. Complete the getRaw function:</p>
-
 <pre><code>getRaw &lt;- function () {
   data &lt;- read.csv(
     url(&quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec?sheet=Raw&quot;),
@@ -151,85 +133,42 @@
   data$date = as.POSIXct(data$timestamp, tz=&quot;GMT&quot;, origin=&quot;1970-01-01&quot;)
   data
 }
-</code></pre>
-
-<p>You&rsquo;re now ready to rock!</p>
-
+</code></pre><p>You&rsquo;re now ready to rock!</p>
 <h2 id="play-with-ggplot2">Play with ggplot2</h2>
-
 <p>The ggplot2 library provides the brilliant <code>qplot</code> function. A single line of code can produce a huge variety of plots, which makes R my favourite tool to  play with data.</p>
-
 <p>To start off, let&rsquo;s plot all the values we recorded as a function of time. If you haven&rsquo;t already, import ggplot2 and helpers.R, and load the CSV data in a data frame.</p>
-
 <pre><code>import(ggplot2)
 source(&quot;helpers.R&quot;)
 data &lt;- getRaw()
 qplot(date, value, data = data)
-</code></pre>
-
-<p><img src="/images/gdocs/21_all.png" alt="All points on a single plot, a good start, but not very clear." /></p>
-
+</code></pre><p><img src="/images/gdocs/21_all.png" alt="All points on a single plot, a good start, but not very clear."></p>
 <p>We can clarify the plot a little by colouring points according to sensor location:</p>
-
 <pre><code>qplot(date, value, data = data, colour = origin)
-</code></pre>
-
-<p><img src="/images/gdocs/22_colours.png" alt="Colouring the points as a function of sensor locations clarifies the plot a bit." /></p>
-
+</code></pre><p><img src="/images/gdocs/22_colours.png" alt="Colouring the points as a function of sensor locations clarifies the plot a bit."></p>
 <p>We still can&rsquo;t distinguish temperature from humidity. Let&rsquo;s separate those variables into different panels using &ldquo;facets&rdquo;. We&rsquo;ll add the &ldquo;free_y&rdquo; option to allow each y to scale independently:</p>
-
 <pre><code>qplot(date, value, data = data, colour = origin) + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
-</code></pre>
-
-<p><img src="/images/gdocs/23_facets.png" alt="Faceted by variable." /></p>
-
+</code></pre><p><img src="/images/gdocs/23_facets.png" alt="Faceted by variable."></p>
 <p>Since there is a lot of noise, joining the points with a line makes the plot easier to read:</p>
-
 <pre><code>qplot(date, value, data = data, colour = origin, geom = &quot;line&quot;) + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
-</code></pre>
-
-<p><img src="/images/gdocs/24_timeseries.png" alt="Points replaced by lines" /></p>
-
+</code></pre><p><img src="/images/gdocs/24_timeseries.png" alt="Points replaced by lines"></p>
 <p>If you add a sensor in a new room, a new line colour will automatically appear on the plot. If you add a new type of data (such as &ldquo;power&rdquo; for a power meter), a third facet will appear. Try it! Just modify the Python script to send data from a new location and re-run the python script, the <code>data &lt;- getRaw()</code> line, and the latest qplot instruction.</p>
-
 <p>If the date scale looks wrong, with one tick per point on the x axis, try adding <code>scale_x_datetime</code>:</p>
-
 <pre><code>qplot(date, value, data = data, colour = origin, geom = &quot;line&quot;) + scale_x_datetime() + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
-</code></pre>
-
-<h2 id="other-forms-of-plots">Other forms of plots.</h2>
-
+</code></pre><h2 id="other-forms-of-plots">Other forms of plots.</h2>
 <p>How about box plots to observe variations in temperature and humidity? Easy: just change x axis to &ldquo;origin&rdquo;, ditch the colours, and change geometry to &ldquo;boxplot&rdquo;:</p>
-
 <pre><code>qplot(origin, value, data = data, geom = &quot;boxplot&quot;) + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
-</code></pre>
-
-<p><img src="/images/gdocs/25_boxplots.png" alt="Box plots are even easier than time series" /></p>
-
+</code></pre><p><img src="/images/gdocs/25_boxplots.png" alt="Box plots are even easier than time series"></p>
 <p>Have a look at the qplot official documents for more inspiration on plot types: <a href="http://docs.ggplot2.org/current">http://docs.ggplot2.org/current</a></p>
-
 <h2 id="filtering-by-date">Filtering by date</h2>
-
 <p>We&rsquo;ll cover a final R topic before moving on: filtering data frames, and in particular filtering by date. To filter a data frame, we extract a <em>subset</em> of the data that fulfills a condition. For example, if we want to retrieve all the lines of <code>data</code> that contain a <code>temperature</code> measurement, pick the subset:</p>
-
 <pre><code>data.filt &lt;- subset(data, variable == 'temperature')
-</code></pre>
-
-<p>Now let&rsquo;s keep all the data from the second half of our measurement period. Pick a timestamp from the middle of the data frame and create a <code>POSIXct object from it</code>.</p>
-
+</code></pre><p>Now let&rsquo;s keep all the data from the second half of our measurement period. Pick a timestamp from the middle of the data frame and create a <code>POSIXct object from it</code>.</p>
 <pre><code>ts &lt;- data$timestamp[nrow(data) / 2]
 mindate &lt;- as.POSIXct(ts, tz = &quot;GMT&quot;, origin = &quot;1970-01-01&quot;)
-</code></pre>
-
-<p>POSIXct objects allow comparisons (<code>&gt;</code> and <code>&lt;</code>), so we can use <code>mindate</code> to filter the data:</p>
-
+</code></pre><p>POSIXct objects allow comparisons (<code>&gt;</code> and <code>&lt;</code>), so we can use <code>mindate</code> to filter the data:</p>
 <pre><code>data.filt &lt;- subset(data, date &gt; mindate)
-</code></pre>
-
-<h2 id="wrapping-them-in-functions-for-shiny">Wrapping them in functions for Shiny</h2>
-
+</code></pre><h2 id="wrapping-them-in-functions-for-shiny">Wrapping them in functions for Shiny</h2>
 <p>For easy access later in Shiny, we&rsquo;ll just shove the two <code>qplot</code> calls in a function. Our <code>helpers.R</code> file now looks like this, with the library import statement added:</p>
-
 <pre><code>library(ggplot2)
 
 getRaw &lt;- function () {
@@ -250,7 +189,6 @@ boxPlot &lt;- function(data) {
   qplot(origin, value, data = data, geom = &quot;boxplot&quot;) + facet_grid(variable ~ ., scales = &quot;free_y&quot;)
 }
 </code></pre>
-
   </div>
   
 

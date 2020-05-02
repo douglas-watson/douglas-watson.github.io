@@ -66,7 +66,7 @@
       <a href="https://github.com/douglas-watson"><i class="fa fa-github-square fa-3x"></i></a>
       
       
-      <a href="https://ch.linkedin.com/in/douglas-watson-b8464015"><i class="fa fa-linkedin-square fa-3x"></i></a>
+      
       
       
       
@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2018 <a href="http://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2020 <a href="http://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -97,111 +97,77 @@
     <br/>
     
     </span>
-    
-
-<p>Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&rsquo;ll quickly run into a &ldquo;singular gradient&rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.</p>
-
+    <p>Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&rsquo;ll quickly run into a &ldquo;singular gradient&rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.</p>
 <p>The formula I&rsquo;ll use in the following examples is:
 $$
 y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
 $$</p>
-
 <p>The measured value $y$ starts at $y_0$ and decays towards $y_f$ at a rate $\alpha$. Let&rsquo;s generate some artificial data so you can replicate the examples:</p>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">library</span>(tidyverse)
+<span style="color:#0a0">library</span>(broom)
 
-<pre><code class="language-R">library(tidyverse)
-library(broom)
-
-t = 1:100
-y1 = 22 + (53 - 22) * exp(-0.02 * t) %&gt;% jitter(10)
-y2 = 24 + (60 - 22) * exp(-0.01 * t) %&gt;% jitter(10)
+t = <span style="color:#099">1</span>:<span style="color:#099">100</span>
+y1 = <span style="color:#099">22</span> + (<span style="color:#099">53</span> - <span style="color:#099">22</span>) * <span style="color:#0a0">exp</span>(<span style="color:#099">-0.02</span> * t) %&gt;% <span style="color:#0a0">jitter</span>(<span style="color:#099">10</span>)
+y2 = <span style="color:#099">24</span> + (<span style="color:#099">60</span> - <span style="color:#099">22</span>) * <span style="color:#0a0">exp</span>(<span style="color:#099">-0.01</span> * t) %&gt;% <span style="color:#0a0">jitter</span>(<span style="color:#099">10</span>)
 
 
-df &lt;- data.frame(t = t, y = y1, sensor = 'sensor1') %&gt;% 
-  rbind(. , data.frame(t = t, y = y2, sensor = 'sensor2'))
-sensor1 &lt;- df %&gt;% filter(sensor == 'sensor1')
-</code></pre>
-
-<p>Our data looks like this:</p>
-
+df &lt;- <span style="color:#0a0">data.frame</span>(t = t, y = y1, sensor = <span style="color:#a50">&#39;sensor1&#39;</span>) %&gt;% 
+  <span style="color:#0a0">rbind</span>(. , <span style="color:#0a0">data.frame</span>(t = t, y = y2, sensor = <span style="color:#a50">&#39;sensor2&#39;</span>))
+sensor1 &lt;- df %&gt;% <span style="color:#0a0">filter</span>(sensor == <span style="color:#a50">&#39;sensor1&#39;</span>)
+</code></pre></div><p>Our data looks like this:</p>
 <pre><code>qplot(t, y, data = df, colour = sensor)
-</code></pre>
-
-<p><img src="/images/fitting/raw_data.png" alt="raw_data" /></p>
-
+</code></pre><p><img src="/images/fitting/raw_data.png" alt="raw_data"></p>
 <h2 id="fitting-with-nls">Fitting with NLS</h2>
-
 <p><code>nls</code> is the standard R base function to fit non-linear equations. Trying to fit the exponential decay with <code>nls</code> however leads to sadness and disappointment if you pick a bad initial guess for the rate constant ($\alpha$). This code:</p>
-
-<pre><code class="language-R">nls(y ~ yf + (y0 - yf) * exp(-alpha * t), 
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">nls</span>(y ~ yf + (y0 - yf) * <span style="color:#0a0">exp</span>(-alpha * t), 
     data = sensor1,
-    start = list(y0 = 54, yf = 25, alpha = 1))
-</code></pre>
-
-<p>fails with:</p>
-
+    start = <span style="color:#0a0">list</span>(y0 = <span style="color:#099">54</span>, yf = <span style="color:#099">25</span>, alpha = <span style="color:#099">1</span>))
+</code></pre></div><p>fails with:</p>
 <pre><code>Error in nls(y ~ yf + (y0 - yf) * exp(-alpha * t), data = sensor1, start = list(y0 = 54,  : 
   singular gradient
-</code></pre>
-
-<h2 id="using-ssasymp">Using SSasymp</h2>
-
+</code></pre><h2 id="using-ssasymp">Using SSasymp</h2>
 <p>The solution is to use a <em>self-starting function</em>, a special function for curve fitting that guesses its own start parameters. The asymptotic regression function, <code>SSasymp</code> is equivalent to our exponential decay:</p>
-
-<pre><code class="language-R">&gt; fit &lt;- nls(y ~ SSasymp(t, yf, y0, log_alpha), data = sensor1)
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">&gt; fit &lt;- <span style="color:#0a0">nls</span>(y ~ <span style="color:#0a0">SSasymp</span>(t, yf, y0, log_alpha), data = sensor1)
 &gt; fit
 Nonlinear regression model
-  model: y ~ SSasymp(t, yf, y0, log_alpha)
+  model: y ~ <span style="color:#0a0">SSasymp</span>(t, yf, y0, log_alpha)
    data: sensor1
        yf        y0 log_alpha 
-   21.884    52.976    -3.921 
- residual sum-of-squares: 0.9205
+   <span style="color:#099">21.884</span>    <span style="color:#099">52.976</span>    <span style="color:#099">-3.921</span> 
+ residual sum-of-squares: <span style="color:#099">0.9205</span>
 
-Number of iterations to convergence: 0 
-Achieved convergence tolerance: 8.788e-07
-</code></pre>
-
-<p>Its formula is a little different from ours, instead of fitting the rate constant $\alpha$ directly:
+Number of iterations to convergence: <span style="color:#099">0</span> 
+Achieved convergence tolerance: <span style="color:#099">8.788e-07</span>
+</code></pre></div><p>Its formula is a little different from ours, instead of fitting the rate constant $\alpha$ directly:
 $$
 y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
 $$</p>
-
 <p>It searches for the logarithm of $\alpha$:</p>
-
 <p>$$
 y(t) \sim y_f + (y_0 - y_f) e^{-\exp(\log\alpha) t}
 $$</p>
-
 <p>From the fit result, you can plot the fitted curve, or extract whichever other information you need:</p>
-
-<pre><code class="language-R">qplot(t, y, data = augment(fit)) + geom_line(aes(y = .fitted))
-</code></pre>
-
-<p><img src="/images/fitting/exponential.png" alt="Exponentially decaying data, fitted" /></p>
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">qplot</span>(t, y, data = <span style="color:#0a0">augment</span>(fit)) + <span style="color:#0a0">geom_line</span>(<span style="color:#0a0">aes</span>(y = .fitted))
+</code></pre></div><p><img src="/images/fitting/exponential.png" alt="Exponentially decaying data, fitted"></p>
 <p>For a single curve, it&rsquo;s easy to guess the approximate fit parameters by looking at the plot, or just trying several values. When fitting many curves however, it is quite convenient to automate the process. Self-starting functions are especially useful combined with dplyr, to fit several experimental conditions in one step.</p>
-
 <p>Here is how we can read out the fit parameters for each sensor in our example data:</p>
-
-<pre><code class="language-R">df %&gt;% 
-  group_by(sensor) %&gt;% 
-  do(fit = nls(y ~ SSasymp(t, yf, y0, log_alpha), data = .)) %&gt;% 
-  tidy(fit) %&gt;% 
-  select(sensor, term, estimate) %&gt;% 
-  spread(term, estimate) %&gt;% 
-  mutate(alpha = exp(log_alpha))
-</code></pre>
-
-<table>
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">df %&gt;% 
+  <span style="color:#0a0">group_by</span>(sensor) %&gt;% 
+  <span style="color:#0a0">do</span>(fit = <span style="color:#0a0">nls</span>(y ~ <span style="color:#0a0">SSasymp</span>(t, yf, y0, log_alpha), data = .)) %&gt;% 
+  <span style="color:#0a0">tidy</span>(fit) %&gt;% 
+  <span style="color:#0a0">select</span>(sensor, term, estimate) %&gt;% 
+  <span style="color:#0a0">spread</span>(term, estimate) %&gt;% 
+  <span style="color:#0a0">mutate</span>(alpha = <span style="color:#0a0">exp</span>(log_alpha))
+</code></pre></div><table>
 <thead>
 <tr>
-<th>sensor<fctr></th>
-<th>log_alpha<dbl></th>
-<th>y0<dbl></th>
-<th>yf<dbl></th>
-<th>alpha<dbl></th>
+<th>sensor<!-- raw HTML omitted --></th>
+<th>log_alpha<!-- raw HTML omitted --></th>
+<th>y0<!-- raw HTML omitted --></th>
+<th>yf<!-- raw HTML omitted --></th>
+<th>alpha<!-- raw HTML omitted --></th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td>sensor1</td>
@@ -210,7 +176,6 @@ $$</p>
 <td>21.88404</td>
 <td>0.019827795</td>
 </tr>
-
 <tr>
 <td>sensor2</td>
 <td>-4.611703</td>
@@ -220,9 +185,7 @@ $$</p>
 </tr>
 </tbody>
 </table>
-
 <p>Now we know at one glance the rate constant for each sensor location, or the $y$ value that each position will stabilise at.</p>
-
 <p>For more ideas on how to apply curve fitting with dplyr, check out my <a href="/post/2018-09_dplyr_curve_fitting">previous article on dplyr</a>.</p>
 
   </div>
