@@ -103,11 +103,11 @@
 <p><a href="/dl/Export%20Downloaded%20Podcasts.zip"><img src="/images/varia/export_podcast_service.png" alt="Export Downloaded Podcasts service"></a></p>
 <p>Clicking this will prompt you to choose a destination folder (on your desktop for example). It will then copy all downloaded episodes to this folder, tagging them in the process so that your music player indexes them correctly. The first time you run this service, it may ask for your password. It is needed to install a python library to manage mp3 file tags.</p>
 <p>You can now copy these files to any device. Happy listening!</p>
-<h1 id="side-notes">Side notes</h1>
+<h2 id="side-notes">Side notes</h2>
 <p>For cautious readers, the password is prompted by this line in a script:</p>
 <pre><code>osascript -e 'do shell script &quot;/usr/bin/easy_install mp3_tagger&quot; with administrator privileges'
 </code></pre><p>It executes the shell command <code>easy_install mp3_tagger</code>. My script never sees the password. Note that the script is written in Python 2.7, which has already been deprecated but is still the only Python version in Automator. It may break in future updates.</p>
-<h1 id="how-does-it-work">How does it work?</h1>
+<h2 id="how-does-it-work">How does it work?</h2>
 <p>Podcasts stores its data in the <code>~/Library/Group Containers/243LU875E5.groups.com.apple.podcasts</code> directory, structured like so:</p>
 <pre><code>.
 ├── Documents

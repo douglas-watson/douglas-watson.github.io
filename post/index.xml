@@ -22,11 +22,11 @@
 &lt;p&gt;&lt;a href=&#34;http://douglas-watson.github.io/dl/Export%20Downloaded%20Podcasts.zip&#34;&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/varia/export_podcast_service.png&#34; alt=&#34;Export Downloaded Podcasts service&#34;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Clicking this will prompt you to choose a destination folder (on your desktop for example). It will then copy all downloaded episodes to this folder, tagging them in the process so that your music player indexes them correctly. The first time you run this service, it may ask for your password. It is needed to install a python library to manage mp3 file tags.&lt;/p&gt;
 &lt;p&gt;You can now copy these files to any device. Happy listening!&lt;/p&gt;
-&lt;h1 id=&#34;side-notes&#34;&gt;Side notes&lt;/h1&gt;
+&lt;h2 id=&#34;side-notes&#34;&gt;Side notes&lt;/h2&gt;
 &lt;p&gt;For cautious readers, the password is prompted by this line in a script:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;osascript -e &#39;do shell script &amp;quot;/usr/bin/easy_install mp3_tagger&amp;quot; with administrator privileges&#39;
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;It executes the shell command &lt;code&gt;easy_install mp3_tagger&lt;/code&gt;. My script never sees the password. Note that the script is written in Python 2.7, which has already been deprecated but is still the only Python version in Automator. It may break in future updates.&lt;/p&gt;
-&lt;h1 id=&#34;how-does-it-work&#34;&gt;How does it work?&lt;/h1&gt;
+&lt;h2 id=&#34;how-does-it-work&#34;&gt;How does it work?&lt;/h2&gt;
 &lt;p&gt;Podcasts stores its data in the &lt;code&gt;~/Library/Group Containers/243LU875E5.groups.com.apple.podcasts&lt;/code&gt; directory, structured like so:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;.
 ├── Documents
