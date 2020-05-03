@@ -54,7 +54,8 @@
       <pubDate>Sun, 09 Sep 2018 11:00:00 +0200</pubDate>
       
       <guid>http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/</guid>
-      <description>&lt;p&gt;Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&amp;rsquo;ll quickly run into a &amp;ldquo;singular gradient&amp;rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.&lt;/p&gt;
+      <description>&lt;p&gt;&lt;em&gt;Updated in May 2020 to show a full example with qplot.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&amp;rsquo;ll quickly run into a &amp;ldquo;singular gradient&amp;rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.&lt;/p&gt;
 &lt;p&gt;The formula I&amp;rsquo;ll use in the following examples is:
 $$
 y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
@@ -143,7 +144,18 @@ $$&lt;/p&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;Now we know at one glance the rate constant for each sensor location, or the $y$ value that each position will stabilise at.&lt;/p&gt;
-&lt;p&gt;For more ideas on how to apply curve fitting with dplyr, check out my &lt;a href=&#34;http://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting&#34;&gt;previous article on dplyr&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;plotting-with-gglot2&#34;&gt;Plotting with gglot2&lt;/h2&gt;
+&lt;p&gt;To show both fitted curves on the original data, use broom&amp;rsquo;s &lt;code&gt;augment&lt;/code&gt; function:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;augmented &amp;lt;- df %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(sensor) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;do&lt;/span&gt;(fit = &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ &lt;span style=&#34;color:#0a0&#34;&gt;SSasymp&lt;/span&gt;(t, yf, y0, log_alpha), data = .)) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)
+
+&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = augmented, geom = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;point&amp;#39;&lt;/span&gt;, colour = sensor) +
+  &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y=.fitted))
+&lt;span style=&#34;color:#0a0&#34;&gt;ggsave&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;ggplot_exponential_fit.png&amp;#34;&lt;/span&gt;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/ggplot_exponential_fit.png&#34; alt=&#34;Plotting the result of an exponential fit with qplot and ggplot2&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;augment&lt;/code&gt; also yields the residuals. For more ideas on how to apply curve fitting with dplyr, check out my &lt;a href=&#34;http://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting&#34;&gt;previous article on dplyr&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
     
