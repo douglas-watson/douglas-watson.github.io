@@ -1,25 +1,25 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on Programming notes</title>
-    <link>http://douglas-watson.github.io/post/</link>
+    <link>https://douglas-watson.github.io/post/</link>
     <description>Recent content in Posts on Programming notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 02 May 2020 20:03:46 +0000</lastBuildDate>
     
-        <atom:link href="http://douglas-watson.github.io/post/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="https://douglas-watson.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>How To Export Apple Podcasts to mp3 Files</title>
-      <link>http://douglas-watson.github.io/post/2020-05_export_podcasts/</link>
+      <link>https://douglas-watson.github.io/post/2020-05_export_podcasts/</link>
       <pubDate>Sat, 02 May 2020 20:03:46 +0000</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/2020-05_export_podcasts/</guid>
+      <guid>https://douglas-watson.github.io/post/2020-05_export_podcasts/</guid>
       <description>&lt;p&gt;&lt;em&gt;Or how to export podcasts to your Sandisk Clip or other non-Apple device.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Apple Podcasts, introduced in macOS Catalina, is a convenient app: every podcast page I&amp;rsquo;ve ever visited includes a &amp;ldquo;Listen on Apple Podcasts&amp;rdquo; link, it&amp;rsquo;s already installed on my computer, and I can download episodes for offline listening. The problem is that I can&amp;rsquo;t get those offline files &lt;em&gt;out&lt;/em&gt; of Apple Podcasts, to transfer them to my small waterproof mp3 player.&lt;/p&gt;
-&lt;p&gt;To solve this problem, I made a quick Automator service that finds all downloaded episodes and copies them to a directory of your choosing. Download it &lt;a href=&#34;http://douglas-watson.github.io/dl/Export%20Downloaded%20Podcasts.zip&#34;&gt;here&lt;/a&gt;, unzip the file, and open the .workflow file. MacOS should offer to install it: &lt;em&gt;Do you want to install the “Export Downloaded Podcasts” quick action?&lt;/em&gt; Once installed, you&amp;rsquo;ll have a new service available in Podcasts:&lt;/p&gt;
-&lt;p&gt;&lt;a href=&#34;http://douglas-watson.github.io/dl/Export%20Downloaded%20Podcasts.zip&#34;&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/varia/export_podcast_service.png&#34; alt=&#34;Export Downloaded Podcasts service&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;To solve this problem, I made a quick Automator service that finds all downloaded episodes and copies them to a directory of your choosing. Download it &lt;a href=&#34;https://douglas-watson.github.io/dl/Export%20Downloaded%20Podcasts.zip&#34;&gt;here&lt;/a&gt;, unzip the file, and open the .workflow file. MacOS should offer to install it: &lt;em&gt;Do you want to install the “Export Downloaded Podcasts” quick action?&lt;/em&gt; Once installed, you&amp;rsquo;ll have a new service available in Podcasts:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://douglas-watson.github.io/dl/Export%20Downloaded%20Podcasts.zip&#34;&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/varia/export_podcast_service.png&#34; alt=&#34;Export Downloaded Podcasts service&#34;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;Clicking this will prompt you to choose a destination folder (on your desktop for example). It will then copy all downloaded episodes to this folder, tagging them in the process so that your music player indexes them correctly. The first time you run this service, it may ask for your password. It is needed to install a Python library to manage mp3 file tags.&lt;/p&gt;
 &lt;p&gt;You can now copy these files to any device. Happy listening!&lt;/p&gt;
 &lt;h2 id=&#34;side-notes&#34;&gt;Side notes&lt;/h2&gt;
@@ -41,7 +41,7 @@
 ... ... ... 
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;As far as I can tell, the path is the same on everyone&amp;rsquo;s computer. The &lt;code&gt;Library/Cache&lt;/code&gt; subfolder contains an mp3 file for each downloaded episode, named after an internal unique id and with empty ID3 tags. Since the tags are empty, we need to look elsewhere to identify these files. We find that &lt;code&gt;Documents&lt;/code&gt; contains a sqlite database that stores the application&amp;rsquo;s Core Data, including lists of podcasts and episodes.&lt;/p&gt;
 &lt;p&gt;It was actually easiest to use the database as a starting point. The first step was to find all episodes that are cached and find their associated podcast name and author:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/varia/sql_query.png&#34; alt=&#34;SQlite query&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/varia/sql_query.png&#34; alt=&#34;SQlite query&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Quick shout-out to &lt;a href=&#34;https://sqlitebrowser.org/&#34;&gt;DB browser for SQLite&lt;/a&gt; that made this exploration quite easy.&lt;/p&gt;
 &lt;p&gt;Once we&amp;rsquo;ve figured out the SQL query, we just need to execute it in a Python script and loop through each result, copying the file from &lt;code&gt;ZASSETURL&lt;/code&gt; to the destination folder and setting the ID3 tags.&lt;/p&gt;
 &lt;p&gt;For convenience, I wrapped this python script in an Automator workflow that registers as a service for the Podcasts App. You can see the full code here: &lt;a href=&#34;https://github.com/douglas-watson/podcasts_export&#34;&gt;https://github.com/douglas-watson/podcasts_export&lt;/a&gt;.&lt;/p&gt;
@@ -52,10 +52,10 @@
     
     <item>
       <title>Fitting exponential decays in R, the easy way</title>
-      <link>http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/</link>
+      <link>https://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/</link>
       <pubDate>Sun, 09 Sep 2018 11:00:00 +0200</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/</guid>
+      <guid>https://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/</guid>
       <description>&lt;p&gt;&lt;em&gt;Updated in May 2020 to show a full example with qplot.&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&amp;rsquo;ll quickly run into a &amp;ldquo;singular gradient&amp;rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.&lt;/p&gt;
 &lt;p&gt;The formula I&amp;rsquo;ll use in the following examples is:
@@ -76,7 +76,7 @@ df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = 
 sensor1 &amp;lt;- df %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;filter&lt;/span&gt;(sensor == &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our data looks like this:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;qplot(t, y, data = df, colour = sensor)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/raw_data.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/raw_data.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;fitting-with-nls&#34;&gt;Fitting with NLS&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;nls&lt;/code&gt; is the standard R base function to fit non-linear equations. Trying to fit the exponential decay with &lt;code&gt;nls&lt;/code&gt; however leads to sadness and disappointment if you pick a bad initial guess for the rate constant ($\alpha$). This code:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ yf + (y0 - yf) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(-alpha * t), 
@@ -108,7 +108,7 @@ y(t) \sim y_f + (y_0 - y_f) e^{-\exp(\log\alpha) t}
 $$&lt;/p&gt;
 &lt;p&gt;From the fit result, you can plot the fitted curve, or extract whichever other information you need:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)) + &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y = .fitted))
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/exponential.png&#34; alt=&#34;Exponentially decaying data, fitted&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/exponential.png&#34; alt=&#34;Exponentially decaying data, fitted&#34;&gt;&lt;/p&gt;
 &lt;p&gt;For a single curve, it&amp;rsquo;s easy to guess the approximate fit parameters by looking at the plot, or just trying several values. When fitting many curves however, it is quite convenient to automate the process. Self-starting functions are especially useful combined with dplyr, to fit several experimental conditions in one step.&lt;/p&gt;
 &lt;p&gt;Here is how we can read out the fit parameters for each sensor in our example data:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;df %&amp;gt;% 
@@ -156,17 +156,17 @@ $$&lt;/p&gt;
 &lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = augmented, geom = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;point&amp;#39;&lt;/span&gt;, colour = sensor) +
   &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y=.fitted))
 &lt;span style=&#34;color:#0a0&#34;&gt;ggsave&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;ggplot_exponential_fit.png&amp;#34;&lt;/span&gt;)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/ggplot_exponential_fit.png&#34; alt=&#34;Plotting the result of an exponential fit with qplot and ggplot2&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;augment&lt;/code&gt; also yields the residuals. For more ideas on how to apply curve fitting with dplyr, check out my &lt;a href=&#34;http://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting&#34;&gt;previous article on dplyr&lt;/a&gt;.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/ggplot_exponential_fit.png&#34; alt=&#34;Plotting the result of an exponential fit with qplot and ggplot2&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;augment&lt;/code&gt; also yields the residuals. For more ideas on how to apply curve fitting with dplyr, check out my &lt;a href=&#34;https://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting&#34;&gt;previous article on dplyr&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>Curve fitting on batches in the tidyverse: R, dplyr, and broom</title>
-      <link>http://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/</link>
+      <link>https://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/</link>
       <pubDate>Sun, 09 Sep 2018 10:00:00 +0200</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/</guid>
+      <guid>https://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/</guid>
       <description>&lt;p&gt;I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.&lt;/p&gt;
 &lt;p&gt;First we&amp;rsquo;ll generate some artificial data so that you can follow along at home. Here&amp;rsquo;s an exponentially decaying value measured by two sensors at different locations:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# if needed&lt;/span&gt;
@@ -234,8 +234,8 @@ df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = 
 &lt;/table&gt;
 &lt;p&gt;And our data looks like this:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;qplot(t, y, data = df, colour = sensor)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/raw_data.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
-&lt;p&gt;I created the data in &lt;em&gt;long format&lt;/em&gt;, as it works best with dplyr pipelines. You can read more about long format vs wide format data &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/raw_data.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
+&lt;p&gt;I created the data in &lt;em&gt;long format&lt;/em&gt;, as it works best with dplyr pipelines. You can read more about long format vs wide format data &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_1_gdocs&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
 &lt;h3 id=&#34;i-want-to-plot-the-fitted-curve-over-my-data-points&#34;&gt;I want to plot the fitted curve over my data points&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;augmented &amp;lt;- df %&amp;gt;% 
@@ -246,12 +246,12 @@ df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = 
 &lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = augmented, geom = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;point&amp;#39;&lt;/span&gt;, colour = sensor) +
   &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y=.fitted))
 
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/fit.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/fit.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;h3 id=&#34;i-want-to-plot-the-residuals&#34;&gt;I want to plot the residuals&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, .resid, data = augmented, colour = sensor)
 &lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(.fitted, .resid, data = augmented, colour = sensor)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/residuals1.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/residuals2.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/residuals1.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/residuals2.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;i-want-a-table-of-my-fit-parameters-for-each-condition&#34;&gt;I want a table of my fit parameters for each condition:&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;df %&amp;gt;% 
   &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(sensor) %&amp;gt;% 
@@ -284,7 +284,7 @@ df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = 
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h3 id=&#34;i-want-a-less-horrendous-fit-how-can-i-do-better&#34;&gt;I want a less horrendous fit. How can I do better?&lt;/h3&gt;
-&lt;p&gt;Try with an actual exponential. You&amp;rsquo;ll probably want a self-starting function to avoid the &amp;ldquo;singular gradient&amp;rdquo; error — read more in &lt;a href=&#34;http://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/&#34;&gt;my post on the subject&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Try with an actual exponential. You&amp;rsquo;ll probably want a self-starting function to avoid the &amp;ldquo;singular gradient&amp;rdquo; error — read more in &lt;a href=&#34;https://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/&#34;&gt;my post on the subject&lt;/a&gt;.&lt;/p&gt;
 &lt;h2 id=&#34;explanation-intro-to-curve-fitting-in-r&#34;&gt;Explanation: intro to curve fitting in R&lt;/h2&gt;
 &lt;p&gt;The goal of our fitting example was to find an estimate $\hat{y}(t) = a t + b$ that approximates our measured data $y$. In R, we can directly write that we want to approximate $y$ as a function $a \cdot t + b$, using the very intuitive built-in &lt;strong&gt;formula&lt;/strong&gt; syntax:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;y ~ a * t + b
@@ -419,8 +419,8 @@ Achieved convergence tolerance: 1.571e-09
 &lt;p&gt;You can plot the &amp;lsquo;augmented&amp;rsquo; fit with qplot:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)) + &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y = .fitted))
 &lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, .resid, data = &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit))
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/augmented1.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/fitting/augmented2.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/augmented1.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/augmented2.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;glance&lt;/strong&gt; shows fit statistics:&lt;/li&gt;
 &lt;/ul&gt;
@@ -606,26 +606,26 @@ fitted
     
     <item>
       <title>An interactive map of mass shootings based on Shiny</title>
-      <link>http://douglas-watson.github.io/post/2018-03_mass-shootings/</link>
+      <link>https://douglas-watson.github.io/post/2018-03_mass-shootings/</link>
       <pubDate>Thu, 15 Mar 2018 08:12:00 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/2018-03_mass-shootings/</guid>
+      <guid>https://douglas-watson.github.io/post/2018-03_mass-shootings/</guid>
       <description>&lt;blockquote&gt;
 &lt;p&gt;&amp;ldquo;Four? That&amp;rsquo;s barely your average family murder-suicide!&amp;rdquo; - Anonymous American&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;The United States saw 427 mass shootings in 2017, making a total of 2571 victims. That&amp;rsquo;s more than one shooting per day.&lt;/p&gt;
 &lt;p&gt;Why don&amp;rsquo;t you hear about them on the news every day? Or conversely, if they are so common, why did the recent shooting in Las Vegas or the night club shooting in Orlando get so much attention?&lt;/p&gt;
 &lt;p&gt;These numbers are gathered by MassShootingTracker.org, who define a mass shooting as an event with four or more victims, including dead and wounded. I heard several people react along the lines of the quote above, who said that four people is hardly a mass shooting by American standards. So, how would the numbers change if you changed the definition? This question inspired me to make an interactive visualisation of the data, with a slider that lets you pick your own definition of a mass shooting. I then got intrigued by where they were happening: in what states? Can we show them on a map? When are they happening, are there more and more every year? What about Europe, how do their numbers compare? Read on to learn more, or head over to the &lt;a href=&#34;https://moncherwatson.shinyapps.io/mass-shootings/&#34;&gt;interactive app&lt;/a&gt; to answer those questions and play with the data yourself.&lt;/p&gt;
-&lt;p&gt;&lt;a href=&#34;https://moncherwatson.shinyapps.io/mass-shootings/&#34;&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/overview.png&#34; alt=&#34;Dashboard overview&#34;&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://moncherwatson.shinyapps.io/mass-shootings/&#34;&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/shootings/overview.png&#34; alt=&#34;Dashboard overview&#34;&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;This being a technical blog, however, the goal is not to make a social or political analysis, but rather to explain how I built the app. Read along to learn more about the unexpected challenges I encountered to represent the data on a map and cache location data for online deployment; maybe you&amp;rsquo;ll learn from some of my mistakes.&lt;/p&gt;
 &lt;h2 id=&#34;basics&#34;&gt;Basics&lt;/h2&gt;
-&lt;p&gt;&lt;em&gt;If you are new to Shiny, you can skim through my first article on the subject &lt;a href=&#34;http://douglas-watson.github.io/post/ggdocs_3_shiny/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;If you are new to Shiny, you can skim through my first article on the subject &lt;a href=&#34;https://douglas-watson.github.io/post/ggdocs_3_shiny/&#34;&gt;here&lt;/a&gt;&lt;/em&gt;.&lt;/p&gt;
 &lt;p&gt;The visualisation is a Shiny application, hosted on the free tier of Shinyapps.io. A couple of filters can select events by date range, or limit the minimum number of victims. A map (shown above) shows the location of every event, marked by a circle whose area is proportional to the total number of victims — you&amp;rsquo;ll notice that the Florida and Nevada circles are much larger than any of the others; these shootings were exceptionally violent. Clicking a marker pops up links to related news articles. Optionally, events can be clustered on the map to reduce clutter. A searchable table shows a list of all events:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/table.png&#34; alt=&#34;Searchable table&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/shootings/table.png&#34; alt=&#34;Searchable table&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Two bar graphs show number of shootings and victims per month. Interestingly, they show a cyclic trend: shootings are more common in the summer.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/per_month.png&#34; alt=&#34;Shootings by month&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/shootings/per_month.png&#34; alt=&#34;Shootings by month&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Another set of graphs shows the number of shootings and victims per state, optionally normalised by state population. The absolute totals just tend to show that larger states have more shootings. Per capita numbers show that D.C. is the most dangerous state!&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/per_state.png&#34; alt=&#34;Shootings by state&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/shootings/per_state.png&#34; alt=&#34;Shootings by state&#34;&gt;&lt;/p&gt;
 &lt;p&gt;The end result is slow, so either my approach or choice of platform probably weren&amp;rsquo;t the best. It would be interesting to deploy the app to a faster service, to see if the issue comes from an inherent slowness of Shiny, or from the limitations of shinyapps.io.&lt;/p&gt;
 &lt;h2 id=&#34;data-and-tools&#34;&gt;Data and tools&lt;/h2&gt;
 &lt;p&gt;The data is provided by MassShootingTracker.org, in the form of one CSV file per year. The file for the current year is continuously updated on their website, thus my app downloads the latest version every time it is reloaded. Files from previous years are saved to disk.&lt;/p&gt;
@@ -703,17 +703,17 @@ fitted
 }
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;europe&#34;&gt;Europe&lt;/h2&gt;
 &lt;p&gt;After working on the American map, I was interested in comparing with European data. I found data for 2016, aggregated by a &lt;a href=&#34;https://www.vice.com/en_us/article/4wb9p3/mass-shootings-in-europe-in-2016&#34;&gt;Vice journalist&lt;/a&gt;. The result was rather boring: Russia saw the most shootings, but per capita the victims are fewer than the safest US state. Cyprus has such a small population that a single event skewed the statistics.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/europe_events.png&#34; alt=&#34;Total number of shootings in 2016, comparing USA to Europe&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/shootings/europe_victims.png&#34; alt=&#34;Total shooting victims in 2016, comparing USA to Europe&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/shootings/europe_events.png&#34; alt=&#34;Total number of shootings in 2016, comparing USA to Europe&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/shootings/europe_victims.png&#34; alt=&#34;Total shooting victims in 2016, comparing USA to Europe&#34;&gt;&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>How to add Google Analytics to a Shiny application</title>
-      <link>http://douglas-watson.github.io/post/2018-02_shiny_google_analytics/</link>
+      <link>https://douglas-watson.github.io/post/2018-02_shiny_google_analytics/</link>
       <pubDate>Wed, 21 Feb 2018 22:00:00 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/2018-02_shiny_google_analytics/</guid>
+      <guid>https://douglas-watson.github.io/post/2018-02_shiny_google_analytics/</guid>
       <description>&lt;p&gt;I recently wanted to add a Google Analytics tracker to a Shiny dashboard, and I found that the official documentation doesn&amp;rsquo;t explain how to include &amp;ldquo;Global Site Tag&amp;rdquo; tracking code, which seems to be the current default setting in Analytics. The process is simple, we just have to include the tracking code as an HTML snippet in &lt;code&gt;ui.R&lt;/code&gt;. The process requires only two steps:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;Copy the analytics HTML snippet into a text file&lt;/li&gt;
@@ -745,16 +745,16 @@ fitted
     
     <item>
       <title>How to change the number of breaks on a datetime axis with R and ggplot2</title>
-      <link>http://douglas-watson.github.io/post/2017-05_ggplot_datetime/</link>
+      <link>https://douglas-watson.github.io/post/2017-05_ggplot_datetime/</link>
       <pubDate>Sat, 06 May 2017 07:33:58 +0200</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/2017-05_ggplot_datetime/</guid>
+      <guid>https://douglas-watson.github.io/post/2017-05_ggplot_datetime/</guid>
       <description>&lt;p&gt;It took me a surprising amount of time to find how to change the tick interval on ggplot2 datetime axes, without manually specifying the date of each position. The solution is surprisingly simple and clear once you know the syntax:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;scale_x_datetime&lt;/span&gt;(date_breaks = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;12 hours&amp;#34;&lt;/span&gt;)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This places a break every 12 hours. The interval can be any value accepted by the &lt;code&gt;scales&lt;/code&gt; package: &amp;ldquo;sec&amp;rdquo;, &amp;ldquo;min&amp;rdquo;, &amp;ldquo;hour&amp;rdquo;, &amp;ldquo;day&amp;rdquo;, &amp;ldquo;week&amp;rdquo;, &amp;ldquo;month&amp;rdquo;, or &amp;ldquo;year&amp;rdquo;. The trailing &lt;code&gt;s&lt;/code&gt; is ignored. Read along for examples and instructions on how to rotate the label text.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Updated 2 Feb 2018: changed from using &lt;code&gt;breaks&lt;/code&gt; argument to using &lt;code&gt;date_breaks&lt;/code&gt; argument.&lt;/em&gt;&lt;/p&gt;
 &lt;h1 id=&#34;examples&#34;&gt;Examples&lt;/h1&gt;
-&lt;p&gt;Let&amp;rsquo;s illustrate with some fake data. I&amp;rsquo;ve re-used the CSV data from my Shiny tutorial. You can download the file &lt;a href=&#34;http://douglas-watson.github.io/data/datetime/data.csv&#34;&gt;here&lt;/a&gt;. The format looks like this:&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s illustrate with some fake data. I&amp;rsquo;ve re-used the CSV data from my Shiny tutorial. You can download the file &lt;a href=&#34;https://douglas-watson.github.io/data/datetime/data.csv&#34;&gt;here&lt;/a&gt;. The format looks like this:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;&amp;quot;timestamp&amp;quot;,&amp;quot;date&amp;quot;,&amp;quot;origin&amp;quot;,&amp;quot;variable&amp;quot;,&amp;quot;value&amp;quot;
 1448315085.07,2015-11-23 21:44:45,&amp;quot;kitchen&amp;quot;,&amp;quot;temperature&amp;quot;,24.4
 1448315085.07,2015-11-23 21:44:45,&amp;quot;kitchen&amp;quot;,&amp;quot;humidity&amp;quot;,44.9
@@ -766,7 +766,7 @@ fitted
 1448318685.07,2015-11-23 22:44:45,&amp;quot;bedroom&amp;quot;,&amp;quot;humidity&amp;quot;,45.7
 1448322285.07,2015-11-23 23:44:45,&amp;quot;kitchen&amp;quot;,&amp;quot;temperature&amp;quot;,23.4
 ...
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Let&amp;rsquo;s load it into an R dataframe, making sure to convert the date column to an R datetime object (see my &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r&#34;&gt;previous post&lt;/a&gt; on the subject), then create a simple plot of temperature versus time:&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Let&amp;rsquo;s load it into an R dataframe, making sure to convert the date column to an R datetime object (see my &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_2_r&#34;&gt;previous post&lt;/a&gt; on the subject), then create a simple plot of temperature versus time:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(ggplot2)
 &lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(scales)
 &lt;span style=&#34;color:#0a0&#34;&gt;library&lt;/span&gt;(dplyr)
@@ -777,20 +777,20 @@ temperatures &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;filter&lt;/span&gt
 
 
 &lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(date, value, data = temperatures, geom=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;line&amp;#34;&lt;/span&gt;, ylab = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;Temperature [C]&amp;#34;&lt;/span&gt;)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/1_baseplot.png&#34; alt=&#34;Default date scale&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/datetime/1_baseplot.png&#34; alt=&#34;Default date scale&#34;&gt;&lt;/p&gt;
 &lt;p&gt;The default breaks are quite sensible, but for the sake of illustration let&amp;rsquo;s change them to a break every two days. The label format follows strftime syntax (see &lt;a href=&#34;http://www.foragoodstrftime.com/&#34;&gt;http://www.foragoodstrftime.com/&lt;/a&gt; for help building them):&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(date, value, data = temperatures, geom=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;line&amp;#34;&lt;/span&gt;, ylab = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;Temperature [C]&amp;#34;&lt;/span&gt;) +
   &lt;span style=&#34;color:#0a0&#34;&gt;scale_x_datetime&lt;/span&gt;(date_breaks = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;2 day&amp;#34;&lt;/span&gt;, labels = &lt;span style=&#34;color:#0a0&#34;&gt;date_format&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;%b %d&amp;#34;&lt;/span&gt;))
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/2_datetime.png&#34; alt=&#34;Reduced number of ticks&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/datetime/2_datetime.png&#34; alt=&#34;Reduced number of ticks&#34;&gt;&lt;/p&gt;
 &lt;p&gt;You can see the number of breaks has changed. Most of the time, I&amp;rsquo;m more interested in increasing their density. Let&amp;rsquo;s switch to an interval in hours, and also include the time in the labels:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(date, value, data = temperatures, geom=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;line&amp;#34;&lt;/span&gt;, ylab = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;Temperature [C]&amp;#34;&lt;/span&gt;) +
   &lt;span style=&#34;color:#0a0&#34;&gt;scale_x_datetime&lt;/span&gt;(date_breaks = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;12 hour&amp;#34;&lt;/span&gt;, labels = &lt;span style=&#34;color:#0a0&#34;&gt;date_format&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;%b %d - %H:%M&amp;#34;&lt;/span&gt;))
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/3_hours.png&#34; alt=&#34;Increased number of ticks&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/datetime/3_hours.png&#34; alt=&#34;Increased number of ticks&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Ouch! The labels are unreadable. Thankfully we can rotate the text to prevent them from overlapping:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(date, value, data = temperatures, geom=&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;line&amp;#34;&lt;/span&gt;, ylab = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;Temperature [C]&amp;#34;&lt;/span&gt;) +
   &lt;span style=&#34;color:#0a0&#34;&gt;scale_x_datetime&lt;/span&gt;(date_breaks = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;12 hour&amp;#34;&lt;/span&gt;, labels = &lt;span style=&#34;color:#0a0&#34;&gt;date_format&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;%b %d - %H:%M&amp;#34;&lt;/span&gt;)) +
   &lt;span style=&#34;color:#0a0&#34;&gt;theme&lt;/span&gt;(axis.text.x = &lt;span style=&#34;color:#0a0&#34;&gt;element_text&lt;/span&gt;(angle = &lt;span style=&#34;color:#099&#34;&gt;25&lt;/span&gt;, vjust = &lt;span style=&#34;color:#099&#34;&gt;1.0&lt;/span&gt;, hjust = &lt;span style=&#34;color:#099&#34;&gt;1.0&lt;/span&gt;))
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/datetime/4_hours_rotation.png&#34; alt=&#34;Increased number of ticks&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/datetime/4_hours_rotation.png&#34; alt=&#34;Increased number of ticks&#34;&gt;&lt;/p&gt;
 &lt;p&gt;That&amp;rsquo;s a lot better! If you set the angle to 90 degrees, or if you have an older version of R, you will need to play with the &lt;code&gt;vjust&lt;/code&gt; and &lt;code&gt;hjust&lt;/code&gt; values until the labels line up correctly. Try adding &lt;code&gt;debug = TRUE&lt;/code&gt; to &lt;code&gt;element_text&lt;/code&gt; to display the text anchor point.&lt;/p&gt;
 &lt;h1 id=&#34;including-these-in-a-library&#34;&gt;Including these in a library&lt;/h1&gt;
 &lt;p&gt;I found myself loading the same data format and making similar graphs across many R notebooks, so I wrote a small library of functions that I could re-use in all of my analyses. &lt;a href=&#34;https://hilaryparker.com/2014/04/29/writing-an-r-package-from-scratch/&#34;&gt;Hillary Parker&amp;rsquo;s guide&lt;/a&gt; explains everything you need to write your own. My functions resemble the code below, where I can optionally specify a tick interval. The labels include the time automatically if I specify an interval in hours. If I leave the argument blank, ggplot keeps its defaults:&lt;/p&gt;
@@ -820,11 +820,11 @@ temperatures &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;filter&lt;/span&gt
     
     <item>
       <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 3/3</title>
-      <link>http://douglas-watson.github.io/post/gdocs_3_shiny/</link>
+      <link>https://douglas-watson.github.io/post/gdocs_3_shiny/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:42 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/gdocs_3_shiny/</guid>
-      <description>&lt;p&gt;This is the third and final part of the Shiny + Google Docs dashboard tutorial, where I explain how to build a live web dashboard for connected &amp;ldquo;Internet of Things&amp;rdquo; sensors, using Google Sheets as a data server. &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;Part one&lt;/a&gt; covered setting up a Google Sheet to store and serve data through HTTP requests; &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt; covered reading, filtering, and plotting that data in R. In this part, we&amp;rsquo;ll create the actual dashboard and host it online.&lt;/p&gt;
+      <guid>https://douglas-watson.github.io/post/gdocs_3_shiny/</guid>
+      <description>&lt;p&gt;This is the third and final part of the Shiny + Google Docs dashboard tutorial, where I explain how to build a live web dashboard for connected &amp;ldquo;Internet of Things&amp;rdquo; sensors, using Google Sheets as a data server. &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;Part one&lt;/a&gt; covered setting up a Google Sheet to store and serve data through HTTP requests; &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt; covered reading, filtering, and plotting that data in R. In this part, we&amp;rsquo;ll create the actual dashboard and host it online.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Chinese translation: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;Shiny adds a web server and an interactive web front end to R code and graphics. We&amp;rsquo;ll use it to make a web-based dashboard, in other words a collection of plots that display the latest sensor data with some widgets to modify the plots. In this section, we&amp;rsquo;ll first build a simple page that shows a time series and boxplot with the latest data from Google Sheets. We&amp;rsquo;ll then add a date selection widget that narrows down the time period to be displayed.&lt;/p&gt;
 &lt;p&gt;The finished shiny app is on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
@@ -870,9 +870,9 @@ shinyServer(function(input, output) {
 
 })
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Create the &lt;code&gt;ui.R&lt;/code&gt; and &lt;code&gt;server.R&lt;/code&gt; files in the same directory as &lt;code&gt;helpers.R&lt;/code&gt;, which you created at the end of the previous section. RStudio automatically detects that the files are Shiny application and adds a &amp;ldquo;Run App&amp;rdquo; button the toolbar above the editor.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/33_run_btn.png&#34; alt=&#34;RStudio adds a run button to Shiny applications&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/33_run_btn.png&#34; alt=&#34;RStudio adds a run button to Shiny applications&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Use that button to preview the application. It should pop up a window similar to the one below:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/31_basicui.png&#34; alt=&#34;Our first dashboard, with two static graphs&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/31_basicui.png&#34; alt=&#34;Our first dashboard, with two static graphs&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Note that none of our code detects changes on the google document; you still need to refresh the page to get the latest data.&lt;/p&gt;
 &lt;h2 id=&#34;add-a-grid-layout-and-filter-by-date&#34;&gt;Add a grid layout and filter by date&lt;/h2&gt;
 &lt;p&gt;Let&amp;rsquo;s now add some date selection widgets that restrict the displayed date range. We&amp;rsquo;ll first extend the layout from a simple vertical stack to a &lt;em&gt;fluid grid&lt;/em&gt;. On sufficiently wide displays, this layout shows up as a grid. On narrower displays, it reverts to a vertical stack, to avoid lateral scrolling. Grids are specified as &lt;code&gt;fluidRow&lt;/code&gt; elements which contain &lt;code&gt;column&lt;/code&gt; elements. Each column is assigned a width (in units of 1/12 of the screen width) and can contain another widget (an input, a plot, or another grid). The new &lt;code&gt;ui.R&lt;/code&gt; file below now shows a layout with nested rows and columns.&lt;/p&gt;
@@ -941,11 +941,11 @@ shinyServer(function(input, output) {
 
 })
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Run the application again. The new result should resemble my example below:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;Our improved dashboard, now with date range selection&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;Our improved dashboard, now with date range selection&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;publish-to-shinyappsio&#34;&gt;Publish to Shinyapps.io&lt;/h2&gt;
 &lt;p&gt;ShinyApps.io provides a hosting service for Shiny apps, and is another product by the makers of RStudio. Their developers integrated the service into RStudio: simply click &amp;ldquo;Publish&amp;rdquo; in the upper right corner of your Shiny app preview, and follow the instructions! Create a free account and upload your dashboard.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/35_publish_btn.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/34_publish.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/35_publish_btn.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/34_publish.png&#34; alt=&#34;Publish your dashboard to ShinyApps.io from RStudio&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Once the app is published, you will notice a problem remains: nothing shows up on your dashboard. If you check the server logs, you&amp;rsquo;ll notice that HTTPS requests from R to Google Sheets failed. The final section of our tutorial, below, will explain how to work around that.&lt;/p&gt;
 &lt;h2 id=&#34;using-an-https-to-http-proxy&#34;&gt;Using an https to http proxy&lt;/h2&gt;
 &lt;p&gt;Sadly, ShinyApps (at the time of writing) doesn&amp;rsquo;t support https URLs, and thus blocks the request to Google Sheets. To work around this, we need to route the requests through an external server (a proxy) which is accessible through HTTP, can fetch the target HTTPS page, and return it back to R&amp;rsquo;s &lt;code&gt;read.csv&lt;/code&gt; request through HTTP. Doing this goes against the security benefits of HTTPS, but since we are making a public dashboard from data publicly available on a Google Sheet, and mostly for demonstration only, I&amp;rsquo;m not concerned about it.&lt;/p&gt;
@@ -964,12 +964,12 @@ data &amp;lt;- read.csv(
     
     <item>
       <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 2/3</title>
-      <link>http://douglas-watson.github.io/post/gdocs_2_r/</link>
+      <link>https://douglas-watson.github.io/post/gdocs_2_r/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:38 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/gdocs_2_r/</guid>
-      <description>&lt;p&gt;This is the second installment of the Shiny + GDocs dashboard tutorial, where we learn how to use a Google Sheet spreadsheet to store data from connected &amp;ldquo;Internet of Things&amp;rdquo; data and use Shiny to create a web page to show the data. The &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;first part&lt;/a&gt; showed you how to set up a Google Sheet to serve as a data server that accepts POST and GET HTTP requests, as well as how to use pivot tables and filters on the sheets directly. In this section, I&amp;rsquo;ll walk you through the specific aspects of R that we will wrap in Shiny code. We&amp;rsquo;ll cover: how to download CSV data from the web, handling date fields, and making various plots with ggplot2. I assume if you are reading tutorial that you already are using R and found the tutorial through a desire to connect to Google Sheets data. If not, I hope this overview will motivate you to learn more R!&lt;/p&gt;
-&lt;p&gt;If you want to skip to using Shiny, head over to &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny&#34;&gt;part 3&lt;/a&gt;. The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
+      <guid>https://douglas-watson.github.io/post/gdocs_2_r/</guid>
+      <description>&lt;p&gt;This is the second installment of the Shiny + GDocs dashboard tutorial, where we learn how to use a Google Sheet spreadsheet to store data from connected &amp;ldquo;Internet of Things&amp;rdquo; data and use Shiny to create a web page to show the data. The &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;first part&lt;/a&gt; showed you how to set up a Google Sheet to serve as a data server that accepts POST and GET HTTP requests, as well as how to use pivot tables and filters on the sheets directly. In this section, I&amp;rsquo;ll walk you through the specific aspects of R that we will wrap in Shiny code. We&amp;rsquo;ll cover: how to download CSV data from the web, handling date fields, and making various plots with ggplot2. I assume if you are reading tutorial that you already are using R and found the tutorial through a desire to connect to Google Sheets data. If not, I hope this overview will motivate you to learn more R!&lt;/p&gt;
+&lt;p&gt;If you want to skip to using Shiny, head over to &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_3_shiny&#34;&gt;part 3&lt;/a&gt;. The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Chinese translation: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id=&#34;recommended-setup&#34;&gt;Recommended setup&lt;/h2&gt;
 &lt;p&gt;If you are an experienced R user, you already know what development environment you prefer. Use that one. If not, I recommend RStudio, available for Linux, Mac, and Windows. It has a decent editor (with Vim mode!) and integrates with Shiny. Head over to &lt;a href=&#34;https://www.rstudio.com/products/rstudio/#Desktop&#34;&gt;https://www.rstudio.com/products/rstudio/#Desktop&lt;/a&gt; to download it.&lt;/p&gt;
@@ -1015,23 +1015,23 @@ data &amp;lt;- read.csv(
 source(&amp;quot;helpers.R&amp;quot;)
 data &amp;lt;- getRaw()
 qplot(date, value, data = data)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/21_all.png&#34; alt=&#34;All points on a single plot, a good start, but not very clear.&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/21_all.png&#34; alt=&#34;All points on a single plot, a good start, but not very clear.&#34;&gt;&lt;/p&gt;
 &lt;p&gt;We can clarify the plot a little by colouring points according to sensor location:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/22_colours.png&#34; alt=&#34;Colouring the points as a function of sensor locations clarifies the plot a bit.&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/22_colours.png&#34; alt=&#34;Colouring the points as a function of sensor locations clarifies the plot a bit.&#34;&gt;&lt;/p&gt;
 &lt;p&gt;We still can&amp;rsquo;t distinguish temperature from humidity. Let&amp;rsquo;s separate those variables into different panels using &amp;ldquo;facets&amp;rdquo;. We&amp;rsquo;ll add the &amp;ldquo;free_y&amp;rdquo; option to allow each y to scale independently:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/23_facets.png&#34; alt=&#34;Faceted by variable.&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/23_facets.png&#34; alt=&#34;Faceted by variable.&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Since there is a lot of noise, joining the points with a line makes the plot easier to read:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin, geom = &amp;quot;line&amp;quot;) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/24_timeseries.png&#34; alt=&#34;Points replaced by lines&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/24_timeseries.png&#34; alt=&#34;Points replaced by lines&#34;&gt;&lt;/p&gt;
 &lt;p&gt;If you add a sensor in a new room, a new line colour will automatically appear on the plot. If you add a new type of data (such as &amp;ldquo;power&amp;rdquo; for a power meter), a third facet will appear. Try it! Just modify the Python script to send data from a new location and re-run the python script, the &lt;code&gt;data &amp;lt;- getRaw()&lt;/code&gt; line, and the latest qplot instruction.&lt;/p&gt;
 &lt;p&gt;If the date scale looks wrong, with one tick per point on the x axis, try adding &lt;code&gt;scale_x_datetime&lt;/code&gt;:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;qplot(date, value, data = data, colour = origin, geom = &amp;quot;line&amp;quot;) + scale_x_datetime() + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
 &lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;other-forms-of-plots&#34;&gt;Other forms of plots.&lt;/h2&gt;
 &lt;p&gt;How about box plots to observe variations in temperature and humidity? Easy: just change x axis to &amp;ldquo;origin&amp;rdquo;, ditch the colours, and change geometry to &amp;ldquo;boxplot&amp;rdquo;:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;qplot(origin, value, data = data, geom = &amp;quot;boxplot&amp;quot;) + facet_grid(variable ~ ., scales = &amp;quot;free_y&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/25_boxplots.png&#34; alt=&#34;Box plots are even easier than time series&#34;&gt;&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/25_boxplots.png&#34; alt=&#34;Box plots are even easier than time series&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Have a look at the qplot official documents for more inspiration on plot types: &lt;a href=&#34;http://docs.ggplot2.org/current&#34;&gt;http://docs.ggplot2.org/current&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&#34;filtering-by-date&#34;&gt;Filtering by date&lt;/h2&gt;
 &lt;p&gt;We&amp;rsquo;ll cover a final R topic before moving on: filtering data frames, and in particular filtering by date. To filter a data frame, we extract a &lt;em&gt;subset&lt;/em&gt; of the data that fulfills a condition. For example, if we want to retrieve all the lines of &lt;code&gt;data&lt;/code&gt; that contain a &lt;code&gt;temperature&lt;/code&gt; measurement, pick the subset:&lt;/p&gt;
@@ -1067,12 +1067,12 @@ boxPlot &amp;lt;- function(data) {
     
     <item>
       <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial part 1/3</title>
-      <link>http://douglas-watson.github.io/post/gdocs_1_gdocs/</link>
+      <link>https://douglas-watson.github.io/post/gdocs_1_gdocs/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:30 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/gdocs_1_gdocs/</guid>
+      <guid>https://douglas-watson.github.io/post/gdocs_1_gdocs/</guid>
       <description>&lt;p&gt;In part one of this tutorial, you will learn how to script a Google Sheet to store data from your hardware using an HTTP POST request and to retrieve the sheet&amp;rsquo;s data using an HTTP GET requests. Along the way, you will also experiment with some of the spreadsheet&amp;rsquo;s built-in analytics tools: filters, pivot tables, and charts.&lt;/p&gt;
-&lt;p&gt;Skip to &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part 2&lt;/a&gt; to learn how to fetch and manipulate this data in R, or &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part 3&lt;/a&gt; to learn how to use Shiny.&lt;/p&gt;
+&lt;p&gt;Skip to &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part 2&lt;/a&gt; to learn how to fetch and manipulate this data in R, or &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part 3&lt;/a&gt; to learn how to use Shiny.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;Chinese translation: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;The finished code files are available on Github: &lt;a href=&#34;https://github.com/douglas-watson/shiny-gdocs&#34;&gt;https://github.com/douglas-watson/shiny-gdocs&lt;/a&gt;&lt;/p&gt;
 &lt;h1 id=&#34;prelude-data-storage-format&#34;&gt;Prelude: data storage format&lt;/h1&gt;
@@ -1176,7 +1176,7 @@ boxPlot &amp;lt;- function(data) {
 &lt;li&gt;Open the script editor, in the &amp;ldquo;Tools&amp;rdquo; &amp;gt; &amp;ldquo;Script editor&amp;hellip;&amp;rdquo; menu.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;You are now ready to code!&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/0_gdoc_init.png&#34; alt=&#34;Create a header row, then open the script editor.&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/0_gdoc_init.png&#34; alt=&#34;Create a header row, then open the script editor.&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;appending-a-line-from-google-script&#34;&gt;Appending a line from google script&lt;/h2&gt;
 &lt;p&gt;You should now be looking at the script editor. This tool allows you to write custom spreadsheet functions (which are called as&lt;code&gt;=SUM(A1:A5)&lt;/code&gt;), and to write simple web applications. Our first step will be to write a function that appends CSV data to the spreadsheet. Copy this code into the script editor:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;function appendLines(worksheet, csvData) {
@@ -1202,11 +1202,11 @@ function test() {
 &lt;li&gt;for each line in the CSV data, append the line to the sheet.&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;We additionally wrote a small &lt;code&gt;test&lt;/code&gt; function which calls appendLines, to make sure everything works. To run it, select the &lt;code&gt;test&lt;/code&gt; function in the toolbar and click the run button. If you are asked to authorize the script, do so. This should have appended two lines to the spreadsheet. You can also view the log output with &amp;ldquo;View&amp;rdquo; &amp;gt; &amp;ldquo;Logs&amp;rdquo; in the script editor.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/1_code_editor.png&#34; alt=&#34;To test your code from the script editor, click the run button.&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/1_code_editor.png&#34; alt=&#34;To test your code from the script editor, click the run button.&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Two lines of data should be added to the spreadsheet:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/2_appended_data.png&#34; alt=&#34;Two lines of data should be added to the spreadsheet&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/2_appended_data.png&#34; alt=&#34;Two lines of data should be added to the spreadsheet&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Our code has a critical flaw, however. Later, when we&amp;rsquo;ll call it as a web service, the script will have no active spreadsheet associated. We need to change the code to fetch the spreadsheet from its unique ID. Find the document ID in the URL of spreadsheet:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/3_id.png&#34; alt=&#34;Find the document ID in its URL&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/3_id.png&#34; alt=&#34;Find the document ID in its URL&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Then modify &lt;code&gt;appendLines&lt;/code&gt; to fetch the document by ID:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;function appendLines(worksheet, csvData) {
   var ss = SpreadsheetApp.openById(&amp;quot;13_BUd7WJlA8Z9B5Vc-5tyf3vyRUYmIx67sDz7ZmyPG4&amp;quot;);
@@ -1226,11 +1226,11 @@ function test() {
   return ContentService.createTextOutput(params);
 }
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now publish it with &amp;ldquo;Publish&amp;rdquo; &amp;gt; &amp;ldquo;Deploy as web app&amp;hellip;&amp;quot;. Give the version a brief description, ask to execute it as yourself, and allow anonymous access, so that you can post to the spreadsheet without authentication, then deploy:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/4_publish.png&#34; alt=&#34;Publishing our first web app!&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/4_publish.png&#34; alt=&#34;Publishing our first web app!&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Copy the URL:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/5_published.png&#34; alt=&#34;Publishing our first web app!&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/5_published.png&#34; alt=&#34;Publishing our first web app!&#34;&gt;&lt;/p&gt;
 &lt;p&gt;There&amp;rsquo;s one last thing you need to do before sending HTTP requests to this new web server. Share the spreadsheet publicly. Return to the spreadsheet tab, and open &amp;ldquo;File&amp;rdquo; &amp;gt; &amp;ldquo;Share&amp;hellip;&amp;quot;. Click &amp;ldquo;Get shareable link&amp;rdquo;, and allow anyone with the link to edit:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/6_share.png&#34; alt=&#34;Share the spreadsheet publicly to avoid authentication errors&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/6_share.png&#34; alt=&#34;Share the spreadsheet publicly to avoid authentication errors&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Now, fire up your favourite HTTP client (the Postman Chrome extension is a great graphical tool). I&amp;rsquo;ll be using CURL, from the console. Send a first POST request to the URL you copied above. If using CURL make sure to add the &lt;code&gt;-L&lt;/code&gt; option to follow redirects, and the &lt;code&gt;--data&lt;/code&gt; option to make a POST request. For my URL, I get:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;$ curl --data &amp;quot;hello, world&amp;quot; &amp;quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec&amp;quot;
 
@@ -1259,7 +1259,7 @@ function test() {
 
 }
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Publish a new version of the app (&amp;ldquo;Publish&amp;rdquo; &amp;gt; &amp;ldquo;Deploy as web app&amp;hellip;&amp;quot;, set &amp;ldquo;Project Version&amp;rdquo; to &amp;ldquo;new&amp;rdquo;, describe it, and click &amp;ldquo;update&amp;rdquo;). You can now append lines to the spreadsheet through an HTTP Post request! Rerun the last curl command, and observe the newest line added to your spreadsheet:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/7_post_append.png&#34; alt=&#34;You recorded data from an HTTP request!&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/7_post_append.png&#34; alt=&#34;You recorded data from an HTTP request!&#34;&gt;&lt;/p&gt;
 &lt;p&gt;Clear the spreadsheet now: delete all rows except for the header.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;More on &lt;code&gt;doGet&lt;/code&gt; and &lt;code&gt;doPost&lt;/code&gt;: &lt;a href=&#34;https://developers.google.com/apps-script/guides/web&#34;&gt;https://developers.google.com/apps-script/guides/web&lt;/a&gt;&lt;/li&gt;
@@ -1306,21 +1306,21 @@ if __name__ == &#39;__main__&#39;:
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now, replace the URL in the code above with your web app URL, save it as &lt;code&gt;uploads.py&lt;/code&gt;, and run:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;python uploads.py
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Return to the spreadsheet. You should see the lines appearing as the script sends them:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/8_python_append.png&#34; alt=&#34;Fake data uploaded from a Python script&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/8_python_append.png&#34; alt=&#34;Fake data uploaded from a Python script&#34;&gt;&lt;/p&gt;
 &lt;h1 id=&#34;analytics-within-the-spreadsheet&#34;&gt;Analytics within the spreadsheet&lt;/h1&gt;
 &lt;p&gt;Before we move on to exporting the data, let&amp;rsquo;s play with the built-in analytical capabilities of the spreadsheet: we can apply simple filters to the data, extract information with pivot tables, and display it with various charts. Being a web-based application, Sheets even allows those charts to be embedded on web pages directly.&lt;/p&gt;
 &lt;h2 id=&#34;filters&#34;&gt;Filters&lt;/h2&gt;
 &lt;p&gt;Filters allow you to show or hide rows of data based on one or several criteria. They are ridiculously simple to use: select the columns you want to filter, then click the funnel symbol in the toolbar. Little arrow icons appear next to each column header. Clicking these pops down a menu from which you can choose filtering criteria. Try restricting the data to only today&amp;rsquo;s data or only temperature measurements.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/9_filters.png&#34; alt=&#34;Filters hide rows based on a search criteria. Here, we filter based on date, to show only today&amp;rsquo;s data.&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/9_filters.png&#34; alt=&#34;Filters hide rows based on a search criteria. Here, we filter based on date, to show only today&amp;rsquo;s data.&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;pivot-tables&#34;&gt;Pivot tables&lt;/h2&gt;
 &lt;p&gt;Pivot tables transform long-format data into wide-format data. Select columns A:G, by clicking the A letter above the header row and dragging to the G letter. Go to the &amp;ldquo;Data&amp;rdquo; &amp;gt; &amp;ldquo;Pivot table&amp;rdquo; menu option. This opens a new blank sheet with a right-hand-side menu to configure the pivot table. Select the &amp;ldquo;date&amp;rdquo; column for rows, &amp;ldquo;origin&amp;rdquo; for the columns, and &amp;ldquo;value&amp;rdquo; for the values &amp;ndash; summarize by AVERAGE for the totals to make sense. Finally, filter by &amp;ldquo;variable&amp;rdquo;, showing only &amp;ldquo;temperature&amp;rdquo;. Your configuration and pivot table should look similar to the screenshot below:&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/10_pivot_table.png&#34; alt=&#34;Pivot tables&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/10_pivot_table.png&#34; alt=&#34;Pivot tables&#34;&gt;&lt;/p&gt;
 &lt;p&gt;You now have a table that extracts only temperature data and presents them by room. If you kept the &amp;ldquo;show totals&amp;rdquo; option checked, you&amp;rsquo;ll also have an average temperature at each point in time, and an average per room. Note that it updates live, as soon as new data arrives!&lt;/p&gt;
 &lt;p&gt;As an exercise, try making a pivot table that displays, for each room, the average, standard deviation, and measurement count for both temperature and humidity.&lt;/p&gt;
 &lt;h2 id=&#34;graphs&#34;&gt;Graphs&lt;/h2&gt;
 &lt;p&gt;We can make graphs from a pivot table in the usual &amp;ldquo;spreadsheet&amp;rdquo; way: select the columns of interest, and click the chart icon on the toolbar. Again, these charts are updated live, as new data is posted to the sheet.&lt;/p&gt;
 &lt;p&gt;The screenshot below shows a &lt;em&gt;time line chart&lt;/em&gt;, moved to its own sheet. This chart can interactively zoom onto date ranges, and is thus ideal to represent time series data from a sensor. You could even embed the chart directly on a web page to make a monitoring dashboard (which could be hosted on google sites, if you are really lazy), using the &amp;ldquo;Publish chart&amp;rdquo; option.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Graphs&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Graphs&#34;&gt;&lt;/p&gt;
 &lt;h1 id=&#34;get-data-in-csv-format&#34;&gt;GET data in CSV format&lt;/h1&gt;
 &lt;p&gt;The spreadsheet is a powerful analytics tool on its own, but our end goal in this tutorial is to retrieve the sensor data from other tools. We&amp;rsquo;ll do this by letting GET requests download a sheet in CSV format. To enable this, add a &lt;code&gt;doGet&lt;/code&gt; function in the Script Editor (make sure to replace the sheet ID by your own).&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;function doGet(e) {
@@ -1377,20 +1377,20 @@ timestamp,date,origin,variable,value
     
     <item>
       <title>Build an internet-of-things dashboard with Google Sheets and RStudio Shiny: Tutorial Series.</title>
-      <link>http://douglas-watson.github.io/post/gdocs_0_intro/</link>
+      <link>https://douglas-watson.github.io/post/gdocs_0_intro/</link>
       <pubDate>Sun, 27 Dec 2015 13:21:24 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/gdocs_0_intro/</guid>
+      <guid>https://douglas-watson.github.io/post/gdocs_0_intro/</guid>
       <description>&lt;p&gt;Logging data to a central server and displaying it online is a common task in Internet of Things applications. This usually requires deploying and maintaining your own servers, with a database for storage and a web server for display. System administration tasks are no fun to me, so instead I found a way to use Google Sheets as a server, and ShinyApps.io as a visualization platform. Uploading data to Google docs is relatively simple and well documented, but connecting Shiny to Google Docs was a little more tricky; this motivated me to write this tutorial to show others how to set up a similar system.&lt;/p&gt;
-&lt;p&gt;In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;part one&lt;/a&gt;, I&amp;rsquo;ll explain how to set up a Google spreadsheet as data storage and use it as an elementary dashboard. In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt;, I&amp;rsquo;ll teach you how to retrieve that data in R, and plot it with the ggplot2 library. In &lt;a href=&#34;http://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part three&lt;/a&gt;, I&amp;rsquo;ll walk you through making a simple interactive visualization in Shiny and publishing it online to ShinyApps.io.&lt;/p&gt;
+&lt;p&gt;In &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_1_gdocs/&#34;&gt;part one&lt;/a&gt;, I&amp;rsquo;ll explain how to set up a Google spreadsheet as data storage and use it as an elementary dashboard. In &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_2_r/&#34;&gt;part two&lt;/a&gt;, I&amp;rsquo;ll teach you how to retrieve that data in R, and plot it with the ggplot2 library. In &lt;a href=&#34;https://douglas-watson.github.io/post/gdocs_3_shiny/&#34;&gt;part three&lt;/a&gt;, I&amp;rsquo;ll walk you through making a simple interactive visualization in Shiny and publishing it online to ShinyApps.io.&lt;/p&gt;
 &lt;p&gt;During the tutorial, we&amp;rsquo;ll pretend to have a network of several temperature and humidity sensors. Each sensor is named after its location name (such as &amp;ldquo;bedroom&amp;rdquo; or &amp;ldquo;living room&amp;rdquo;), and records the temperature every hour. I assume you know how to program your IOT hardware to make HTTP requests; for the sake of the tutorial I provide a Python script to upload fake temperature and humidity values.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;This tutorial series has kindly been translated to Chinese by Harry Zhu: &lt;a href=&#34;https://segmentfault.com/a/1190000004426828&#34;&gt;https://segmentfault.com/a/1190000004426828&lt;/a&gt;&lt;/em&gt;&lt;/p&gt;
 &lt;h2 id=&#34;why-use-google-sheets&#34;&gt;Why use Google Sheets?&lt;/h2&gt;
 &lt;p&gt;Google spreadsheets can serve as a simple server to store and retrieve data, while writing surprisingly little code. We avoid maintaining our own servers, and we additionally benefit from easy access to the raw data. On top of that, the spreadsheets on their own are powerful analysis tools, with statistics, pivot tables, filters, and interactive charts which can be embedded on external websites.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Google Sheets on their own are a powerful analytics tool for distributed data&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/11_charts.png&#34; alt=&#34;Google Sheets on their own are a powerful analytics tool for distributed data&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;why-use-r-and-shiny&#34;&gt;Why use R and Shiny?&lt;/h2&gt;
 &lt;p&gt;R is a powerful language specifically designed for data analysis. Combined with the ggplot2 graphing library, it provides an ideal package to explore and visualize large amounts data. Once you have figured out what you want to show, Shiny allows you to take your visualizations, make them interactive, and publish them on the web. RStudio, the makers of Shiny, even provide free hosting for visualizations, which makes the service quite convenient to experiment with.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;The final product of our tutorial: a live interactive web-based dashboard&#34;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/gdocs/32_fullui.png&#34; alt=&#34;The final product of our tutorial: a live interactive web-based dashboard&#34;&gt;&lt;/p&gt;
 </description>
     </item>
     

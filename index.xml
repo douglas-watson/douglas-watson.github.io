@@ -1,39 +1,39 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Programming notes</title>
-    <link>http://douglas-watson.github.io/</link>
+    <link>https://douglas-watson.github.io/</link>
     <description>Recent content on Programming notes</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 27 Dec 2015 16:15:13 +0100</lastBuildDate>
     
-        <atom:link href="http://douglas-watson.github.io/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="https://douglas-watson.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Posts</title>
-      <link>http://douglas-watson.github.io/post/</link>
+      <link>https://douglas-watson.github.io/post/</link>
       <pubDate>Sat, 02 May 2020 20:03:46 +0000</pubDate>
       
-      <guid>http://douglas-watson.github.io/post/</guid>
+      <guid>https://douglas-watson.github.io/post/</guid>
       <description></description>
     </item>
     
     <item>
       <title>Projects</title>
-      <link>http://douglas-watson.github.io/projects/</link>
+      <link>https://douglas-watson.github.io/projects/</link>
       <pubDate>Sun, 27 Dec 2015 16:15:13 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.io/projects/</guid>
+      <guid>https://douglas-watson.github.io/projects/</guid>
       <description></description>
     </item>
     
     <item>
       <title>The MIT License (MIT)</title>
-      <link>http://douglas-watson.github.io/license/</link>
+      <link>https://douglas-watson.github.io/license/</link>
       <pubDate>Sun, 27 Dec 2015 16:15:13 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.io/license/</guid>
+      <guid>https://douglas-watson.github.io/license/</guid>
       <description>&lt;p&gt;Copyright © 2015-2016 Douglas C. Watson&lt;/p&gt;
 &lt;p&gt;Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
@@ -58,10 +58,10 @@ OTHER DEALINGS IN THE SOFTWARE.&lt;/p&gt;
     
     <item>
       <title>About</title>
-      <link>http://douglas-watson.github.io/about/</link>
+      <link>https://douglas-watson.github.io/about/</link>
       <pubDate>Sun, 27 Dec 2015 13:01:07 +0100</pubDate>
       
-      <guid>http://douglas-watson.github.io/about/</guid>
+      <guid>https://douglas-watson.github.io/about/</guid>
       <description>&lt;p&gt;I look after software development for a hardware startup. I frequently code in Python and Go, and sometimes in R and Javascript.&lt;/p&gt;
 &lt;p&gt;I&amp;rsquo;ve often found other developers blogs to be useful resources, so I set up my own to share some tips and tricks, and solutions to problems that didn&amp;rsquo;t have obvious solutions.&lt;/p&gt;
 </description>
