@@ -1,0 +1,24 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>sport on Programming notes</title>
+    <link>https://douglas-watson.github.io/tags/sport/</link>
+    <description>Recent content in sport on Programming notes</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 10 May 2020 18:06:14 +0000</lastBuildDate>
+    
+        <atom:link href="https://douglas-watson.github.io/tags/sport/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Aerobic Drift calculator</title>
+      <link>https://douglas-watson.github.io/post/2020-05_aerobic_drift_calculator/</link>
+      <pubDate>Sun, 10 May 2020 18:06:14 +0000</pubDate>
+      
+      <guid>https://douglas-watson.github.io/post/2020-05_aerobic_drift_calculator/</guid>
+      <description>&lt;p&gt;If you are reading this page, you were probably looking for this one instead: &lt;a href=&#34;https://douglas-watson.github.io/aet-calc/&#34;&gt;https://douglas-watson.github.io/aet-calc/&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
