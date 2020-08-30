@@ -67,7 +67,8 @@
       
       <guid>https://douglas-watson.github.io/post/2018-09_exponential_curve_fitting/</guid>
       <description>&lt;p&gt;&lt;em&gt;Updated in May 2020 to show a full example with qplot.&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&amp;rsquo;ll quickly run into a &amp;ldquo;singular gradient&amp;rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Updated in August 2020 to show broom&amp;rsquo;s &lt;a href=&#34;https://broom.tidymodels.org/articles/broom_and_dplyr.html&#34;&gt;newer nest-map-unnest pattern&lt;/a&gt; and use tibbles instead of data frames. The original code no longer worked with broom versions newer than 0.5.0.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are useful functions, but can be tricky to fit in R: you&amp;rsquo;ll quickly run into a &amp;ldquo;singular gradient&amp;rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.&lt;/p&gt;
 &lt;p&gt;The formula I&amp;rsquo;ll use in the following examples is:
 $$
 y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
@@ -78,18 +79,18 @@ $$&lt;/p&gt;
 
 t = &lt;span style=&#34;color:#099&#34;&gt;1&lt;/span&gt;:&lt;span style=&#34;color:#099&#34;&gt;100&lt;/span&gt;
 y1 = &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt; + (&lt;span style=&#34;color:#099&#34;&gt;53&lt;/span&gt; - &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt;) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;-0.02&lt;/span&gt; * t) %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;jitter&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;10&lt;/span&gt;)
-y2 = &lt;span style=&#34;color:#099&#34;&gt;24&lt;/span&gt; + (&lt;span style=&#34;color:#099&#34;&gt;60&lt;/span&gt; - &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt;) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;-0.01&lt;/span&gt; * t) %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;jitter&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;10&lt;/span&gt;)
+y2 = &lt;span style=&#34;color:#099&#34;&gt;24&lt;/span&gt; + (&lt;span style=&#34;color:#099&#34;&gt;60&lt;/span&gt; - &lt;span style=&#34;color:#099&#34;&gt;24&lt;/span&gt;) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;-0.01&lt;/span&gt; * t) %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;jitter&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;10&lt;/span&gt;)
 
 
-df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = t, y = y1, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;) %&amp;gt;% 
+df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;tibble&lt;/span&gt;(t = t, y = y1, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;) %&amp;gt;% 
   &lt;span style=&#34;color:#0a0&#34;&gt;rbind&lt;/span&gt;(. , &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = t, y = y2, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor2&amp;#39;&lt;/span&gt;))
-sensor1 &amp;lt;- df %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;filter&lt;/span&gt;(sensor == &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our data looks like this:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;qplot(t, y, data = df, colour = sensor)
 &lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/raw_data.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;fitting-with-nls&#34;&gt;Fitting with NLS&lt;/h2&gt;
 &lt;p&gt;&lt;code&gt;nls&lt;/code&gt; is the standard R base function to fit non-linear equations. Trying to fit the exponential decay with &lt;code&gt;nls&lt;/code&gt; however leads to sadness and disappointment if you pick a bad initial guess for the rate constant ($\alpha$). This code:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ yf + (y0 - yf) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(-alpha * t), 
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;sensor1 &amp;lt;- df %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;filter&lt;/span&gt;(sensor == &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;)
+&lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ yf + (y0 - yf) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(-alpha * t), 
     data = sensor1,
     start = &lt;span style=&#34;color:#0a0&#34;&gt;list&lt;/span&gt;(y0 = &lt;span style=&#34;color:#099&#34;&gt;54&lt;/span&gt;, yf = &lt;span style=&#34;color:#099&#34;&gt;25&lt;/span&gt;, alpha = &lt;span style=&#34;color:#099&#34;&gt;1&lt;/span&gt;))
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;fails with:&lt;/p&gt;
@@ -112,19 +113,27 @@ Achieved convergence tolerance: &lt;span style=&#34;color:#099&#34;&gt;8.788e-07
 $$
 y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
 $$&lt;/p&gt;
-&lt;p&gt;It searches for the logarithm of $\alpha$:&lt;/p&gt;
+&lt;p&gt;it searches for the logarithm of $\alpha$:&lt;/p&gt;
 &lt;p&gt;$$
 y(t) \sim y_f + (y_0 - y_f) e^{-\exp(\log\alpha) t}
 $$&lt;/p&gt;
-&lt;p&gt;From the fit result, you can plot the fitted curve, or extract whichever other information you need:&lt;/p&gt;
+&lt;p&gt;From the fit result, you can plot the fitted curve, or extract whichever information you need:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)) + &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y = .fitted))
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/exponential.png&#34; alt=&#34;Exponentially decaying data, fitted&#34;&gt;&lt;/p&gt;
-&lt;p&gt;For a single curve, it&amp;rsquo;s easy to guess the approximate fit parameters by looking at the plot, or just trying several values. When fitting many curves however, it is quite convenient to automate the process. Self-starting functions are especially useful combined with dplyr, to fit several experimental conditions in one step.&lt;/p&gt;
+&lt;p&gt;For a single curve, it&amp;rsquo;s easy to guess the approximate fit parameters by looking at the plot, or just by trying several values. When fitting many curves however, it is more convenient to automate the process. Self-starting functions are especially useful combined with dplyr, to fit several experimental conditions in one step.&lt;/p&gt;
 &lt;p&gt;Here is how we can read out the fit parameters for each sensor in our example data:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;df %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(sensor) %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;do&lt;/span&gt;(fit = &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ &lt;span style=&#34;color:#0a0&#34;&gt;SSasymp&lt;/span&gt;(t, yf, y0, log_alpha), data = .)) %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;tidy&lt;/span&gt;(fit) %&amp;gt;% 
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# Fit the data&lt;/span&gt;
+fitted &amp;lt;- df %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;nest&lt;/span&gt;(-sensor) %&amp;gt;%
+  &lt;span style=&#34;color:#0a0&#34;&gt;mutate&lt;/span&gt;(
+    fit = &lt;span style=&#34;color:#0a0&#34;&gt;map&lt;/span&gt;(data, ~&lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ &lt;span style=&#34;color:#0a0&#34;&gt;SSasymp&lt;/span&gt;(t, yf, y0, log_alpha), data = .)),
+    tidied = &lt;span style=&#34;color:#0a0&#34;&gt;map&lt;/span&gt;(fit, tidy),
+    augmented = &lt;span style=&#34;color:#0a0&#34;&gt;map&lt;/span&gt;(fit, augment),
+  )  
+
+&lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# Produce a table of fit parameters: y0, yf, alpha&lt;/span&gt;
+fitted %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;unnest&lt;/span&gt;(tidied) %&amp;gt;% 
   &lt;span style=&#34;color:#0a0&#34;&gt;select&lt;/span&gt;(sensor, term, estimate) %&amp;gt;% 
   &lt;span style=&#34;color:#0a0&#34;&gt;spread&lt;/span&gt;(term, estimate) %&amp;gt;% 
   &lt;span style=&#34;color:#0a0&#34;&gt;mutate&lt;/span&gt;(alpha = &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(log_alpha))
@@ -141,33 +150,31 @@ $$&lt;/p&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
-&lt;td&gt;-3.920671&lt;/td&gt;
-&lt;td&gt;52.97573&lt;/td&gt;
-&lt;td&gt;21.88404&lt;/td&gt;
-&lt;td&gt;0.019827795&lt;/td&gt;
+&lt;td&gt;-3.908686&lt;/td&gt;
+&lt;td&gt;52.99619&lt;/td&gt;
+&lt;td&gt;22.04402&lt;/td&gt;
+&lt;td&gt;0.020066853&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
-&lt;td&gt;-4.611703&lt;/td&gt;
-&lt;td&gt;61.98803&lt;/td&gt;
-&lt;td&gt;23.85592&lt;/td&gt;
-&lt;td&gt;0.009934881&lt;/td&gt;
+&lt;td&gt;-4.627930&lt;/td&gt;
+&lt;td&gt;59.99358&lt;/td&gt;
+&lt;td&gt;23.42025&lt;/td&gt;
+&lt;td&gt;0.009774973&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;Now we know at one glance the rate constant for each sensor location, or the $y$ value that each position will stabilise at.&lt;/p&gt;
 &lt;h2 id=&#34;plotting-with-gglot2&#34;&gt;Plotting with gglot2&lt;/h2&gt;
 &lt;p&gt;To show both fitted curves on the original data, use broom&amp;rsquo;s &lt;code&gt;augment&lt;/code&gt; function:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;augmented &amp;lt;- df %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(sensor) %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;do&lt;/span&gt;(fit = &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ &lt;span style=&#34;color:#0a0&#34;&gt;SSasymp&lt;/span&gt;(t, yf, y0, log_alpha), data = .)) %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)
-
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;augmented &amp;lt;- fitted %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;unnest&lt;/span&gt;(augmented)
 &lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = augmented, geom = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;point&amp;#39;&lt;/span&gt;, colour = sensor) +
   &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y=.fitted))
+
 &lt;span style=&#34;color:#0a0&#34;&gt;ggsave&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;ggplot_exponential_fit.png&amp;#34;&lt;/span&gt;)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/ggplot_exponential_fit.png&#34; alt=&#34;Plotting the result of an exponential fit with qplot and ggplot2&#34;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;augment&lt;/code&gt; also yields the residuals. For more ideas on how to apply curve fitting with dplyr, check out my &lt;a href=&#34;https://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting&#34;&gt;previous article on dplyr&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;augment&lt;/code&gt; also yields the residuals. For more ideas on how to apply curve fitting with dplyr, check out my &lt;a href=&#34;https://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting&#34;&gt;previous article on dplyr&lt;/a&gt;. Refer to the &lt;a href=&#34;https://broom.tidymodels.org/articles/broom_and_dplyr.html&#34;&gt;updated official vignette on broom with dplyr&lt;/a&gt; for explanations on the newer nest-map-unnest pattern.&lt;/p&gt;
 </description>
     </item>
     

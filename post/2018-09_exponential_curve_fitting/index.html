@@ -98,7 +98,8 @@
     
     </span>
     <p><em>Updated in May 2020 to show a full example with qplot.</em></p>
-<p>Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are very useful functions, but can be tricky to fit in R: you&rsquo;ll quickly run into a &ldquo;singular gradient&rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.</p>
+<p><em>Updated in August 2020 to show broom&rsquo;s <a href="https://broom.tidymodels.org/articles/broom_and_dplyr.html">newer nest-map-unnest pattern</a> and use tibbles instead of data frames. The original code no longer worked with broom versions newer than 0.5.0.</em></p>
+<p>Exponential decays can describe many physical phenomena: capacitor discharge, temperature of a billet during cooling, kinetics of first order chemical reactions, radioactive decay, and so on. They are useful functions, but can be tricky to fit in R: you&rsquo;ll quickly run into a &ldquo;singular gradient&rdquo; error. Thankfully, self-starting functions provide an easy and automatic fix. Read on to learn how to use them.</p>
 <p>The formula I&rsquo;ll use in the following examples is:
 $$
 y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
@@ -109,18 +110,18 @@ $$</p>
 
 t = <span style="color:#099">1</span>:<span style="color:#099">100</span>
 y1 = <span style="color:#099">22</span> + (<span style="color:#099">53</span> - <span style="color:#099">22</span>) * <span style="color:#0a0">exp</span>(<span style="color:#099">-0.02</span> * t) %&gt;% <span style="color:#0a0">jitter</span>(<span style="color:#099">10</span>)
-y2 = <span style="color:#099">24</span> + (<span style="color:#099">60</span> - <span style="color:#099">22</span>) * <span style="color:#0a0">exp</span>(<span style="color:#099">-0.01</span> * t) %&gt;% <span style="color:#0a0">jitter</span>(<span style="color:#099">10</span>)
+y2 = <span style="color:#099">24</span> + (<span style="color:#099">60</span> - <span style="color:#099">24</span>) * <span style="color:#0a0">exp</span>(<span style="color:#099">-0.01</span> * t) %&gt;% <span style="color:#0a0">jitter</span>(<span style="color:#099">10</span>)
 
 
-df &lt;- <span style="color:#0a0">data.frame</span>(t = t, y = y1, sensor = <span style="color:#a50">&#39;sensor1&#39;</span>) %&gt;% 
+df &lt;- <span style="color:#0a0">tibble</span>(t = t, y = y1, sensor = <span style="color:#a50">&#39;sensor1&#39;</span>) %&gt;% 
   <span style="color:#0a0">rbind</span>(. , <span style="color:#0a0">data.frame</span>(t = t, y = y2, sensor = <span style="color:#a50">&#39;sensor2&#39;</span>))
-sensor1 &lt;- df %&gt;% <span style="color:#0a0">filter</span>(sensor == <span style="color:#a50">&#39;sensor1&#39;</span>)
 </code></pre></div><p>Our data looks like this:</p>
 <pre><code>qplot(t, y, data = df, colour = sensor)
 </code></pre><p><img src="/images/fitting/raw_data.png" alt="raw_data"></p>
 <h2 id="fitting-with-nls">Fitting with NLS</h2>
 <p><code>nls</code> is the standard R base function to fit non-linear equations. Trying to fit the exponential decay with <code>nls</code> however leads to sadness and disappointment if you pick a bad initial guess for the rate constant ($\alpha$). This code:</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">nls</span>(y ~ yf + (y0 - yf) * <span style="color:#0a0">exp</span>(-alpha * t), 
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">sensor1 &lt;- df %&gt;% <span style="color:#0a0">filter</span>(sensor == <span style="color:#a50">&#39;sensor1&#39;</span>)
+<span style="color:#0a0">nls</span>(y ~ yf + (y0 - yf) * <span style="color:#0a0">exp</span>(-alpha * t), 
     data = sensor1,
     start = <span style="color:#0a0">list</span>(y0 = <span style="color:#099">54</span>, yf = <span style="color:#099">25</span>, alpha = <span style="color:#099">1</span>))
 </code></pre></div><p>fails with:</p>
@@ -143,19 +144,27 @@ Achieved convergence tolerance: <span style="color:#099">8.788e-07</span>
 $$
 y(t) \sim y_f + (y_0 - y_f) e^{-\alpha t}
 $$</p>
-<p>It searches for the logarithm of $\alpha$:</p>
+<p>it searches for the logarithm of $\alpha$:</p>
 <p>$$
 y(t) \sim y_f + (y_0 - y_f) e^{-\exp(\log\alpha) t}
 $$</p>
-<p>From the fit result, you can plot the fitted curve, or extract whichever other information you need:</p>
+<p>From the fit result, you can plot the fitted curve, or extract whichever information you need:</p>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">qplot</span>(t, y, data = <span style="color:#0a0">augment</span>(fit)) + <span style="color:#0a0">geom_line</span>(<span style="color:#0a0">aes</span>(y = .fitted))
 </code></pre></div><p><img src="/images/fitting/exponential.png" alt="Exponentially decaying data, fitted"></p>
-<p>For a single curve, it&rsquo;s easy to guess the approximate fit parameters by looking at the plot, or just trying several values. When fitting many curves however, it is quite convenient to automate the process. Self-starting functions are especially useful combined with dplyr, to fit several experimental conditions in one step.</p>
+<p>For a single curve, it&rsquo;s easy to guess the approximate fit parameters by looking at the plot, or just by trying several values. When fitting many curves however, it is more convenient to automate the process. Self-starting functions are especially useful combined with dplyr, to fit several experimental conditions in one step.</p>
 <p>Here is how we can read out the fit parameters for each sensor in our example data:</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">df %&gt;% 
-  <span style="color:#0a0">group_by</span>(sensor) %&gt;% 
-  <span style="color:#0a0">do</span>(fit = <span style="color:#0a0">nls</span>(y ~ <span style="color:#0a0">SSasymp</span>(t, yf, y0, log_alpha), data = .)) %&gt;% 
-  <span style="color:#0a0">tidy</span>(fit) %&gt;% 
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#aaa;font-style:italic"># Fit the data</span>
+fitted &lt;- df %&gt;% 
+  <span style="color:#0a0">nest</span>(-sensor) %&gt;%
+  <span style="color:#0a0">mutate</span>(
+    fit = <span style="color:#0a0">map</span>(data, ~<span style="color:#0a0">nls</span>(y ~ <span style="color:#0a0">SSasymp</span>(t, yf, y0, log_alpha), data = .)),
+    tidied = <span style="color:#0a0">map</span>(fit, tidy),
+    augmented = <span style="color:#0a0">map</span>(fit, augment),
+  )  
+
+<span style="color:#aaa;font-style:italic"># Produce a table of fit parameters: y0, yf, alpha</span>
+fitted %&gt;% 
+  <span style="color:#0a0">unnest</span>(tidied) %&gt;% 
   <span style="color:#0a0">select</span>(sensor, term, estimate) %&gt;% 
   <span style="color:#0a0">spread</span>(term, estimate) %&gt;% 
   <span style="color:#0a0">mutate</span>(alpha = <span style="color:#0a0">exp</span>(log_alpha))
@@ -172,33 +181,31 @@ $$</p>
 <tbody>
 <tr>
 <td>sensor1</td>
-<td>-3.920671</td>
-<td>52.97573</td>
-<td>21.88404</td>
-<td>0.019827795</td>
+<td>-3.908686</td>
+<td>52.99619</td>
+<td>22.04402</td>
+<td>0.020066853</td>
 </tr>
 <tr>
 <td>sensor2</td>
-<td>-4.611703</td>
-<td>61.98803</td>
-<td>23.85592</td>
-<td>0.009934881</td>
+<td>-4.627930</td>
+<td>59.99358</td>
+<td>23.42025</td>
+<td>0.009774973</td>
 </tr>
 </tbody>
 </table>
 <p>Now we know at one glance the rate constant for each sensor location, or the $y$ value that each position will stabilise at.</p>
 <h2 id="plotting-with-gglot2">Plotting with gglot2</h2>
 <p>To show both fitted curves on the original data, use broom&rsquo;s <code>augment</code> function:</p>
-<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">augmented &lt;- df %&gt;% 
-  <span style="color:#0a0">group_by</span>(sensor) %&gt;% 
-  <span style="color:#0a0">do</span>(fit = <span style="color:#0a0">nls</span>(y ~ <span style="color:#0a0">SSasymp</span>(t, yf, y0, log_alpha), data = .)) %&gt;% 
-  <span style="color:#0a0">augment</span>(fit)
-
+<div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">augmented &lt;- fitted %&gt;% 
+  <span style="color:#0a0">unnest</span>(augmented)
 <span style="color:#0a0">qplot</span>(t, y, data = augmented, geom = <span style="color:#a50">&#39;point&#39;</span>, colour = sensor) +
   <span style="color:#0a0">geom_line</span>(<span style="color:#0a0">aes</span>(y=.fitted))
+
 <span style="color:#0a0">ggsave</span>(<span style="color:#a50">&#34;ggplot_exponential_fit.png&#34;</span>)
 </code></pre></div><p><img src="/images/fitting/ggplot_exponential_fit.png" alt="Plotting the result of an exponential fit with qplot and ggplot2"></p>
-<p><code>augment</code> also yields the residuals. For more ideas on how to apply curve fitting with dplyr, check out my <a href="/post/2018-09_dplyr_curve_fitting">previous article on dplyr</a>.</p>
+<p><code>augment</code> also yields the residuals. For more ideas on how to apply curve fitting with dplyr, check out my <a href="/post/2018-09_dplyr_curve_fitting">previous article on dplyr</a>. Refer to the <a href="https://broom.tidymodels.org/articles/broom_and_dplyr.html">updated official vignette on broom with dplyr</a> for explanations on the newer nest-map-unnest pattern.</p>
 
   </div>
   
