@@ -184,7 +184,8 @@ fitted %&amp;gt;%
       <pubDate>Sun, 09 Sep 2018 10:00:00 +0200</pubDate>
       
       <guid>https://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/</guid>
-      <description>&lt;p&gt;I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.&lt;/p&gt;
+      <description>&lt;p&gt;&lt;em&gt;Updated August 2020: changed to broom&amp;rsquo;s newer nest-map-unnest pattern, from the older group_by-do pattern.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.&lt;/p&gt;
 &lt;p&gt;First we&amp;rsquo;ll generate some artificial data so that you can follow along at home. Here&amp;rsquo;s an exponentially decaying value measured by two sensors at different locations:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#aaa;font-style:italic&#34;&gt;# if needed&lt;/span&gt;
 &lt;span style=&#34;color:#0a0&#34;&gt;install.packages&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;c&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;tidyverse&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#a50&#34;&gt;&amp;#34;broom&amp;#34;&lt;/span&gt;))
@@ -197,9 +198,8 @@ y1 = &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt; + (&lt;span style=&#
 y2 = &lt;span style=&#34;color:#099&#34;&gt;24&lt;/span&gt; + (&lt;span style=&#34;color:#099&#34;&gt;60&lt;/span&gt; - &lt;span style=&#34;color:#099&#34;&gt;22&lt;/span&gt;) * &lt;span style=&#34;color:#0a0&#34;&gt;exp&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;-0.01&lt;/span&gt; * t) %&amp;gt;% &lt;span style=&#34;color:#0a0&#34;&gt;jitter&lt;/span&gt;(&lt;span style=&#34;color:#099&#34;&gt;10&lt;/span&gt;)
 
 
-df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = t, y = y1, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;) %&amp;gt;% 
+df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;tibble&lt;/span&gt;(t = t, y = y1, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor1&amp;#39;&lt;/span&gt;) %&amp;gt;% 
   &lt;span style=&#34;color:#0a0&#34;&gt;rbind&lt;/span&gt;(. , &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = t, y = y2, sensor = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;sensor2&amp;#39;&lt;/span&gt;))
-
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Our data frame looks like this:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;df
@@ -256,13 +256,15 @@ df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = 
 &lt;h2 id=&#34;tldr&#34;&gt;TL;DR&lt;/h2&gt;
 &lt;h3 id=&#34;i-want-to-plot-the-fitted-curve-over-my-data-points&#34;&gt;I want to plot the fitted curve over my data points&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;augmented &amp;lt;- df %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(sensor) %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;do&lt;/span&gt;(fit = &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ a * t + b, data = .)) %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;augment&lt;/span&gt;(fit)
+  &lt;span style=&#34;color:#0a0&#34;&gt;nest&lt;/span&gt;(-sensor) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;mutate&lt;/span&gt;(
+    fit = &lt;span style=&#34;color:#0a0&#34;&gt;map&lt;/span&gt;(data, ~ &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ a * t + b, data = .)),
+    augmented = &lt;span style=&#34;color:#0a0&#34;&gt;map&lt;/span&gt;(fit, augment),
+  ) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;unnest&lt;/span&gt;(augmented)
 
 &lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, y, data = augmented, geom = &lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;point&amp;#39;&lt;/span&gt;, colour = sensor) +
   &lt;span style=&#34;color:#0a0&#34;&gt;geom_line&lt;/span&gt;(&lt;span style=&#34;color:#0a0&#34;&gt;aes&lt;/span&gt;(y=.fitted))
-
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/fit.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;h3 id=&#34;i-want-to-plot-the-residuals&#34;&gt;I want to plot the residuals&lt;/h3&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;qplot&lt;/span&gt;(t, .resid, data = augmented, colour = sensor)
@@ -271,15 +273,18 @@ df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = 
 &lt;p&gt;&lt;img src=&#34;https://douglas-watson.github.io/images/fitting/residuals2.png&#34; alt=&#34;raw_data&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;i-want-a-table-of-my-fit-parameters-for-each-condition&#34;&gt;I want a table of my fit parameters for each condition:&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;df %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;group_by&lt;/span&gt;(sensor) %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;do&lt;/span&gt;(fit = &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ a * t + b, data = .)) %&amp;gt;% 
-  &lt;span style=&#34;color:#0a0&#34;&gt;tidy&lt;/span&gt;(fit) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;nest&lt;/span&gt;(-sensor) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;mutate&lt;/span&gt;(
+    fit = &lt;span style=&#34;color:#0a0&#34;&gt;map&lt;/span&gt;(data, ~ &lt;span style=&#34;color:#0a0&#34;&gt;nls&lt;/span&gt;(y ~ a * t + b, data = .)),
+    tidied = &lt;span style=&#34;color:#0a0&#34;&gt;map&lt;/span&gt;(fit, tidy),
+  ) %&amp;gt;% 
+  &lt;span style=&#34;color:#0a0&#34;&gt;unnest&lt;/span&gt;(tidied) %&amp;gt;% 
   &lt;span style=&#34;color:#0a0&#34;&gt;select&lt;/span&gt;(sensor, term, estimate) %&amp;gt;% 
   &lt;span style=&#34;color:#0a0&#34;&gt;spread&lt;/span&gt;(term, estimate)
+
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;&lt;/th&gt;
 &lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;th&gt;a&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;th&gt;b&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
@@ -287,13 +292,11 @@ df &amp;lt;- &lt;span style=&#34;color:#0a0&#34;&gt;data.frame&lt;/span&gt;(t = 
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td&gt;1&lt;/td&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
 &lt;td&gt;-0.2495347&lt;/td&gt;
 &lt;td&gt;47.87376&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;2&lt;/td&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
 &lt;td&gt;-0.2350898&lt;/td&gt;
 &lt;td&gt;59.77793&lt;/td&gt;
@@ -350,7 +353,7 @@ Achieved convergence tolerance: 1.571e-09
 
 &amp;gt; resid(fit)
 [1] 4.628798 4.339712 4.014558 3.576258 3.528138 3.001447 ...
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now these functions all return vectors, which work best with R&amp;rsquo;s native plotting functions. To integrate with dplyr and ggplot, we&amp;rsquo;d rather have data frames. This is where the &lt;em&gt;broom&lt;/em&gt; package comes in.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Now these functions all return vectors, which work best with R&amp;rsquo;s native plotting functions. To integrate with dplyr and ggplot, we&amp;rsquo;d rather have data frames or tibbles. This is where the &lt;em&gt;broom&lt;/em&gt; package comes in.&lt;/p&gt;
 &lt;h2 id=&#34;introducing-broom&#34;&gt;Introducing broom&lt;/h2&gt;
 &lt;p&gt;&lt;em&gt;Broom&lt;/em&gt; is a separate R package that feeds on fit results and produces useful data frames. Install it directly within the R console if you haven&amp;rsquo;t already:&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-R&#34; data-lang=&#34;R&#34;&gt;&lt;span style=&#34;color:#0a0&#34;&gt;install.packages&lt;/span&gt;(&lt;span style=&#34;color:#a50&#34;&gt;&amp;#39;broom&amp;#39;&lt;/span&gt;)
@@ -469,89 +472,154 @@ Achieved convergence tolerance: 1.571e-09
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;h2 id=&#34;using-broom-with-dplyr&#34;&gt;Using broom with dplyr&lt;/h2&gt;
-&lt;p&gt;Since broom&amp;rsquo;s functions return data frames, they integrate naturally with magrittr pipelines (&lt;code&gt;%&amp;gt;%&lt;/code&gt;) and dplyr. Let&amp;rsquo;s illustrate by grouping the data by sensor id, then producing a fit object for each group. The &lt;code&gt;do&lt;/code&gt; function calls &lt;code&gt;nls&lt;/code&gt; once for each group, then stores the return value in a column we named &lt;code&gt;fit&lt;/code&gt;:&lt;/p&gt;
+&lt;p&gt;Since broom&amp;rsquo;s functions return data frames, they integrate naturally with magrittr pipelines (&lt;code&gt;%&amp;gt;%&lt;/code&gt;) and dplyr. Let&amp;rsquo;s illustrate by grouping the data by sensor id, then producing a fit object for each group. The &lt;code&gt;nest&lt;/code&gt; function creates a new tibble with one line per sensor. Each line contains the name of the sensor (in the &lt;code&gt;sensor&lt;/code&gt; column) and an embedded tibble with that sensor&amp;rsquo;s data (in the &lt;code&gt;data&lt;/code&gt; column):&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;df %&amp;gt;% 
+  nest(-sensor)
+&lt;/code&gt;&lt;/pre&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;sensor &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;data &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;sensor1&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;sensor2&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Each &lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt; here contains the $t$ and $y$ columns, with rows from one sensor.&lt;/p&gt;
+&lt;p&gt;We can then &lt;code&gt;map&lt;/code&gt; the fitting function onto each sensor&amp;rsquo;s tibble to create a new column with fit results:&lt;/p&gt;
 &lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;fitted &amp;lt;- df %&amp;gt;% 
-  group_by(sensor) %&amp;gt;% 
-  do(fit = nls(y ~ a * t + b, data = ., start = list(a = 1, b = 1)))
+  nest(-sensor) %&amp;gt;% 
+  mutate(
+    fit = map(data, ~ nls(y ~ a * t + b, data = .)),
+  )
 fitted
 &lt;/code&gt;&lt;/pre&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;&lt;/th&gt;
-&lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
-&lt;th&gt;fit&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;sensor &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;data &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;fit &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td&gt;1&lt;/td&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
-&lt;td&gt;2&lt;/td&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;We now have one nls object per group, which can be fed into either &lt;code&gt;tidy&lt;/code&gt; or &lt;code&gt;augment&lt;/code&gt;. These functions act on each group separately:&lt;/p&gt;
+&lt;p&gt;We now have one nls object per group, which can be fed into either &lt;code&gt;tidy&lt;/code&gt; or &lt;code&gt;augment&lt;/code&gt;. Again, we use &lt;code&gt;map&lt;/code&gt; to apply these functions to each separate nls object:&lt;/p&gt;
 &lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;fitted %&amp;gt;% 
-  tidy(fit)
+  mutate(tidied = map(fit, tidy))
 &lt;/code&gt;&lt;/pre&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
-&lt;th&gt;term&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
-&lt;th&gt;estimate&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
-&lt;th&gt;std.error&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
-&lt;th&gt;statistic&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
-&lt;th&gt;p.value&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;sensor &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;data &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;fit &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;tidied &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;sensor2&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;To actually use the result we unnest it into a regular tibble. Unnest inflates each sensor&amp;rsquo;s tibble and concatenates them (&lt;code&gt;rbinds&lt;/code&gt; them, similarly to how we created &lt;code&gt;df&lt;/code&gt; in the first place):&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;fitted %&amp;gt;% 
+  mutate(tidied = map(fit, tidy)) %&amp;gt;% 
+  unnest(tidied)
+&lt;/code&gt;&lt;/pre&gt;&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;sensor &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;data &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;fit &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th&gt;term &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;estimate &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;std.error &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;statistic &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;p.value &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;sensor1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;a&lt;/td&gt;
-&lt;td&gt;-0.2495347&lt;/td&gt;
-&lt;td&gt;0.006377179&lt;/td&gt;
-&lt;td&gt;-39.12932&lt;/td&gt;
-&lt;td&gt;1.267667e-61&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;-0.2492956&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.006427426&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;-38.78622&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;2.853154e-61&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;b&lt;/td&gt;
-&lt;td&gt;47.8737585&lt;/td&gt;
-&lt;td&gt;0.370946839&lt;/td&gt;
-&lt;td&gt;129.05827&lt;/td&gt;
-&lt;td&gt;3.123849e-111&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;47.8620767&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.373869603&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;128.01810&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;6.872225e-111&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;a&lt;/td&gt;
-&lt;td&gt;-0.2350898&lt;/td&gt;
-&lt;td&gt;0.003088217&lt;/td&gt;
-&lt;td&gt;-76.12478&lt;/td&gt;
-&lt;td&gt;5.400611e-89&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;-0.2357433&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.003189115&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;-73.92124&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;9.150052e-88&lt;/td&gt;
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;b&lt;/td&gt;
-&lt;td&gt;59.7779291&lt;/td&gt;
-&lt;td&gt;0.179634964&lt;/td&gt;
-&lt;td&gt;332.77446&lt;/td&gt;
-&lt;td&gt;1.931798e-151&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;59.8061527&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0.185503969&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;322.39824&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;4.294989e-150&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;From here, we can use &lt;code&gt;select&lt;/code&gt; and &lt;code&gt;spread&lt;/code&gt; to generate a more succinct table, as in the TL;DR example, or keep the table as-is to inspect the quality of the fit.&lt;/p&gt;
 &lt;p&gt;The result of &lt;code&gt;augment&lt;/code&gt; is a long data frame that can be used immediately with qplot, also shown in the TL;DR section above:&lt;/p&gt;
 &lt;pre&gt;&lt;code class=&#34;language-{r}&#34; data-lang=&#34;{r}&#34;&gt;fitted %&amp;gt;% 
-  augment(fit)
+  mutate(augmented = map(fit, augment)) %&amp;gt;% 
+  unnest(augmented)
 &lt;/code&gt;&lt;/pre&gt;&lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
 &lt;th&gt;sensor&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;data &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;fit &lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;th&gt;t&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;th&gt;y&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
 &lt;th&gt;.fitted&lt;!-- raw HTML omitted --&gt;&lt;/th&gt;
@@ -561,6 +629,8 @@ fitted
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;1&lt;/td&gt;
 &lt;td&gt;52.41684&lt;/td&gt;
 &lt;td&gt;47.58220&lt;/td&gt;
@@ -568,6 +638,8 @@ fitted
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;2&lt;/td&gt;
 &lt;td&gt;51.64323&lt;/td&gt;
 &lt;td&gt;47.33347&lt;/td&gt;
@@ -575,6 +647,8 @@ fitted
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor1&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;3&lt;/td&gt;
 &lt;td&gt;51.09595&lt;/td&gt;
 &lt;td&gt;47.08475&lt;/td&gt;
@@ -582,6 +656,8 @@ fitted
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;…&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;…&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;…&lt;/td&gt;
 &lt;td&gt;…&lt;/td&gt;
 &lt;td&gt;…&lt;/td&gt;
 &lt;td&gt;…&lt;/td&gt;
@@ -589,6 +665,8 @@ fitted
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;98&lt;/td&gt;
 &lt;td&gt;38.06029&lt;/td&gt;
 &lt;td&gt;36.72428&lt;/td&gt;
@@ -596,6 +674,8 @@ fitted
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;99&lt;/td&gt;
 &lt;td&gt;37.86891&lt;/td&gt;
 &lt;td&gt;36.48926&lt;/td&gt;
@@ -603,6 +683,8 @@ fitted
 &lt;/tr&gt;
 &lt;tr&gt;
 &lt;td&gt;sensor2&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;tibble&amp;gt;&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;code&gt;&amp;lt;S3: nls&amp;gt;&lt;/code&gt;&lt;/td&gt;
 &lt;td&gt;100&lt;/td&gt;
 &lt;td&gt;37.89936&lt;/td&gt;
 &lt;td&gt;36.25425&lt;/td&gt;
@@ -610,7 +692,7 @@ fitted
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;That&amp;rsquo;s it for broom and dplyr. The magic of this approach is that you can add a sensor to your input data then re-run all your code; your new curves will just appear on the plots. Similarly, you can change the formula of your fit, and your new coefficients will appear as a new column in the coefficients table. No need to change your code.&lt;/p&gt;
+&lt;p&gt;That&amp;rsquo;s it for broom and dplyr. The magic of this approach is that you can add a sensor to your input data then re-run all your code; your new curves will just appear on the plots. Similarly, you can change the formula of your fit, and your new coefficients will appear as a new column in the coefficients table. No need to rewrite all your code.&lt;/p&gt;
 &lt;h2 id=&#34;references&#34;&gt;References&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;R documentation: &lt;a href=&#34;https://stat.ethz.ch/R-manual/R-devel/library/stats/html/nls.html&#34;&gt;https://stat.ethz.ch/R-manual/R-devel/library/stats/html/nls.html&lt;/a&gt;&lt;/li&gt;

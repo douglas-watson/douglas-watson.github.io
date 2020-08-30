@@ -92,12 +92,13 @@
 <div class="content container">
   <div class="post">
     <h1 class="post-title">Curve fitting on batches in the tidyverse: R, dplyr, and broom</h1>
-    <span class="post-date">Sep 9, 2018 &middot; 7 minute read &middot; <a href="https://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/#disqus_thread">Comments</a>
+    <span class="post-date">Sep 9, 2018 &middot; 8 minute read &middot; <a href="https://douglas-watson.github.io/post/2018-09_dplyr_curve_fitting/#disqus_thread">Comments</a>
     
     <br/>
     
     </span>
-    <p>I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.</p>
+    <p><em>Updated August 2020: changed to broom&rsquo;s newer nest-map-unnest pattern, from the older group_by-do pattern.</em></p>
+<p>I recently needed to fit curves on several sets of similar data, measured from different sensors. I found how to achieve this with dplyr, without needing to define outside functions or use for-loops. This approach integrates perfectly with my usual dplyr and ggplot2 workflows, which means it adapts to new data or new experimental conditions with no changes. Here are the ready-made recipes for any one else who may run into a similar problem.</p>
 <p>First we&rsquo;ll generate some artificial data so that you can follow along at home. Here&rsquo;s an exponentially decaying value measured by two sensors at different locations:</p>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#aaa;font-style:italic"># if needed</span>
 <span style="color:#0a0">install.packages</span>(<span style="color:#0a0">c</span>(<span style="color:#a50">&#34;tidyverse&#34;</span>, <span style="color:#a50">&#34;broom&#34;</span>))
@@ -110,9 +111,8 @@ y1 = <span style="color:#099">22</span> + (<span style="color:#099">53</span> - 
 y2 = <span style="color:#099">24</span> + (<span style="color:#099">60</span> - <span style="color:#099">22</span>) * <span style="color:#0a0">exp</span>(<span style="color:#099">-0.01</span> * t) %&gt;% <span style="color:#0a0">jitter</span>(<span style="color:#099">10</span>)
 
 
-df &lt;- <span style="color:#0a0">data.frame</span>(t = t, y = y1, sensor = <span style="color:#a50">&#39;sensor1&#39;</span>) %&gt;% 
+df &lt;- <span style="color:#0a0">tibble</span>(t = t, y = y1, sensor = <span style="color:#a50">&#39;sensor1&#39;</span>) %&gt;% 
   <span style="color:#0a0">rbind</span>(. , <span style="color:#0a0">data.frame</span>(t = t, y = y2, sensor = <span style="color:#a50">&#39;sensor2&#39;</span>))
-
 
 </code></pre></div><p>Our data frame looks like this:</p>
 <pre><code>df
@@ -169,13 +169,15 @@ df &lt;- <span style="color:#0a0">data.frame</span>(t = t, y = y1, sensor = <spa
 <h2 id="tldr">TL;DR</h2>
 <h3 id="i-want-to-plot-the-fitted-curve-over-my-data-points">I want to plot the fitted curve over my data points</h3>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">augmented &lt;- df %&gt;% 
-  <span style="color:#0a0">group_by</span>(sensor) %&gt;% 
-  <span style="color:#0a0">do</span>(fit = <span style="color:#0a0">nls</span>(y ~ a * t + b, data = .)) %&gt;% 
-  <span style="color:#0a0">augment</span>(fit)
+  <span style="color:#0a0">nest</span>(-sensor) %&gt;% 
+  <span style="color:#0a0">mutate</span>(
+    fit = <span style="color:#0a0">map</span>(data, ~ <span style="color:#0a0">nls</span>(y ~ a * t + b, data = .)),
+    augmented = <span style="color:#0a0">map</span>(fit, augment),
+  ) %&gt;% 
+  <span style="color:#0a0">unnest</span>(augmented)
 
 <span style="color:#0a0">qplot</span>(t, y, data = augmented, geom = <span style="color:#a50">&#39;point&#39;</span>, colour = sensor) +
   <span style="color:#0a0">geom_line</span>(<span style="color:#0a0">aes</span>(y=.fitted))
-
 </code></pre></div><p><img src="/images/fitting/fit.png" alt="raw_data"></p>
 <h3 id="i-want-to-plot-the-residuals">I want to plot the residuals</h3>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">qplot</span>(t, .resid, data = augmented, colour = sensor)
@@ -184,15 +186,18 @@ df &lt;- <span style="color:#0a0">data.frame</span>(t = t, y = y1, sensor = <spa
 <p><img src="/images/fitting/residuals2.png" alt="raw_data"></p>
 <h2 id="i-want-a-table-of-my-fit-parameters-for-each-condition">I want a table of my fit parameters for each condition:</h2>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R">df %&gt;% 
-  <span style="color:#0a0">group_by</span>(sensor) %&gt;% 
-  <span style="color:#0a0">do</span>(fit = <span style="color:#0a0">nls</span>(y ~ a * t + b, data = .)) %&gt;% 
-  <span style="color:#0a0">tidy</span>(fit) %&gt;% 
+  <span style="color:#0a0">nest</span>(-sensor) %&gt;% 
+  <span style="color:#0a0">mutate</span>(
+    fit = <span style="color:#0a0">map</span>(data, ~ <span style="color:#0a0">nls</span>(y ~ a * t + b, data = .)),
+    tidied = <span style="color:#0a0">map</span>(fit, tidy),
+  ) %&gt;% 
+  <span style="color:#0a0">unnest</span>(tidied) %&gt;% 
   <span style="color:#0a0">select</span>(sensor, term, estimate) %&gt;% 
   <span style="color:#0a0">spread</span>(term, estimate)
+
 </code></pre></div><table>
 <thead>
 <tr>
-<th></th>
 <th>sensor<!-- raw HTML omitted --></th>
 <th>a<!-- raw HTML omitted --></th>
 <th>b<!-- raw HTML omitted --></th>
@@ -200,13 +205,11 @@ df &lt;- <span style="color:#0a0">data.frame</span>(t = t, y = y1, sensor = <spa
 </thead>
 <tbody>
 <tr>
-<td>1</td>
 <td>sensor1</td>
 <td>-0.2495347</td>
 <td>47.87376</td>
 </tr>
 <tr>
-<td>2</td>
 <td>sensor2</td>
 <td>-0.2350898</td>
 <td>59.77793</td>
@@ -263,7 +266,7 @@ Achieved convergence tolerance: 1.571e-09
 
 &gt; resid(fit)
 [1] 4.628798 4.339712 4.014558 3.576258 3.528138 3.001447 ...
-</code></pre><p>Now these functions all return vectors, which work best with R&rsquo;s native plotting functions. To integrate with dplyr and ggplot, we&rsquo;d rather have data frames. This is where the <em>broom</em> package comes in.</p>
+</code></pre><p>Now these functions all return vectors, which work best with R&rsquo;s native plotting functions. To integrate with dplyr and ggplot, we&rsquo;d rather have data frames or tibbles. This is where the <em>broom</em> package comes in.</p>
 <h2 id="introducing-broom">Introducing broom</h2>
 <p><em>Broom</em> is a separate R package that feeds on fit results and produces useful data frames. Install it directly within the R console if you haven&rsquo;t already:</p>
 <div class="highlight"><pre style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-R" data-lang="R"><span style="color:#0a0">install.packages</span>(<span style="color:#a50">&#39;broom&#39;</span>)
@@ -382,89 +385,154 @@ Achieved convergence tolerance: 1.571e-09
 </tbody>
 </table>
 <h2 id="using-broom-with-dplyr">Using broom with dplyr</h2>
-<p>Since broom&rsquo;s functions return data frames, they integrate naturally with magrittr pipelines (<code>%&gt;%</code>) and dplyr. Let&rsquo;s illustrate by grouping the data by sensor id, then producing a fit object for each group. The <code>do</code> function calls <code>nls</code> once for each group, then stores the return value in a column we named <code>fit</code>:</p>
+<p>Since broom&rsquo;s functions return data frames, they integrate naturally with magrittr pipelines (<code>%&gt;%</code>) and dplyr. Let&rsquo;s illustrate by grouping the data by sensor id, then producing a fit object for each group. The <code>nest</code> function creates a new tibble with one line per sensor. Each line contains the name of the sensor (in the <code>sensor</code> column) and an embedded tibble with that sensor&rsquo;s data (in the <code>data</code> column):</p>
+<pre><code class="language-{r}" data-lang="{r}">df %&gt;% 
+  nest(-sensor)
+</code></pre><table>
+<thead>
+<tr>
+<th>sensor <!-- raw HTML omitted --></th>
+<th>data <!-- raw HTML omitted --></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sensor1</td>
+<td><code>&lt;tibble&gt;</code></td>
+</tr>
+<tr>
+<td>sensor2</td>
+<td><code>&lt;tibble&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Each <code>&lt;tibble&gt;</code> here contains the $t$ and $y$ columns, with rows from one sensor.</p>
+<p>We can then <code>map</code> the fitting function onto each sensor&rsquo;s tibble to create a new column with fit results:</p>
 <pre><code class="language-{r}" data-lang="{r}">fitted &lt;- df %&gt;% 
-  group_by(sensor) %&gt;% 
-  do(fit = nls(y ~ a * t + b, data = ., start = list(a = 1, b = 1)))
+  nest(-sensor) %&gt;% 
+  mutate(
+    fit = map(data, ~ nls(y ~ a * t + b, data = .)),
+  )
 fitted
 </code></pre><table>
 <thead>
 <tr>
-<th></th>
-<th>sensor<!-- raw HTML omitted --></th>
-<th>fit<!-- raw HTML omitted --></th>
+<th>sensor <!-- raw HTML omitted --></th>
+<th>data <!-- raw HTML omitted --></th>
+<th>fit <!-- raw HTML omitted --></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>1</td>
 <td>sensor1</td>
+<td><code>&lt;tibble&gt;</code></td>
 <td><code>&lt;S3: nls&gt;</code></td>
 </tr>
 <tr>
-<td>2</td>
 <td>sensor2</td>
+<td><code>&lt;tibble&gt;</code></td>
 <td><code>&lt;S3: nls&gt;</code></td>
 </tr>
 </tbody>
 </table>
-<p>We now have one nls object per group, which can be fed into either <code>tidy</code> or <code>augment</code>. These functions act on each group separately:</p>
+<p>We now have one nls object per group, which can be fed into either <code>tidy</code> or <code>augment</code>. Again, we use <code>map</code> to apply these functions to each separate nls object:</p>
 <pre><code class="language-{r}" data-lang="{r}">fitted %&gt;% 
-  tidy(fit)
+  mutate(tidied = map(fit, tidy))
 </code></pre><table>
 <thead>
 <tr>
-<th>sensor<!-- raw HTML omitted --></th>
-<th>term<!-- raw HTML omitted --></th>
-<th>estimate<!-- raw HTML omitted --></th>
-<th>std.error<!-- raw HTML omitted --></th>
-<th>statistic<!-- raw HTML omitted --></th>
-<th>p.value<!-- raw HTML omitted --></th>
+<th>sensor <!-- raw HTML omitted --></th>
+<th>data <!-- raw HTML omitted --></th>
+<th>fit <!-- raw HTML omitted --></th>
+<th>tidied <!-- raw HTML omitted --></th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>sensor1</td>
+<td><code>&lt;tibble&gt;</code></td>
+<td><code>&lt;S3: nls&gt;</code></td>
+<td><code>&lt;tibble&gt;</code></td>
+</tr>
+<tr>
+<td>sensor2</td>
+<td><code>&lt;tibble&gt;</code></td>
+<td><code>&lt;S3: nls&gt;</code></td>
+<td><code>&lt;tibble&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>To actually use the result we unnest it into a regular tibble. Unnest inflates each sensor&rsquo;s tibble and concatenates them (<code>rbinds</code> them, similarly to how we created <code>df</code> in the first place):</p>
+<pre><code class="language-{r}" data-lang="{r}">fitted %&gt;% 
+  mutate(tidied = map(fit, tidy)) %&gt;% 
+  unnest(tidied)
+</code></pre><table>
+<thead>
+<tr>
+<th>sensor <!-- raw HTML omitted --></th>
+<th align="right">data <!-- raw HTML omitted --></th>
+<th align="right">fit <!-- raw HTML omitted --></th>
+<th>term <!-- raw HTML omitted --></th>
+<th align="right">estimate <!-- raw HTML omitted --></th>
+<th align="right">std.error <!-- raw HTML omitted --></th>
+<th align="right">statistic <!-- raw HTML omitted --></th>
+<th align="right">p.value <!-- raw HTML omitted --></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sensor1</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>a</td>
-<td>-0.2495347</td>
-<td>0.006377179</td>
-<td>-39.12932</td>
-<td>1.267667e-61</td>
+<td align="right">-0.2492956</td>
+<td align="right">0.006427426</td>
+<td align="right">-38.78622</td>
+<td align="right">2.853154e-61</td>
 </tr>
 <tr>
 <td>sensor1</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>b</td>
-<td>47.8737585</td>
-<td>0.370946839</td>
-<td>129.05827</td>
-<td>3.123849e-111</td>
+<td align="right">47.8620767</td>
+<td align="right">0.373869603</td>
+<td align="right">128.01810</td>
+<td align="right">6.872225e-111</td>
 </tr>
 <tr>
 <td>sensor2</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>a</td>
-<td>-0.2350898</td>
-<td>0.003088217</td>
-<td>-76.12478</td>
-<td>5.400611e-89</td>
+<td align="right">-0.2357433</td>
+<td align="right">0.003189115</td>
+<td align="right">-73.92124</td>
+<td align="right">9.150052e-88</td>
 </tr>
 <tr>
 <td>sensor2</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>b</td>
-<td>59.7779291</td>
-<td>0.179634964</td>
-<td>332.77446</td>
-<td>1.931798e-151</td>
+<td align="right">59.8061527</td>
+<td align="right">0.185503969</td>
+<td align="right">322.39824</td>
+<td align="right">4.294989e-150</td>
 </tr>
 </tbody>
 </table>
 <p>From here, we can use <code>select</code> and <code>spread</code> to generate a more succinct table, as in the TL;DR example, or keep the table as-is to inspect the quality of the fit.</p>
 <p>The result of <code>augment</code> is a long data frame that can be used immediately with qplot, also shown in the TL;DR section above:</p>
 <pre><code class="language-{r}" data-lang="{r}">fitted %&gt;% 
-  augment(fit)
+  mutate(augmented = map(fit, augment)) %&gt;% 
+  unnest(augmented)
 </code></pre><table>
 <thead>
 <tr>
 <th>sensor<!-- raw HTML omitted --></th>
+<th align="right">data <!-- raw HTML omitted --></th>
+<th align="right">fit <!-- raw HTML omitted --></th>
 <th>t<!-- raw HTML omitted --></th>
 <th>y<!-- raw HTML omitted --></th>
 <th>.fitted<!-- raw HTML omitted --></th>
@@ -474,6 +542,8 @@ fitted
 <tbody>
 <tr>
 <td>sensor1</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>1</td>
 <td>52.41684</td>
 <td>47.58220</td>
@@ -481,6 +551,8 @@ fitted
 </tr>
 <tr>
 <td>sensor1</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>2</td>
 <td>51.64323</td>
 <td>47.33347</td>
@@ -488,6 +560,8 @@ fitted
 </tr>
 <tr>
 <td>sensor1</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>3</td>
 <td>51.09595</td>
 <td>47.08475</td>
@@ -495,6 +569,8 @@ fitted
 </tr>
 <tr>
 <td>…</td>
+<td align="right">…</td>
+<td align="right">…</td>
 <td>…</td>
 <td>…</td>
 <td>…</td>
@@ -502,6 +578,8 @@ fitted
 </tr>
 <tr>
 <td>sensor2</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>98</td>
 <td>38.06029</td>
 <td>36.72428</td>
@@ -509,6 +587,8 @@ fitted
 </tr>
 <tr>
 <td>sensor2</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>99</td>
 <td>37.86891</td>
 <td>36.48926</td>
@@ -516,6 +596,8 @@ fitted
 </tr>
 <tr>
 <td>sensor2</td>
+<td align="right"><code>&lt;tibble&gt;</code></td>
+<td align="right"><code>&lt;S3: nls&gt;</code></td>
 <td>100</td>
 <td>37.89936</td>
 <td>36.25425</td>
@@ -523,7 +605,7 @@ fitted
 </tr>
 </tbody>
 </table>
-<p>That&rsquo;s it for broom and dplyr. The magic of this approach is that you can add a sensor to your input data then re-run all your code; your new curves will just appear on the plots. Similarly, you can change the formula of your fit, and your new coefficients will appear as a new column in the coefficients table. No need to change your code.</p>
+<p>That&rsquo;s it for broom and dplyr. The magic of this approach is that you can add a sensor to your input data then re-run all your code; your new curves will just appear on the plots. Similarly, you can change the formula of your fit, and your new coefficients will appear as a new column in the coefficients table. No need to rewrite all your code.</p>
 <h2 id="references">References</h2>
 <ul>
 <li>R documentation: <a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/nls.html">https://stat.ethz.ch/R-manual/R-devel/library/stats/html/nls.html</a></li>
