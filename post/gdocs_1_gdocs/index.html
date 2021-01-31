@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2020 <a href="https://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2021 <a href="https://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -248,11 +248,11 @@ function test() {
   var params = JSON.stringify(e);
   return ContentService.createTextOutput(params);
 }
-</code></pre><p>Now publish it with &ldquo;Publish&rdquo; &gt; &ldquo;Deploy as web app&hellip;&quot;. Give the version a brief description, ask to execute it as yourself, and allow anonymous access, so that you can post to the spreadsheet without authentication, then deploy:</p>
+</code></pre><p>Now publish it with &ldquo;Publish&rdquo; &gt; &ldquo;Deploy as web app&hellip;&rdquo;. Give the version a brief description, ask to execute it as yourself, and allow anonymous access, so that you can post to the spreadsheet without authentication, then deploy:</p>
 <p><img src="/images/gdocs/4_publish.png" alt="Publishing our first web app!"></p>
 <p>Copy the URL:</p>
 <p><img src="/images/gdocs/5_published.png" alt="Publishing our first web app!"></p>
-<p>There&rsquo;s one last thing you need to do before sending HTTP requests to this new web server. Share the spreadsheet publicly. Return to the spreadsheet tab, and open &ldquo;File&rdquo; &gt; &ldquo;Share&hellip;&quot;. Click &ldquo;Get shareable link&rdquo;, and allow anyone with the link to edit:</p>
+<p>There&rsquo;s one last thing you need to do before sending HTTP requests to this new web server. Share the spreadsheet publicly. Return to the spreadsheet tab, and open &ldquo;File&rdquo; &gt; &ldquo;Share&hellip;&rdquo;. Click &ldquo;Get shareable link&rdquo;, and allow anyone with the link to edit:</p>
 <p><img src="/images/gdocs/6_share.png" alt="Share the spreadsheet publicly to avoid authentication errors"></p>
 <p>Now, fire up your favourite HTTP client (the Postman Chrome extension is a great graphical tool). I&rsquo;ll be using CURL, from the console. Send a first POST request to the URL you copied above. If using CURL make sure to add the <code>-L</code> option to follow redirects, and the <code>--data</code> option to make a POST request. For my URL, I get:</p>
 <pre><code>$ curl --data &quot;hello, world&quot; &quot;https://script.google.com/macros/s/AKfycbxOw-Tl_r0jDV4wcnixdYdUjcNipSzgufiezRKr28Q5OAN50cIP/exec&quot;
@@ -281,7 +281,7 @@ function test() {
   return ContentService.createTextOutput(params);
 
 }
-</code></pre><p>Publish a new version of the app (&ldquo;Publish&rdquo; &gt; &ldquo;Deploy as web app&hellip;&quot;, set &ldquo;Project Version&rdquo; to &ldquo;new&rdquo;, describe it, and click &ldquo;update&rdquo;). You can now append lines to the spreadsheet through an HTTP Post request! Rerun the last curl command, and observe the newest line added to your spreadsheet:</p>
+</code></pre><p>Publish a new version of the app (&ldquo;Publish&rdquo; &gt; &ldquo;Deploy as web app&hellip;&rdquo;, set &ldquo;Project Version&rdquo; to &ldquo;new&rdquo;, describe it, and click &ldquo;update&rdquo;). You can now append lines to the spreadsheet through an HTTP Post request! Rerun the last curl command, and observe the newest line added to your spreadsheet:</p>
 <p><img src="/images/gdocs/7_post_append.png" alt="You recorded data from an HTTP request!"></p>
 <p>Clear the spreadsheet now: delete all rows except for the header.</p>
 <ul>

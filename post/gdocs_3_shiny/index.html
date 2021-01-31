@@ -82,7 +82,7 @@
     <li class="sidebar-nav-item"><a href="https://www.r-bloggers.com/">R-bloggers</a></li>
     <li class="sidebar-nav-item"><a href="https://towardsdatascience.com/">Towards Data Science</a></li>
 </ul>
-<p>Copyright &copy; 2020 <a href="https://douglas-watson.github.io/license/">License</a><br/>
+<p>Copyright &copy; 2021 <a href="https://douglas-watson.github.io/license/">License</a><br/>
     Powered by <a href="http://gohugo.io">Hugo</a> and <a href="https://github.com/zyro/hyde-x">Hyde-X</a></p>
 
   </div>
@@ -180,7 +180,7 @@ shinyUI(fluidPage(
     )
   )
 ))
-</code></pre><p>The server-side code can access the values of the input widgets through the <code>input</code> argument of <code>ShinyServers</code>'s callback. When one of the inputs is changed on the UI, Shiny automatically re-executes any of the server&rsquo;s <code>renderPlot</code> or <code>reactive</code> code blocks that access that value. The <code>reactive</code> blocks are useful to transform data according to input values; we will thus use one to apply the date range filter.</p>
+</code></pre><p>The server-side code can access the values of the input widgets through the <code>input</code> argument of <code>ShinyServers</code>&rsquo;s callback. When one of the inputs is changed on the UI, Shiny automatically re-executes any of the server&rsquo;s <code>renderPlot</code> or <code>reactive</code> code blocks that access that value. The <code>reactive</code> blocks are useful to transform data according to input values; we will thus use one to apply the date range filter.</p>
 <p>The <code>reactive</code> block in the new code example below converts our inputs to two POSIXct date objects, then uses them as lower and upper bounds to filter the data frame. We assign the reactive code block to <code>data.filt</code>, and modify the <code>renderPlot</code> calls to plot <code>data.filt()</code> instead of the original <code>data</code>. Note the syntax: <code>data.filt()</code> returns the value of the code block passed to <code>reactive</code>. As explained above, each time one of the inputs used inside the <code>reactive</code> block is updated, any other code block which calls <code>data.filt()</code> is also updated. In the example below, both <code>renderPlot</code> blocks are re-executed on update.</p>
 <p><strong>Warning:</strong> make sure to include the parenthesis each time you call <code>data.filt()</code>!</p>
 <pre><code># server.R
