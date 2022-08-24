@@ -28,7 +28,7 @@
       <guid>https://douglas-watson.github.io/post/2020-05_export_podcasts/</guid>
       <description>&lt;p&gt;&lt;em&gt;Or how to export podcasts to your Sandisk Clip or other non-Apple device.&lt;/em&gt;&lt;/p&gt;
 &lt;hr&gt;
-&lt;p&gt;&lt;strong&gt;2021 Update&lt;/strong&gt;: from macOS Big Sur, you can drag and drop episodes from the app&amp;rsquo;s Downloaded page to a Finder window. My Automator workflow is no longer needed.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2022 Update&lt;/strong&gt;: I have made a standalone app that offers more features and works on more computers. &lt;a href=&#34;https://github.com/douglas-watson/podcasts_export_app&#34;&gt;Find the app and installation instructions on github&lt;/a&gt;.&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;Apple Podcasts, introduced in macOS Catalina, is a convenient app: every podcast page I&amp;rsquo;ve ever visited includes a &amp;ldquo;Listen on Apple Podcasts&amp;rdquo; link, it&amp;rsquo;s already installed on my computer, and I can download episodes for offline listening. The problem is that I can&amp;rsquo;t get those offline files &lt;em&gt;out&lt;/em&gt; of Apple Podcasts, to transfer them to my small waterproof mp3 player.&lt;/p&gt;
 &lt;p&gt;To solve this problem, I made a quick Automator service that finds all downloaded episodes and copies them to a directory of your choosing. Download it &lt;a href=&#34;https://github.com/douglas-watson/podcasts_export/raw/master/Export%20Downloaded%20Podcasts.zip&#34;&gt;here&lt;/a&gt;, unzip the file, and open the .workflow file. MacOS should offer to install it: &lt;em&gt;Do you want to install the “Export Downloaded Podcasts” quick action?&lt;/em&gt; Once installed, you&amp;rsquo;ll have a new service available in Podcasts:&lt;/p&gt;
